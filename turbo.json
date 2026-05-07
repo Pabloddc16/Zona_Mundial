@@ -21,6 +21,11 @@
     "lint": {
       "dependsOn": ["^build"]
     },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", "tests/e2e/**", "playwright.config.*"]
+    },
     "clean": {
       "cache": false
     }
