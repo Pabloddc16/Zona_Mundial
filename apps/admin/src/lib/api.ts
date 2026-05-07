@@ -1,0 +1,145 @@
+const API = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000'
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API}${path}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    ...init,
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
+  }
+  return res.json() as Promise<T>
+}
+
+const get = <T>(path: string) => request<T>(path)
+const post = <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body: JSON.stringify(body) })
+const patch = <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
+const put = <T>(path: string, body: unknown) => request<T>(path, { method: 'PUT', body: JSON.stringify(body) })
+const del = <T>(path: string) => request<T>(path, { method: 'DELETE' })
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+export const api = {
+  auth: {
+    login: (email: string, password: string) => post<{ user: AuthUser; accessToken: string }>('/api/auth/login', { email, password }),
+    logout: () => post<{ ok: boolean }>('/api/auth/logout', {}),
+    me: () => get<AuthUser & { profile: unknown; deliverer: unknown }>('/api/auth/me'),
+  },
+
+  // ─── Dashboard ──────────────────────────────────────────────────────────────
+  dashboard: {
+    kpis: (from?: string, to?: string) => get<DashboardData>(`/api/dashboard${from ? `?from=${from}&to=${to ?? ''}` : ''}`),
+    ordersSummary: () => get<OrdersSummary>('/api/dashboard/orders-summary'),
+  },
+
+  // ─── Orders ─────────────────────────────────────────────────────────────────
+  orders: {
+    list: (params?: Record<string, string>) => get<Paginated<Order>>(`/api/orders?${new URLSearchParams(params).toString()}`),
+    get: (n: string) => get<Order>(`/api/orders/${n}`),
+    create: (body: unknown) => post<Order>('/api/orders', body),
+    update: (n: string, body: unknown) => patch<Order>(`/api/orders/${n}`, body),
+    delete: (n: string) => del<{ ok: boolean }>(`/api/orders/${n}`),
+    paymentLink: (n: string) => post<{ url: string; qrDataUrl: string }>(`/api/orders/${n}/payment-link`, {}),
+  },
+
+  // ─── Sales (POS) ────────────────────────────────────────────────────────────
+  sales: {
+    list: (params?: Record<string, string>) => get<Paginated<Sale>>(`/api/sales?${new URLSearchParams(params).toString()}`),
+    today: () => get<SalesToday>('/api/sales/today'),
+    create: (body: unknown) => post<Sale>('/api/sales', body),
+  },
+
+  // ─── Products ───────────────────────────────────────────────────────────────
+  products: {
+    list: (params?: Record<string, string>) => get<Paginated<Product>>(`/api/products?${new URLSearchParams(params).toString()}`),
+    get: (id: string) => get<Product>(`/api/products/${id}`),
+    update: (id: string, body: unknown) => patch<Product>(`/api/products/${id}`, body),
+    adjustStock: (id: string, body: unknown) => patch<StockResult>(`/api/products/${id}/stock`, body),
+    setStock: (id: string, body: unknown) => put<StockResult>(`/api/products/${id}/stock`, body),
+    adjustments: (id: string) => get<StockAdjustment[]>(`/api/products/${id}/stock-adjustments`),
+    allAdjustments: (limit?: number) => get<StockAdjustment[]>(`/api/products/adjustments${limit ? `?limit=${limit}` : ''}`),
+  },
+
+  // ─── Customers ──────────────────────────────────────────────────────────────
+  customers: {
+    list: (q?: string) => get<Customer[]>(`/api/customers${q ? `?q=${encodeURIComponent(q)}` : ''}`),
+    unified: () => get<{ app: Customer[]; wholesale: WholesaleCustomer[] }>('/api/customers/unified'),
+  },
+
+  // ─── Deliverers ─────────────────────────────────────────────────────────────
+  deliverers: {
+    list: () => get<Deliverer[]>('/api/deliverers'),
+    create: (body: unknown) => post<Deliverer>('/api/deliverers', body),
+    update: (id: string, body: unknown) => patch<Deliverer>(`/api/deliverers/${id}`, body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/deliverers/${id}`),
+    route: (id: string) => get<RouteResult>(`/api/deliverers/${id}/route`),
+  },
+
+  // ─── Wholesalers ────────────────────────────────────────────────────────────
+  wholesalers: {
+    list: (active?: boolean) => get<Wholesaler[]>(`/api/wholesalers${active !== undefined ? `?active=${active}` : ''}`),
+    create: (body: unknown) => post<Wholesaler>('/api/wholesalers', body),
+    update: (id: string, body: unknown) => patch<Wholesaler>(`/api/wholesalers/${id}`, body),
+    sales: (params?: Record<string, string>) => get<Paginated<WholesaleSale>>(`/api/wholesalers/sales?${new URLSearchParams(params).toString()}`),
+    createSale: (body: unknown) => post<WholesaleSale>('/api/wholesalers/sales', body),
+    recordPayment: (id: string, body: unknown) => post<{ payment: unknown; sale: WholesaleSale }>(`/api/wholesalers/sales/${id}/payments`, body),
+    paymentLink: (id: string) => post<{ url: string; qrDataUrl: string }>(`/api/wholesalers/sales/${id}/payment-link`, {}),
+  },
+
+  // ─── Expenses ───────────────────────────────────────────────────────────────
+  expenses: {
+    list: (params?: Record<string, string>) => get<Paginated<Expense>>(`/api/expenses?${new URLSearchParams(params).toString()}`),
+    create: (body: unknown) => post<Expense>('/api/expenses', body),
+    update: (id: string, body: unknown) => patch<Expense>(`/api/expenses/${id}`, body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/expenses/${id}`),
+  },
+
+  // ─── Returns ────────────────────────────────────────────────────────────────
+  returns: {
+    list: (params?: Record<string, string>) => get<Paginated<Return>>(`/api/returns?${new URLSearchParams(params).toString()}`),
+    get: (id: string) => get<Return>(`/api/returns/${id}`),
+    create: (body: unknown) => post<Return>('/api/returns', body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/returns/${id}`),
+  },
+
+  // ─── Users ──────────────────────────────────────────────────────────────────
+  users: {
+    list: () => get<AdminUser[]>('/api/users'),
+    create: (body: unknown) => post<AdminUser>('/api/users', body),
+    update: (id: string, body: unknown) => patch<AdminUser>(`/api/users/${id}`, body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/users/${id}`),
+  },
+}
+
+// ─── Types (lightweight, for client use) ────────────────────────────────────
+export interface AuthUser { id: string; email: string; role: string; username: string }
+export interface Paginated<T> { items: T[]; total: number; page: number; pages: number; limit: number }
+export interface Product { id: string; name: string; category?: string; emoji?: string; price: number; cost?: number; stock: number; barcode?: string; updated_at: string }
+export interface Customer { id: string; name: string; phone?: string; email?: string; address?: string; total_orders: number; total_spent: number }
+export interface WholesaleCustomer { source: 'wholesale'; id: string; name: string; rfc?: string; email?: string; totalOrders: number; totalSpent: number }
+export interface Deliverer { id: string; name: string; phone?: string; vehicle?: string; status: string; zone?: string; username?: string; rating: number; deliveries_today: number; deliveries_total: number; lat?: number; lng?: number }
+export interface Wholesaler { id: string; razon_social: string; rfc?: string; email?: string; contacto?: string; nota?: string; active: boolean; created_at: string }
+export interface WholesaleSale { id: string; wholesaler_id?: string; wholesaler_name: string; payment_method: string; subtotal: number; total: number; amount_paid: number; saldo: number; status: string; payments: unknown[]; created_at: string }
+export interface Order { order_number: string; customer_name?: string; phone?: string; address?: string; status: string; total: number; delivery_type?: string; deliverer_id?: string; date: string; order_items?: OrderItem[] }
+export interface OrderItem { product_id?: string; name: string; qty: number; price: number }
+export interface Sale { id: string; payment_method: string; total: number; created_at: string; sale_items?: SaleItem[] }
+export interface SaleItem { product_id?: string; name: string; quantity: number; unit_price: number; subtotal: number }
+export interface SalesToday { count: number; revenue: number; refundTotal: number; netRevenue: number; recent: Sale[] }
+export interface Expense { id: string; date: string; concept: string; category?: string; amount: number; payment_method?: string; notes?: string; created_at: string }
+export interface Return { id: string; source: string; reason: string; refund_amount: number; refund_method: string; created_at: string; return_items?: ReturnItem[] }
+export interface ReturnItem { name: string; qty: number; unit_price?: number }
+export interface StockAdjustment { id: string; product_id: string; delta: number; previous_stock: number; new_stock: number; reason: string; note?: string; created_at: string }
+export interface StockResult { product_id: string; previousStock: number; newStock: number; delta: number }
+export interface AdminUser { id: string; username: string; email?: string; role: string; active: boolean; created_at: string }
+export interface RouteResult { deliverer: Deliverer; stops: RouteStop[]; totals: { stops: number; distanceKm: number; etaMinutes: number }; generatedAt: string }
+export interface RouteStop { sequence: number; order_number: string; customer_name?: string; address?: string; total: number; status: string; distanceFromPrev: number }
+export interface DashboardData {
+  range: { from: string; to: string; days: number }
+  summary: { ingresoTotal: number; cobrado: number; porCobrar: number; utilidadBruta: number; totalEgresos: number; utilidadNeta: number; valorInventario: number; unidadesInventario: number; devoluciones: number }
+  bySource: { pos: { count: number; revenue: number }; wholesale: { count: number; revenue: number }; app: { count: number; revenue: number } }
+  dailyCashFlow: { date: string; revenue: number }[]
+  expensesByCat: Record<string, number>
+  cuentasPorCobrar: { total: number; count: number; items: unknown[] }
+}
+export interface OrdersSummary { ordersToday: number; revenueToday: number; byStatus: Record<string, number>; recent: Order[] }
