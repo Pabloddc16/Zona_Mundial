@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tab-height: 64px;
+}
+
+body {
+  background: theme('colors.crema');
+  color: theme('colors.tinta');
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area bottom padding for tab bar */
+.pb-tab { padding-bottom: calc(var(--tab-height) + env(safe-area-inset-bottom, 0px)); }
+.bottom-tab { bottom: env(safe-area-inset-bottom, 0px); }
