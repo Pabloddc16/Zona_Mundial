@@ -4,6 +4,41 @@ Complete reference for running, testing, and deploying the rewritten monorepo.
 
 ---
 
+## Client Setup Checklist
+
+Everything the client needs to provide / pay for before launch.
+
+**Client email:** `pabloddc16@gmail.com` (use for all account signups)
+
+### Accounts + Costs
+
+| Service | Purpose | Cost | Card needed? |
+|---------|---------|------|-------------|
+| [supabase.com](https://supabase.com) | Database + Auth | Free | No |
+| [vercel.com](https://vercel.com) | Host web + admin app | Free | No |
+| [render.com](https://render.com) | Host API server | Free or $7/mo | Optional |
+| [resend.com](https://resend.com) | Order confirmation emails | Free (3k/mo) | No |
+| [expo.dev](https://expo.dev) | Mobile app builds | Free | No |
+| [sentry.io](https://sentry.io) | Error tracking | Free | No |
+| Apple Developer Program | iOS App Store | **$99/year** | Yes |
+| Google Play Console | Android Play Store | **$25 one-time** | Yes |
+
+**Total upfront: ~$124 USD**  
+**Monthly: $0–7 USD** (Render paid tier optional)
+
+### What We Need Client to Send Us
+
+1. Card details when we hit checkout for Apple ($99) + Google ($25)
+2. Confirm app name for stores (currently **"Pablo App"** — confirm?)
+3. Legal name for Apple Developer account (personal name or business entity)
+4. Phone number for account verification SMS
+
+### What We Can Set Up Without Client
+
+Free services — no card, no approval needed: Supabase, Vercel, Expo, Resend, Sentry
+
+---
+
 ## What Was Built
 
 The original two projects (a 3,476-line `server.js` monolith + 4,229-line vanilla-JS SPA) were replaced with a modern monorepo:
