@@ -10,6 +10,7 @@ declare module 'fastify' {
   interface FastifyRequest {
     user?: {
       id: string
+      email: string
       role: string
       username: string
     }
@@ -36,6 +37,7 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
 
         req.user = {
           id: user.id,
+          email: user.email ?? '',
           role: user.user_metadata['role'] as string ?? 'capturista',
           username: user.user_metadata['username'] as string ?? user.email ?? user.id,
         }

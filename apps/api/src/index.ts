@@ -23,10 +23,9 @@ import mercadopagoWebhook from './routes/webhooks/mercadopago.js'
 const app = Fastify({
   logger: {
     level: process.env['LOG_LEVEL'] ?? 'info',
-    transport:
-      process.env['NODE_ENV'] === 'development'
-        ? { target: 'pino-pretty', options: { colorize: true } }
-        : undefined,
+    ...(process.env['NODE_ENV'] === 'development'
+      ? { transport: { target: 'pino-pretty', options: { colorize: true } } }
+      : {}),
   },
 })
 

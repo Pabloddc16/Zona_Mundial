@@ -1,12 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Database types will be auto-generated here via:
-// pnpm --filter @pablo/db generate-types
-// which runs: supabase gen types typescript --local > src/database.types.ts
-// Until then, we use a placeholder. Replace with generated types after Supabase project is set up.
-export type Database = Record<string, unknown>
+// Placeholder until `supabase gen types typescript` is run after Supabase project is set up.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Database = any
 
-let _client: ReturnType<typeof createClient<Database>> | null = null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _client: ReturnType<typeof createClient<any>> | null = null
 
 export function getClient() {
   if (_client) return _client
@@ -18,7 +17,7 @@ export function getClient() {
     throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set')
   }
 
-  _client = createClient<Database>(url, key, {
+  _client = createClient(url, key, {
     auth: { persistSession: false },
   })
 
@@ -27,5 +26,5 @@ export function getClient() {
 
 // Browser/client-side: uses anon key + RLS
 export function getBrowserClient(url: string, anonKey: string) {
-  return createClient<Database>(url, anonKey)
+  return createClient(url, anonKey)
 }
