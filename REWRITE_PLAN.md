@@ -10,7 +10,7 @@ Two projects exist under `/home/branko/Documents/Projects/pablo_app`, both writt
 Both work at a basic level but have critical problems: unconnected databases, missing features (returns=stub, CFDI=schema-only, user mgmt UI broken), security gaps (no CSRF, no MP webhook signing, weak ACLs), non-maintainable monolithic files, no mobile apps, no shared auth, and no global payment support.
 
 **Goal**: Full rewrite into a modern, maintainable stack. Single monorepo. Shared backend API. Web admin, consumer web app, iOS + Android mobile apps. Deployed globally. Ready for App Store/Play Store.
-
+asdasd
 ---
 
 ## Target Architecture
