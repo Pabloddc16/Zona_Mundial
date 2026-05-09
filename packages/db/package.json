@@ -13,5 +13,6 @@
   },
   "devDependencies": {
     "typescript": "*"
-  }
+  },
+  "type": "module"
 }

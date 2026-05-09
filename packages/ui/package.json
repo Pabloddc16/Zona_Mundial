@@ -16,5 +16,6 @@
   },
   "peerDependencies": {
     "react": "^18.3.0"
-  }
+  },
+  "type": "module"
 }

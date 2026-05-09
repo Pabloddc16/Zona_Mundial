@@ -5,7 +5,8 @@
   "packageManager": "pnpm@9.0.0",
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter=!@pablo/mobile",
+    "dev:mobile": "turbo dev --filter=@pablo/mobile",
     "test": "turbo test",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
