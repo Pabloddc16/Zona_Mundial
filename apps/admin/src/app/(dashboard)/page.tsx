@@ -34,7 +34,7 @@ export default function DashboardPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-xl font-bold text-white/90">Dashboard</h1>
         <select
           value={range}
           onChange={(e) => setRange(Number(e.target.value))}
@@ -88,10 +88,10 @@ export default function DashboardPage() {
               const d = kpis?.bySource?.[src as keyof typeof kpis.bySource]
               return (
                 <div key={src} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 capitalize">{src === 'pos' ? 'POS' : src === 'wholesale' ? 'Mayoreo' : 'App'}</span>
+                  <span className="text-sm text-white/60 capitalize">{src === 'pos' ? 'POS' : src === 'wholesale' ? 'Mayoreo' : 'App'}</span>
                   <div className="text-right">
                     <span className="text-sm font-medium">{fmt(d?.revenue ?? 0)}</span>
-                    <span className="ml-2 text-xs text-gray-400">{d?.count} ventas</span>
+                    <span className="ml-2 text-xs text-white/40">{d?.count} ventas</span>
                   </div>
                 </div>
               )
@@ -109,7 +109,7 @@ export default function DashboardPage() {
               </div>
             ))}
             {orders && (
-              <div className="mt-3 border-t border-gray-100 pt-3 text-sm text-gray-500">
+              <div className="mt-3 border-t border-white/5 pt-3 text-sm text-white/50">
                 Hoy: {orders.ordersToday} pedidos · {fmt(orders.revenueToday)}
               </div>
             )}
@@ -125,7 +125,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               {(kpis!.cuentasPorCobrar.items as Array<{ id: string; wholesaler_name: string; saldo: number; status: string }>).slice(0, 10).map((c) => (
                 <div key={c.id} className="flex items-center justify-between text-sm">
-                  <span className="text-gray-700">{c.wholesaler_name}</span>
+                  <span className="text-white/75">{c.wholesaler_name}</span>
                   <span className="font-medium text-red-600">{fmt(c.saldo)}</span>
                 </div>
               ))}

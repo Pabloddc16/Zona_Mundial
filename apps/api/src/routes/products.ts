@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { getClient } from '@pablo/db'
-import { UpdateProductSchema, StockAdjustmentSchema } from '@pablo/validators'
+import { CreateProductSchema, UpdateProductSchema, StockAdjustmentSchema } from '@pablo/validators'
 import { randomUUID } from 'crypto'
 
 const VALID_ADJUSTMENT_REASONS = ['compra', 'merma', 'ajuste', 'devolucion', 'otro']
@@ -22,6 +22,29 @@ const productsRoutes: FastifyPluginAsync = async (fastify) => {
     const limit = Math.min(Math.max(Number(query['limit'] ?? 25), 1), 200)
     const total = data?.length ?? 0
     return { items: data?.slice((page - 1) * limit, page * limit) ?? [], total, page, pages: Math.ceil(total / limit), limit }
+  })
+
+  // POST /api/products
+  fastify.post('/', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const parsed = CreateProductSchema.safeParse(req.body)
+    if (!parsed.success) return reply.badRequest(parsed.error.message)
+
+    const supabase = getClient()
+    if (parsed.data.barcode) {
+      const { data: dup } = await supabase.from('products').select('id').eq('barcode', parsed.data.barcode).single()
+      if (dup) return reply.conflict(`Barcode ya existe (asignado a ${dup.id})`)
+    }
+
+    const { data, error } = await supabase.from('products').insert({
+      id: randomUUID(),
+      ...parsed.data,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }).select().single()
+
+    if (error) return reply.internalServerError(error.message)
+    reply.code(201)
+    return data
   })
 
   // GET /api/products/:id
@@ -55,6 +78,17 @@ const productsRoutes: FastifyPluginAsync = async (fastify) => {
 
     if (error) return reply.internalServerError(error.message)
     return data
+  })
+
+  // DELETE /api/products/:id
+  fastify.delete('/:id', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const supabase = getClient()
+    const { data: existing } = await supabase.from('products').select('id').eq('id', id).single()
+    if (!existing) return reply.notFound('Producto no encontrado')
+    const { error } = await supabase.from('products').delete().eq('id', id)
+    if (error) return reply.internalServerError(error.message)
+    return { ok: true }
   })
 
   // PATCH /api/products/:id/stock — delta adjustment

@@ -59,7 +59,7 @@ export default function UsersPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Usuarios</h1>
+        <h1 className="text-xl font-bold text-white/90">Usuarios</h1>
         <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nuevo usuario</Button>
       </div>
 
@@ -93,12 +93,12 @@ function UserForm({ onSave, saving, error }: { onSave: (b: unknown) => void; sav
     <div className="space-y-4">
       {([['Usuario', username, setUsername, 'text'], ['Correo', email, setEmail, 'email'], ['Contraseña (mín 8 chars)', password, setPassword, 'password']] as [string, string, (v: string) => void, string][]).map(([label, value, set, type]) => (
         <div key={label}>
-          <label className="mb-1 block text-sm font-medium text-gray-700">{label}</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">{label}</label>
           <Input type={type} value={value} onChange={(e) => set(e.target.value)} />
         </div>
       ))}
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Rol</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Rol</label>
         <Select value={role} onChange={(e) => setRole(e.target.value)}>
           {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
         </Select>
@@ -119,24 +119,24 @@ function EditUserForm({ user, onSave, saving, error }: { user: AdminUser; onSave
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-500">Usuario: <strong>{user.username}</strong></p>
+      <p className="text-sm text-white/50">Usuario: <strong>{user.username}</strong></p>
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Correo</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Correo</label>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Nueva contraseña (vacío = no cambiar)</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Nueva contraseña (vacío = no cambiar)</label>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Rol</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Rol</label>
         <Select value={role} onChange={(e) => setRole(e.target.value)}>
           {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
         </Select>
       </div>
       <div className="flex items-center gap-3">
         <input type="checkbox" id="active" checked={active} onChange={(e) => setActive(e.target.checked)} />
-        <label htmlFor="active" className="text-sm font-medium text-gray-700">Usuario activo</label>
+        <label htmlFor="active" className="text-sm font-medium text-white/75">Usuario activo</label>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <Button

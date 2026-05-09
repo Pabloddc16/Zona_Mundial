@@ -43,7 +43,7 @@ export default function DeliverersPage() {
   })
 
   const columns = [
-    { key: 'id', header: 'ID', cell: (r: Deliverer) => <span className="font-mono text-xs text-gray-500">{r.id}</span> },
+    { key: 'id', header: 'ID', cell: (r: Deliverer) => <span className="font-mono text-xs text-white/50">{r.id}</span> },
     { key: 'name', header: 'Nombre' },
     { key: 'vehicle', header: 'Vehículo', cell: (r: Deliverer) => r.vehicle ?? '—' },
     { key: 'zone', header: 'Zona', cell: (r: Deliverer) => r.zone ?? '—' },
@@ -66,7 +66,7 @@ export default function DeliverersPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Repartidores</h1>
+        <h1 className="text-xl font-bold text-white/90">Repartidores</h1>
         <Button onClick={() => setCreating(true)}>Nuevo repartidor</Button>
       </div>
 
@@ -93,22 +93,22 @@ export default function DeliverersPage() {
       <Dialog open={!!routeDlg} onClose={() => setRouteDlg(null)} title="Ruta optimizada" className="max-w-2xl">
         {route && (
           <div className="space-y-3">
-            <div className="flex gap-4 text-sm text-gray-600">
+            <div className="flex gap-4 text-sm text-white/60">
               <span>{route.totals.stops} paradas</span>
               <span>{route.totals.distanceKm} km</span>
               <span>~{route.totals.etaMinutes} min</span>
             </div>
             <div className="space-y-2">
               {route.stops.map((s) => (
-                <div key={s.order_number} className="flex items-center gap-3 rounded-md border border-gray-100 p-3">
+                <div key={s.order_number} className="flex items-center gap-3 rounded-md border border-white/5 p-3">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">{s.sequence}</span>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{s.customer_name}</p>
-                    <p className="text-xs text-gray-500">{s.address}</p>
+                    <p className="text-xs text-white/50">{s.address}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">${s.total}</p>
-                    <p className="text-xs text-gray-400">{s.distanceFromPrev} km</p>
+                    <p className="text-xs text-white/40">{s.distanceFromPrev} km</p>
                   </div>
                 </div>
               ))}
@@ -145,13 +145,13 @@ function DelivererForm({ initial, onSave, saving, error }: {
         ['Usuario', username, setUsername],
       ] as [string, string, (v: string) => void][]).map(([label, value, set]) => (
         <div key={label}>
-          <label className="mb-1 block text-sm font-medium text-gray-700">{label}</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">{label}</label>
           <Input value={value} onChange={(e) => set(e.target.value)} />
         </div>
       ))}
       {initial && (
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Estado</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Estado</label>
           <Select value={status} onChange={(e) => setStatus(e.target.value)}>
             {['DISPONIBLE', 'EN_RUTA', 'DESCANSO'].map((s) => <option key={s} value={s}>{s}</option>)}
           </Select>

@@ -76,7 +76,7 @@ export default function OrdersPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Pedidos</h1>
+        <h1 className="text-xl font-bold text-white/90">Pedidos</h1>
         <Button variant="ghost" size="icon" onClick={() => qc.invalidateQueries({ queryKey: ['orders'] })}>
           <RefreshCw className="h-4 w-4" />
         </Button>
@@ -134,7 +134,7 @@ function EditOrderForm({ order, deliverers, onSave, saving }: {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Estado</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Estado</label>
         <Select value={status} onChange={(e) => setStatus(e.target.value)}>
           {['CREATED', 'ASSIGNED', 'IN_ROUTE', 'DELIVERED', 'CANCELLED'].map((s) => (
             <option key={s} value={s}>{s}</option>
@@ -142,7 +142,7 @@ function EditOrderForm({ order, deliverers, onSave, saving }: {
         </Select>
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Repartidor</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Repartidor</label>
         <Select value={delivererId} onChange={(e) => setDelivererId(e.target.value)}>
           <option value="">Sin asignar</option>
           {deliverers.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}

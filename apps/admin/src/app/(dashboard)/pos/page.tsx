@@ -76,8 +76,8 @@ export default function POSPage() {
   return (
     <div className="flex h-full gap-0">
       {/* Left — product search */}
-      <div className="flex-1 overflow-y-auto p-6 border-r border-gray-200">
-        <h1 className="mb-4 text-xl font-bold text-gray-900">Punto de venta</h1>
+      <div className="flex-1 overflow-y-auto p-6 border-r border-white/8">
+        <h1 className="mb-4 text-xl font-bold text-white/90">Punto de venta</h1>
         <Input
           ref={searchRef}
           placeholder="Buscar producto por nombre o ID..."
@@ -96,11 +96,11 @@ export default function POSPage() {
             <button
               key={p.id}
               onClick={() => addToCart(p)}
-              className="text-left rounded-lg border border-gray-200 bg-white p-3 hover:border-brand-400 hover:bg-brand-50 transition-colors"
+              className="text-left rounded-lg border border-white/8 bg-surface-elevated p-3 hover:border-brand-400 hover:bg-brand-50 transition-colors"
             >
               <div className="text-2xl mb-1">{p.emoji ?? '📦'}</div>
-              <div className="text-sm font-medium text-gray-900 truncate">{p.name}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{fmt(p.price)}</div>
+              <div className="text-sm font-medium text-white/90 truncate">{p.name}</div>
+              <div className="text-xs text-white/50 mt-0.5">{fmt(p.price)}</div>
               <div className="mt-1">
                 <Badge variant={p.stock > 5 ? 'success' : p.stock > 0 ? 'warning' : 'danger'} className="text-xs">
                   Stock: {p.stock}
@@ -112,19 +112,19 @@ export default function POSPage() {
       </div>
 
       {/* Right — cart */}
-      <div className="w-80 flex flex-col border-l border-gray-200 bg-white">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+      <div className="w-80 flex flex-col border-l border-white/8 bg-surface-elevated">
+        <div className="p-4 border-b border-white/8">
+          <h2 className="font-semibold text-white/90 flex items-center gap-2">
             <Receipt className="h-4 w-4" /> Ticket
           </h2>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {cart.length === 0 && (
-            <p className="text-center text-sm text-gray-400 mt-8">Agrega productos</p>
+            <p className="text-center text-sm text-white/40 mt-8">Agrega productos</p>
           )}
           {cart.map((item) => (
-            <div key={item.product.id} className="rounded-md border border-gray-100 p-3 space-y-2">
+            <div key={item.product.id} className="rounded-md border border-white/5 p-3 space-y-2">
               <div className="flex items-start justify-between gap-2">
                 <span className="text-sm font-medium text-gray-800 flex-1">{item.product.emoji} {item.product.name}</span>
                 <button onClick={() => setQty(item.product.id, 0)} className="text-gray-300 hover:text-red-500">
@@ -132,37 +132,37 @@ export default function POSPage() {
                 </button>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setQty(item.product.id, item.quantity - 1)} className="rounded border border-gray-200 p-0.5 hover:bg-gray-100">
+                <button onClick={() => setQty(item.product.id, item.quantity - 1)} className="rounded border border-white/8 p-0.5 hover:bg-white/8">
                   <Minus className="h-3 w-3" />
                 </button>
                 <input
                   type="number"
                   value={item.quantity}
                   onChange={(e) => setQty(item.product.id, Number(e.target.value))}
-                  className="w-12 rounded border border-gray-200 px-1.5 py-0.5 text-center text-sm"
+                  className="w-12 rounded border border-white/8 px-1.5 py-0.5 text-center text-sm"
                   min={1}
                 />
-                <button onClick={() => setQty(item.product.id, item.quantity + 1)} className="rounded border border-gray-200 p-0.5 hover:bg-gray-100">
+                <button onClick={() => setQty(item.product.id, item.quantity + 1)} className="rounded border border-white/8 p-0.5 hover:bg-white/8">
                   <Plus className="h-3 w-3" />
                 </button>
-                <span className="text-xs text-gray-500">×</span>
+                <span className="text-xs text-white/50">×</span>
                 <input
                   type="number"
                   value={item.unit_price}
                   onChange={(e) => setPrice(item.product.id, Number(e.target.value))}
-                  className="w-20 rounded border border-gray-200 px-1.5 py-0.5 text-right text-sm"
+                  className="w-20 rounded border border-white/8 px-1.5 py-0.5 text-right text-sm"
                   step="0.01"
                   min={0}
                 />
               </div>
-              <div className="text-right text-xs font-medium text-gray-600">
+              <div className="text-right text-xs font-medium text-white/60">
                 {fmt(item.quantity * item.unit_price)}
               </div>
             </div>
           ))}
         </div>
 
-        <div className="border-t border-gray-200 p-4 space-y-3">
+        <div className="border-t border-white/8 p-4 space-y-3">
           <Input
             placeholder="Nombre del cliente (opcional)"
             value={customerName}
@@ -173,7 +173,7 @@ export default function POSPage() {
             <option value="tarjeta">Tarjeta</option>
             <option value="transferencia">Transferencia</option>
           </Select>
-          <div className="flex items-center justify-between text-base font-bold text-gray-900">
+          <div className="flex items-center justify-between text-base font-bold text-white/90">
             <span>Total</span>
             <span>{fmt(total)}</span>
           </div>

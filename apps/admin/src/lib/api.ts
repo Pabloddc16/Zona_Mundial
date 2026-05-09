@@ -54,7 +54,9 @@ export const api = {
   products: {
     list: (params?: Record<string, string>) => get<Paginated<Product>>(`/api/products?${new URLSearchParams(params).toString()}`),
     get: (id: string) => get<Product>(`/api/products/${id}`),
+    create: (body: unknown) => post<Product>('/api/products', body),
     update: (id: string, body: unknown) => patch<Product>(`/api/products/${id}`, body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/products/${id}`),
     adjustStock: (id: string, body: unknown) => patch<StockResult>(`/api/products/${id}/stock`, body),
     setStock: (id: string, body: unknown) => put<StockResult>(`/api/products/${id}/stock`, body),
     adjustments: (id: string) => get<StockAdjustment[]>(`/api/products/${id}/stock-adjustments`),
@@ -64,6 +66,10 @@ export const api = {
   // ─── Customers ──────────────────────────────────────────────────────────────
   customers: {
     list: (q?: string) => get<Customer[]>(`/api/customers${q ? `?q=${encodeURIComponent(q)}` : ''}`),
+    get: (id: string) => get<Customer & { orders: Order[] }>(`/api/customers/${id}`),
+    create: (body: unknown) => post<Customer>('/api/customers', body),
+    update: (id: string, body: unknown) => patch<Customer>(`/api/customers/${id}`, body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/customers/${id}`),
     unified: () => get<{ app: Customer[]; wholesale: WholesaleCustomer[] }>('/api/customers/unified'),
   },
 
@@ -81,6 +87,7 @@ export const api = {
     list: (active?: boolean) => get<Wholesaler[]>(`/api/wholesalers${active !== undefined ? `?active=${active}` : ''}`),
     create: (body: unknown) => post<Wholesaler>('/api/wholesalers', body),
     update: (id: string, body: unknown) => patch<Wholesaler>(`/api/wholesalers/${id}`, body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/wholesalers/${id}`),
     sales: (params?: Record<string, string>) => get<Paginated<WholesaleSale>>(`/api/wholesalers/sales?${new URLSearchParams(params).toString()}`),
     createSale: (body: unknown) => post<WholesaleSale>('/api/wholesalers/sales', body),
     recordPayment: (id: string, body: unknown) => post<{ payment: unknown; sale: WholesaleSale }>(`/api/wholesalers/sales/${id}/payments`, body),

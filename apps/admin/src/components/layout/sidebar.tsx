@@ -32,11 +32,11 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-[var(--sidebar-width)] flex-col border-r border-gray-200 bg-white">
+    <aside className="flex h-screen w-[var(--sidebar-width)] flex-col" style={{ background: 'oklch(0.185 0.011 260)', borderRight: '1px solid oklch(1 0 0 / 0.06)' }}>
       {/* Logo */}
-      <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-4">
-        <Sticker className="h-6 w-6 text-brand-600" />
-        <span className="font-bold text-gray-900">Pablo Admin</span>
+      <div className="flex items-center gap-2 px-4 py-4" style={{ borderBottom: '1px solid oklch(1 0 0 / 0.06)' }}>
+        <Sticker className="h-6 w-6 text-brand-500" />
+        <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Pablo Admin</span>
       </div>
 
       {/* Nav */}
@@ -50,9 +50,13 @@ export function Sidebar() {
               className={cn(
                 'mb-0.5 flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-brand-50 text-brand-700'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                  ? 'text-brand-500'
+                  : 'hover:bg-white/5',
               )}
+              style={active
+                ? { background: 'oklch(0.77 0.163 70 / 0.12)', color: 'oklch(0.84 0.150 80)' }
+                : { color: 'var(--text-secondary)' }
+              }
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
               {label}
@@ -62,13 +66,14 @@ export function Sidebar() {
       </nav>
 
       {/* User */}
-      <div className="border-t border-gray-200 px-3 py-3">
-        <div className="mb-2 truncate px-2 text-xs text-gray-500">
+      <div className="px-3 py-3" style={{ borderTop: '1px solid oklch(1 0 0 / 0.06)' }}>
+        <div className="mb-2 truncate px-2 text-xs" style={{ color: 'var(--text-muted)' }}>
           {user?.username ?? 'Usuario'} · {user?.role}
         </div>
         <button
           onClick={logout}
-          className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-red-500/10 hover:text-red-400"
+          style={{ color: 'var(--text-secondary)' }}
         >
           <LogOut className="h-4 w-4" />
           Cerrar sesión

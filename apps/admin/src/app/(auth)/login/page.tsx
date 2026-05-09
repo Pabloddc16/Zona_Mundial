@@ -31,20 +31,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--surface-deep)' }}>
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600">
             <Sticker className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Pablo Admin</h1>
-          <p className="mt-1 text-sm text-gray-500">Inicia sesión para continuar</p>
+          <h1 className="text-2xl font-bold text-white/90">Pablo Admin</h1>
+          <p className="mt-1 text-sm text-white/50">Inicia sesión para continuar</p>
         </div>
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl p-6" style={{ background: 'var(--surface-elevated)', border: '1px solid var(--glass-border)' }}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Correo</label>
+              <label className="mb-1 block text-sm font-medium text-white/75">Correo</label>
               <Input
                 type="email"
                 value={email}
@@ -55,7 +55,7 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Contraseña</label>
+              <label className="mb-1 block text-sm font-medium text-white/75">Contraseña</label>
               <Input
                 type="password"
                 value={password}

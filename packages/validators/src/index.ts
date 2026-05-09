@@ -30,6 +30,19 @@ export const UpdateUserSchema = CreateUserSchema.partial().omit({ password: true
 
 // ─── Products ─────────────────────────────────────────────────────────────────
 
+export const CreateProductSchema = z.object({
+  name: z.string().min(1),
+  category: z.string().optional(),
+  emoji: z.string().optional(),
+  price: z.number().nonnegative(),
+  cost: z.number().nonnegative().optional(),
+  stock: z.number().int().nonnegative().default(0),
+  supplier: z.string().optional(),
+  barcode: z.string().optional(),
+  clave_prod_serv: z.string().optional(),
+  clave_unidad: z.string().optional(),
+})
+
 export const UpdateProductSchema = z.object({
   name: z.string().min(1).optional(),
   category: z.string().optional(),
@@ -170,6 +183,17 @@ export const CreateReturnSchema = z.object({
   refund_amount: z.number().nonnegative(),
   items: z.array(ReturnItemSchema).min(1),
 })
+
+// ─── Customers ───────────────────────────────────────────────────────────────
+
+export const CreateCustomerSchema = z.object({
+  name: z.string().min(1),
+  phone: z.string().optional(),
+  email: z.string().email().optional(),
+  address: z.string().optional(),
+})
+
+export const UpdateCustomerSchema = CreateCustomerSchema.partial()
 
 // ─── Deliverers ───────────────────────────────────────────────────────────────
 

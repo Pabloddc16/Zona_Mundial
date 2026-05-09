@@ -1,5 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { getClient } from '@pablo/db'
+import { CreateCustomerSchema, UpdateCustomerSchema } from '@pablo/validators'
+import { randomUUID } from 'crypto'
 
 const customersRoutes: FastifyPluginAsync = async (fastify) => {
   // GET /api/customers
@@ -64,6 +66,64 @@ const customersRoutes: FastifyPluginAsync = async (fastify) => {
     }))
 
     return { app, wholesale }
+  })
+
+  // GET /api/customers/:id
+  fastify.get('/:id', { preHandler: fastify.authenticate }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const supabase = getClient()
+    const { data, error } = await supabase.from('customers').select('*').eq('id', id).single()
+    if (error || !data) return reply.notFound('Cliente no encontrado')
+
+    const { data: orders } = await supabase
+      .from('orders').select('order_number, date, status, total').eq('customer_id', id)
+      .order('date', { ascending: false }).limit(20)
+
+    return { ...data, orders: orders ?? [] }
+  })
+
+  // POST /api/customers
+  fastify.post('/', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const parsed = CreateCustomerSchema.safeParse(req.body)
+    if (!parsed.success) return reply.badRequest(parsed.error.message)
+
+    const { data, error } = await getClient().from('customers').insert({
+      id: randomUUID(),
+      ...parsed.data,
+      created_at: new Date().toISOString(),
+    }).select().single()
+
+    if (error) return reply.internalServerError(error.message)
+    reply.code(201)
+    return data
+  })
+
+  // PATCH /api/customers/:id
+  fastify.patch('/:id', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const parsed = UpdateCustomerSchema.safeParse(req.body)
+    if (!parsed.success) return reply.badRequest(parsed.error.message)
+
+    const supabase = getClient()
+    const { data: existing } = await supabase.from('customers').select('id').eq('id', id).single()
+    if (!existing) return reply.notFound('Cliente no encontrado')
+
+    const { data, error } = await supabase
+      .from('customers').update(parsed.data).eq('id', id).select().single()
+
+    if (error) return reply.internalServerError(error.message)
+    return data
+  })
+
+  // DELETE /api/customers/:id
+  fastify.delete('/:id', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const supabase = getClient()
+    const { data: existing } = await supabase.from('customers').select('id').eq('id', id).single()
+    if (!existing) return reply.notFound('Cliente no encontrado')
+    const { error } = await supabase.from('customers').delete().eq('id', id)
+    if (error) return reply.internalServerError(error.message)
+    return { ok: true }
   })
 }
 

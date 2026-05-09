@@ -5,17 +5,65 @@
 @layer base {
   :root {
     --sidebar-width: 240px;
+
+    /* Surfaces */
+    --surface-deep:     oklch(0.165 0.012 260);
+    --surface-main:     oklch(0.195 0.010 260);
+    --surface-elevated: oklch(0.245 0.010 260);
+
+    /* Glass */
+    --glass-surface: oklch(1 0 0 / 0.03);
+    --glass-border:  oklch(1 0 0 / 0.08);
+    --glass-hover:   oklch(1 0 0 / 0.06);
+
+    /* Amber accent */
+    --amber:       oklch(0.77 0.163 70);
+    --amber-hover: oklch(0.84 0.150 80);
+
+    /* Text */
+    --text-primary:   oklch(1 0 0 / 0.92);
+    --text-secondary: oklch(1 0 0 / 0.56);
+    --text-muted:     oklch(1 0 0 / 0.38);
+
+    /* Status */
+    --color-success: oklch(0.72 0.19 145);
+    --color-warning: oklch(0.77 0.163 70);
+    --color-danger:  oklch(0.63 0.225 27);
+    --color-info:    oklch(0.62 0.20 260);
   }
+
   * { box-sizing: border-box; }
+
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    background-color: var(--surface-deep);
+    color: var(--text-primary);
     font-family: Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: oklch(1 0 0 / 0.12); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: oklch(1 0 0 / 0.20); }
 }
 
 @layer utilities {
+  .glass {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+  }
+  .glass-hover:hover {
+    background: var(--glass-hover);
+  }
+  .surface { background: var(--surface-elevated); }
+  .text-primary { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-muted { color: var(--text-muted); }
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: theme(colors.gray.300) transparent;
+    scrollbar-color: oklch(1 0 0 / 0.12) transparent;
   }
 }

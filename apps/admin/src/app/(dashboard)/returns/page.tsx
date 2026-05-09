@@ -37,7 +37,7 @@ export default function ReturnsPage() {
   })
 
   const columns = [
-    { key: 'id', header: 'ID', cell: (r: Return) => <span className="font-mono text-xs text-gray-500">{r.id.slice(-8)}</span> },
+    { key: 'id', header: 'ID', cell: (r: Return) => <span className="font-mono text-xs text-white/50">{r.id.slice(-8)}</span> },
     { key: 'source', header: 'Fuente', cell: (r: Return) => <Badge>{r.source}</Badge> },
     { key: 'reason', header: 'Razón' },
     { key: 'refund_method', header: 'Método', cell: (r: Return) => r.refund_method },
@@ -55,7 +55,7 @@ export default function ReturnsPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Devoluciones</h1>
+        <h1 className="text-xl font-bold text-white/90">Devoluciones</h1>
         <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nueva</Button>
       </div>
 
@@ -91,13 +91,13 @@ function ReturnForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Fuente</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Fuente</label>
           <Select value={source} onChange={(e) => setSource(e.target.value)}>
             {SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
           </Select>
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Razón</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Razón</label>
           <Select value={reason} onChange={(e) => setReason(e.target.value)}>
             {REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
           </Select>
@@ -105,11 +105,11 @@ function ReturnForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Monto devuelto</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Monto devuelto</label>
           <Input type="number" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} step="0.01" />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Método</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Método</label>
           <Select value={refundMethod} onChange={(e) => setRefundMethod(e.target.value)}>
             {['efectivo', 'tarjeta', 'transferencia'].map((m) => <option key={m} value={m}>{m}</option>)}
           </Select>
@@ -118,7 +118,7 @@ function ReturnForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
 
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700">Artículos</label>
+          <label className="text-sm font-medium text-white/75">Artículos</label>
           <Button size="sm" variant="ghost" onClick={addItem}><Plus className="h-3 w-3" /></Button>
         </div>
         {items.map((item, i) => (
@@ -132,7 +132,7 @@ function ReturnForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Notas</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Notas</label>
         <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Opcional" />
       </div>
 

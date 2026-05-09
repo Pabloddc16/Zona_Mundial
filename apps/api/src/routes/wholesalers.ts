@@ -103,6 +103,18 @@ const wholesalersRoutes: FastifyPluginAsync = async (fastify) => {
     return data
   })
 
+  // DELETE /api/wholesalers/:id
+  fastify.delete('/:id', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const supabase = getClient()
+    const { data: existing } = await supabase.from('wholesalers').select('id').eq('id', id).single()
+    if (!existing) return reply.notFound('Mayorista no encontrado')
+    // Soft delete — set active = false to preserve sales history
+    const { error } = await supabase.from('wholesalers').update({ active: false }).eq('id', id)
+    if (error) return reply.internalServerError(error.message)
+    return { ok: true }
+  })
+
   // ── Wholesale Sales ──────────────────────────────────────────────────────────
 
   // GET /api/wholesalers/sales

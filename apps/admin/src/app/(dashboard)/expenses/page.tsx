@@ -64,7 +64,7 @@ export default function ExpensesPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Egresos</h1>
+        <h1 className="text-xl font-bold text-white/90">Egresos</h1>
         <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nuevo</Button>
       </div>
 
@@ -76,7 +76,7 @@ export default function ExpensesPage() {
           {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </Select>
         {data && (
-          <div className="ml-auto text-sm font-medium text-gray-700 flex items-center">
+          <div className="ml-auto text-sm font-medium text-white/75 flex items-center">
             Total: <span className="ml-1 text-red-600">{fmt(total)}</span>
           </div>
         )}
@@ -117,34 +117,34 @@ function ExpenseForm({ initial, onSave, saving, error }: {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Fecha</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Fecha</label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Monto</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Monto</label>
           <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} step="0.01" min="0.01" />
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Concepto</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Concepto</label>
         <Input value={concept} onChange={(e) => setConcept(e.target.value)} placeholder="Descripción del egreso" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Categoría</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Categoría</label>
           <Select value={category} onChange={(e) => setCategory(e.target.value)}>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </Select>
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Método de pago</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Método de pago</label>
           <Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
             {['efectivo', 'tarjeta', 'transferencia'].map((m) => <option key={m} value={m}>{m}</option>)}
           </Select>
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Notas</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Notas</label>
         <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Opcional" />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
