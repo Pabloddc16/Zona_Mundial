@@ -6,20 +6,43 @@ import { useAuthStore } from '@/lib/auth-store'
 import { api } from '@/lib/api'
 import {
   LayoutDashboard, ShoppingBag, ShoppingCart, Package, Users, Truck,
-  Building2, Receipt, RotateCcw, UserCog, LogOut, Sticker,
+  Building2, Receipt, RotateCcw, UserCog, LogOut, Trophy,
+  ArrowLeftRight, GitMerge, FlaskConical, MapPin, TrendingUp, ChevronRight,
 } from 'lucide-react'
 
-const NAV = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Pedidos', href: '/orders', icon: ShoppingBag },
-  { label: 'POS', href: '/pos', icon: ShoppingCart },
-  { label: 'Productos', href: '/products', icon: Package },
-  { label: 'Clientes', href: '/customers', icon: Users },
-  { label: 'Repartidores', href: '/deliverers', icon: Truck },
-  { label: 'Mayoristas', href: '/wholesalers', icon: Building2 },
-  { label: 'Egresos', href: '/expenses', icon: Receipt },
-  { label: 'Devoluciones', href: '/returns', icon: RotateCcw },
-  { label: 'Usuarios', href: '/users', icon: UserCog, adminOnly: true },
+const NAV_SECTIONS = [
+  {
+    label: 'Ventas',
+    items: [
+      { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+      { label: 'Pedidos', href: '/orders', icon: ShoppingBag },
+      { label: 'POS', href: '/pos', icon: ShoppingCart },
+      { label: 'Productos', href: '/products', icon: Package },
+      { label: 'Clientes', href: '/customers', icon: Users },
+      { label: 'Repartidores', href: '/deliverers', icon: Truck },
+      { label: 'Mayoristas', href: '/wholesalers', icon: Building2 },
+      { label: 'Egresos', href: '/expenses', icon: Receipt },
+      { label: 'Devoluciones', href: '/returns', icon: RotateCcw },
+    ],
+  },
+  {
+    label: 'Inventario',
+    items: [
+      { label: 'Stock', href: '/inventory', icon: TrendingUp },
+      { label: 'Compras', href: '/purchases', icon: Package },
+      { label: 'Transferencias', href: '/transfers', icon: ArrowLeftRight },
+      { label: 'Conversiones', href: '/conversions', icon: GitMerge },
+      { label: 'Recetas', href: '/recipes', icon: FlaskConical },
+      { label: 'Locaciones', href: '/locations', icon: MapPin },
+    ],
+  },
+  {
+    label: 'Admin',
+    adminOnly: true,
+    items: [
+      { label: 'Usuarios', href: '/users', icon: UserCog, adminOnly: true },
+    ],
+  },
 ]
 
 export function Sidebar() {
@@ -31,51 +54,78 @@ export function Sidebar() {
     setUser(null)
   }
 
+  const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
+
   return (
-    <aside className="flex h-screen w-[var(--sidebar-width)] flex-col" style={{ background: 'oklch(0.185 0.011 260)', borderRight: '1px solid oklch(1 0 0 / 0.06)' }}>
+    <aside className="flex h-screen w-[var(--sidebar-width)] flex-col" style={{ background: 'oklch(0.178 0.011 260)', borderRight: '1px solid oklch(1 0 0 / 0.06)' }}>
       {/* Logo */}
-      <div className="flex items-center gap-2 px-4 py-4" style={{ borderBottom: '1px solid oklch(1 0 0 / 0.06)' }}>
-        <Sticker className="h-6 w-6 text-brand-500" />
-        <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Pablo Admin</span>
+      <div className="flex items-center gap-3 px-4 py-[18px]" style={{ borderBottom: '1px solid oklch(1 0 0 / 0.06)' }}>
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, oklch(0.77 0.163 70), oklch(0.65 0.18 50))', boxShadow: '0 2px 8px oklch(0.77 0.163 70 / 0.3)' }}>
+          <Trophy className="h-4 w-4 text-white" />
+        </div>
+        <div>
+          <p className="text-sm font-bold leading-none" style={{ color: 'var(--text-primary)' }}>Pablo Admin</p>
+          <p className="mt-0.5 text-[10px] leading-none" style={{ color: 'var(--text-muted)' }}>Mundial 2026</p>
+        </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3 scrollbar-thin">
-        {NAV.filter((n) => !n.adminOnly || user?.role === 'admin').map(({ label, href, icon: Icon }) => {
-          const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
+      <nav className="flex-1 overflow-y-auto px-2 py-3 scrollbar-thin space-y-4">
+        {NAV_SECTIONS.map((section) => {
+          if ('adminOnly' in section && section.adminOnly && user?.role !== 'admin') return null
+          const visibleItems = section.items.filter((item) =>
+            !('adminOnly' in item && item.adminOnly) || user?.role === 'admin'
+          )
+          if (visibleItems.length === 0) return null
           return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'mb-0.5 flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                active
-                  ? 'text-brand-500'
-                  : 'hover:bg-white/5',
-              )}
-              style={active
-                ? { background: 'oklch(0.77 0.163 70 / 0.12)', color: 'oklch(0.84 0.150 80)' }
-                : { color: 'var(--text-secondary)' }
-              }
-            >
-              <Icon className="h-4 w-4 flex-shrink-0" />
-              {label}
-            </Link>
+            <div key={section.label}>
+              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                {section.label}
+              </p>
+              {visibleItems.map(({ label, href, icon: Icon }) => {
+                const active = isActive(href)
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn('group mb-0.5 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all')}
+                    style={active
+                      ? { background: 'oklch(0.77 0.163 70 / 0.13)', color: 'oklch(0.84 0.150 80)' }
+                      : { color: 'var(--text-secondary)' }
+                    }
+                    onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'oklch(1 0 0 / 0.04)' }}
+                    onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = '' }}
+                  >
+                    <Icon className="h-[15px] w-[15px] flex-shrink-0" />
+                    <span className="flex-1 truncate">{label}</span>
+                    {active && <ChevronRight className="h-3 w-3 opacity-50" />}
+                  </Link>
+                )
+              })}
+            </div>
           )
         })}
       </nav>
 
-      {/* User */}
-      <div className="px-3 py-3" style={{ borderTop: '1px solid oklch(1 0 0 / 0.06)' }}>
-        <div className="mb-2 truncate px-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-          {user?.username ?? 'Usuario'} · {user?.role}
+      {/* User footer */}
+      <div className="px-3 pb-3 pt-2" style={{ borderTop: '1px solid oklch(1 0 0 / 0.06)' }}>
+        <div className="mb-2 flex items-center gap-2.5 rounded-lg px-2 py-2" style={{ background: 'oklch(1 0 0 / 0.03)' }}>
+          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: 'oklch(0.77 0.163 70 / 0.15)', color: 'var(--amber)' }}>
+            {(user?.username ?? 'U')[0]?.toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{user?.username ?? 'Usuario'}</p>
+            <p className="text-[10px] capitalize" style={{ color: 'var(--text-muted)' }}>{user?.role}</p>
+          </div>
         </div>
         <button
           onClick={logout}
-          className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-red-500/10 hover:text-red-400"
-          style={{ color: 'var(--text-secondary)' }}
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-all"
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'oklch(0.63 0.225 27 / 0.10)'; e.currentTarget.style.color = 'oklch(0.75 0.18 27)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)' }}
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-3.5 w-3.5" />
           Cerrar sesión
         </button>
       </div>

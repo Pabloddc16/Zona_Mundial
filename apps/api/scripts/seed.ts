@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { getClient } from '@pablo/db'
 
 const sb = getClient()

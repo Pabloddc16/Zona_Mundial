@@ -25,6 +25,8 @@ export const api = {
     login: (email: string, password: string) => post<{ user: AuthUser; accessToken: string }>('/api/auth/login', { email, password }),
     logout: () => post<{ ok: boolean }>('/api/auth/logout', {}),
     me: () => get<AuthUser & { profile: unknown; deliverer: unknown }>('/api/auth/me'),
+    forgotPassword: (email: string) => post<{ ok: boolean }>('/api/auth/request-reset', { email }),
+    resetPassword: (token: string, new_password: string) => post<{ ok: boolean }>('/api/auth/reset', { token, new_password }),
   },
 
   // ─── Dashboard ──────────────────────────────────────────────────────────────
@@ -117,6 +119,59 @@ export const api = {
     update: (id: string, body: unknown) => patch<AdminUser>(`/api/users/${id}`, body),
     delete: (id: string) => del<{ ok: boolean }>(`/api/users/${id}`),
   },
+
+  // ─── Inventory — Locations ────────────────────────────────────────────────
+  locations: {
+    list: () => get<Location[]>('/api/locations'),
+    create: (body: unknown) => post<Location>('/api/locations', body),
+    update: (id: string, body: unknown) => patch<Location>(`/api/locations/${id}`, body),
+  },
+
+  // ─── Inventory — Recipes ──────────────────────────────────────────────────
+  recipes: {
+    list: () => get<Recipe[]>('/api/recipes'),
+    create: (body: unknown) => post<Recipe>('/api/recipes', body),
+    update: (id: string, body: unknown) => patch<Recipe>(`/api/recipes/${id}`, body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/recipes/${id}`),
+  },
+
+  // ─── Inventory — Purchases ────────────────────────────────────────────────
+  purchases: {
+    list: (params?: Record<string, string>) => get<Paginated<Purchase>>(`/api/purchases?${new URLSearchParams(params).toString()}`),
+    get: (id: string) => get<Purchase>(`/api/purchases/${id}`),
+    create: (body: unknown) => post<Purchase>('/api/purchases', body),
+    pay: (id: string) => patch<Purchase>(`/api/purchases/${id}/pay`, {}),
+    receive: (id: string, body?: unknown) => patch<Purchase>(`/api/purchases/${id}/receive`, body ?? {}),
+    cancel: (id: string) => patch<Purchase>(`/api/purchases/${id}/cancel`, {}),
+  },
+
+  // ─── Inventory — Transfers ────────────────────────────────────────────────
+  transfers: {
+    list: (params?: Record<string, string>) => get<Paginated<Transfer>>(`/api/transfers?${new URLSearchParams(params).toString()}`),
+    get: (id: string) => get<Transfer>(`/api/transfers/${id}`),
+    create: (body: unknown) => post<Transfer>('/api/transfers', body),
+    complete: (id: string) => patch<Transfer>(`/api/transfers/${id}/complete`, {}),
+    cancel: (id: string) => patch<Transfer>(`/api/transfers/${id}/cancel`, {}),
+  },
+
+  // ─── Inventory — Conversions ──────────────────────────────────────────────
+  conversions: {
+    list: (params?: Record<string, string>) => get<Paginated<Conversion>>(`/api/conversions?${new URLSearchParams(params).toString()}`),
+    get: (id: string) => get<Conversion>(`/api/conversions/${id}`),
+    create: (body: unknown) => post<Conversion>('/api/conversions', body),
+    start: (id: string) => patch<Conversion>(`/api/conversions/${id}/start`, {}),
+    finish: (id: string) => patch<Conversion>(`/api/conversions/${id}/finish`, {}),
+    cancel: (id: string) => patch<Conversion>(`/api/conversions/${id}/cancel`, {}),
+  },
+
+  // ─── Inventory — Stock & Movements ───────────────────────────────────────
+  stock: {
+    list: (params?: Record<string, string>) => get<StockEntry[]>(`/api/stock?${new URLSearchParams(params).toString()}`),
+    wip: () => get<StockEntry[]>('/api/stock/wip'),
+    idle: (days?: number) => get<IdleStock[]>(`/api/stock/idle${days ? `?days=${days}` : ''}`),
+    movements: (params?: Record<string, string>) => get<Paginated<Movement>>(`/api/movements?${new URLSearchParams(params).toString()}`),
+    summary: () => get<StockSummary>('/api/stock/summary'),
+  },
 }
 
 // ─── Types (lightweight, for client use) ────────────────────────────────────
@@ -141,6 +196,21 @@ export interface StockResult { product_id: string; previousStock: number; newSto
 export interface AdminUser { id: string; username: string; email?: string; role: string; active: boolean; created_at: string }
 export interface RouteResult { deliverer: Deliverer; stops: RouteStop[]; totals: { stops: number; distanceKm: number; etaMinutes: number }; generatedAt: string }
 export interface RouteStop { sequence: number; order_number: string; customer_name?: string; address?: string; total: number; status: string; distanceFromPrev: number }
+
+// ─── Inventory Types ─────────────────────────────────────────────────────────
+export interface Location { id: string; name: string; type: 'warehouse' | 'pos' | 'wip_conversion' | 'wip_assembly'; active: boolean; created_at: string }
+export interface Recipe { id: string; name: string; output_sku_id: string; output_sku_name?: string; output_qty: number; active: boolean; lines: RecipeLine[]; created_at: string }
+export interface RecipeLine { id: string; input_sku_id: string; input_sku_name?: string; input_qty: number }
+export interface Purchase { id: string; supplier: string; status: 'draft' | 'paid' | 'received' | 'cancelled'; total: number; notes?: string; paid_at?: string; received_at?: string; created_by?: string; created_at: string; lines?: PurchaseLine[] }
+export interface PurchaseLine { id: string; purchase_id: string; sku_id: string; sku_name?: string; qty: number; unit_cost: number; received_to?: string }
+export interface Transfer { id: string; from_loc: string; from_loc_name?: string; to_loc: string; to_loc_name?: string; status: 'draft' | 'in_transit' | 'completed' | 'cancelled'; notes?: string; created_by?: string; completed_at?: string; created_at: string; lines?: TransferLine[] }
+export interface TransferLine { id: string; transfer_id: string; sku_id: string; sku_name?: string; qty: number }
+export interface Conversion { id: string; recipe_id: string; recipe_name?: string; output_sku_name?: string; qty: number; location_id: string; location_name?: string; status: 'planned' | 'in_progress' | 'done' | 'cancelled'; notes?: string; started_at?: string; finished_at?: string; created_by?: string; created_at: string }
+export interface StockEntry { sku_id: string; sku_name?: string; sku?: string; unit_type?: string; location_id: string; location_name?: string; location_type?: string; qty: number; avg_cost?: number }
+export interface Movement { id: string; sku_id: string; sku_name?: string; qty: number; location_from?: string; location_from_name?: string; location_to?: string; location_to_name?: string; type: string; ref_table: string; ref_id: string; unit_cost?: number; note?: string; created_by?: string; created_at: string }
+export interface IdleStock { sku_id: string; sku_name?: string; location_id: string; location_name?: string; qty: number; last_movement: string; days_idle: number }
+export interface StockSummary { totalSkus: number; totalUnits: number; totalValue: number; wipUnits: number; byLocation: { location_id: string; location_name: string; location_type: string; skus: number; units: number; value: number }[] }
+
 export interface DashboardData {
   range: { from: string; to: string; days: number }
   summary: { ingresoTotal: number; cobrado: number; porCobrar: number; utilidadBruta: number; totalEgresos: number; utilidadNeta: number; valorInventario: number; unidadesInventario: number; devoluciones: number }
