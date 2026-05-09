@@ -51,7 +51,7 @@ const transfersRoutes: FastifyPluginAsync = async (fastify) => {
 
     const movements = t.transfer_lines.map((l) => ({
       sku_id: l.sku_id, qty: l.qty, location_from: t.from_loc, location_to: t.to_loc,
-      type: 'transfer' as const, ref_table: 'transfers', ref_id: id, created_by: req.user?.username,
+      type: 'transfer' as const, ref_table: 'transfers', ref_id: id, created_by: req.user?.username ?? null,
     }))
 
     await recordMovements(movements)

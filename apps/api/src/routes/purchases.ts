@@ -70,7 +70,7 @@ const purchasesRoutes: FastifyPluginAsync = async (fastify) => {
       ref_table: 'purchases',
       ref_id: id,
       unit_cost: l.unit_cost,
-      created_by: req.user?.username,
+      created_by: req.user?.username ?? null,
     }))
 
     await recordMovements(movements)

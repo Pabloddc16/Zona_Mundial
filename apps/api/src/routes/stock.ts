@@ -20,7 +20,7 @@ const stockRoutes: FastifyPluginAsync = async (fastify) => {
     const { data: stockRows } = await sb
       .from('stock')
       .select('sku_id, location_id, qty, product:products!sku_id(name, sku, avg_cost), location:locations!location_id(name, type)')
-    const rows = (stockRows ?? []) as Array<{ sku_id: string; location_id: string; qty: number; product: { avg_cost?: number } | null; location: { name: string; type: string } | null }>
+    const rows = (stockRows ?? []) as unknown as Array<{ sku_id: string; location_id: string; qty: number; product: { avg_cost?: number } | null; location: { name: string; type: string } | null }>
 
     const byLocation: Record<string, { location_id: string; location_name: string; location_type: string; skus: number; units: number; value: number }> = {}
     let totalSkus = 0, totalUnits = 0, totalValue = 0, wipUnits = 0
