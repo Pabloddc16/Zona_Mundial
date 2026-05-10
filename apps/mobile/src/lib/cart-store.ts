@@ -1,14 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { MMKV } from 'react-native-mmkv'
-import { productById } from './data'
-
-const storage = new MMKV({ id: 'pablo-cart' })
-const mmkvStorage = {
-  setItem: (key: string, value: string) => storage.set(key, value),
-  getItem: (key: string) => storage.getString(key) ?? null,
-  removeItem: (key: string) => storage.delete(key),
-}
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import type { Product } from './data'
 
 interface CartStore {
   cart: Record<string, number>
@@ -33,20 +26,23 @@ export const useCartStore = create<CartStore>()(
       remove: (id) => set((s) => { const cart = { ...s.cart }; delete cart[id]; return { cart } }),
       clear: () => set({ cart: {} }),
     }),
-    { name: 'pablo-cart-v1', storage: createJSONStorage(() => mmkvStorage) },
+    { name: 'pablo-cart-v1', storage: createJSONStorage(() => AsyncStorage) },
   ),
 )
 
-export function cartItems(cart: Record<string, number>) {
+export function cartItems(cart: Record<string, number>, products: Product[]) {
   return Object.entries(cart)
-    .map(([id, qty]) => { const p = productById(id); return p ? { ...p, qty } : null })
-    .filter(Boolean) as Array<ReturnType<typeof productById> & { qty: number }>
+    .map(([id, qty]) => {
+      const p = products.find((x) => x.id === id)
+      return p ? { ...p, qty } : null
+    })
+    .filter(Boolean) as Array<Product & { qty: number }>
 }
 
 export function cartCount(cart: Record<string, number>) {
   return Object.values(cart).reduce((s, q) => s + q, 0)
 }
 
-export function cartSubtotal(cart: Record<string, number>) {
-  return cartItems(cart).reduce((s, i) => s + i!.price * i!.qty, 0)
+export function cartSubtotal(cart: Record<string, number>, products: Product[]) {
+  return cartItems(cart, products).reduce((s, i) => s + i.price * i.qty, 0)
 }

@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
-import { productById, fmt } from '@/lib/data'
+import { fmt } from '@/lib/data'
 import { useCartStore } from '@/lib/cart-store'
+import { useProductsStore } from '@/lib/products-store'
 
 export default function ProductoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const product = productById(id)
+  const product = useProductsStore((s) => s.getById(id))
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
   const add = useCartStore((s) => s.add)
@@ -30,7 +31,11 @@ export default function ProductoScreen() {
           <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
             <Text style={s.backIcon}>‹</Text>
           </TouchableOpacity>
-          <Text style={s.heroEmoji}>{product.emoji}</Text>
+          {product.image ? (
+            <Image source={{ uri: product.image }} style={s.heroImage} resizeMode="contain" />
+          ) : (
+            <Text style={s.heroEmoji}>{product.emoji}</Text>
+          )}
         </View>
 
         <View style={s.body}>
@@ -70,8 +75,9 @@ export default function ProductoScreen() {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#FEFCE8' },
-  hero: { height: 240, alignItems: 'center', justifyContent: 'center' },
-  backBtn: { position: 'absolute', top: 16, left: 16, width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center' },
+  hero: { height: 240, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  heroImage: { width: '100%', height: '100%' },
+  backBtn: { position: 'absolute', top: 16, left: 16, width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.9)', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
   backIcon: { fontSize: 22, color: '#374151', lineHeight: 28 },
   heroEmoji: { fontSize: 72 },
   body: { padding: 20, backgroundColor: '#FEFCE8' },

@@ -1,17 +1,19 @@
 import { useState } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, FlatList } from 'react-native'
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, FlatList } from 'react-native'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
-import { PRODUCTS, CATEGORIES, fmt } from '@/lib/data'
+import { CATEGORIES, fmt } from '@/lib/data'
 import { useCartStore } from '@/lib/cart-store'
+import { useProductsStore } from '@/lib/products-store'
 
 export default function TiendaScreen() {
   const [cat, setCat] = useState('all')
   const [added, setAdded] = useState<string | null>(null)
   const add = useCartStore((s) => s.add)
+  const products = useProductsStore((s) => s.products)
 
-  const visible = cat === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.category === cat)
+  const visible = cat === 'all' ? products : products.filter((p) => p.category === cat)
 
   function handleAdd(id: string) {
     add(id)
@@ -42,7 +44,11 @@ export default function TiendaScreen() {
         renderItem={({ item: p }) => (
           <TouchableOpacity style={s.card} onPress={() => router.push(`/producto/${p.id}`)} activeOpacity={0.8}>
             <View style={[s.cardImg, { backgroundColor: p.gradient[0] }]}>
-              <Text style={s.cardEmoji}>{p.emoji}</Text>
+              {p.image ? (
+                <Image source={{ uri: p.image }} style={s.cardImage} resizeMode="cover" />
+              ) : (
+                <Text style={s.cardEmoji}>{p.emoji}</Text>
+              )}
             </View>
             {p.badge && <Text style={s.badge}>{p.badge}</Text>}
             <Text style={s.cardName} numberOfLines={2}>{p.name}</Text>
@@ -74,7 +80,8 @@ const s = StyleSheet.create({
   list: { paddingHorizontal: 12, paddingBottom: 32 },
   row: { gap: 12, marginBottom: 12 },
   card: { flex: 1, backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#F3F4F6' },
-  cardImg: { height: 120, alignItems: 'center', justifyContent: 'center' },
+  cardImg: { height: 120, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  cardImage: { width: '100%', height: '100%' },
   cardEmoji: { fontSize: 44 },
   badge: { marginHorizontal: 10, marginTop: 6, fontSize: 10, fontWeight: '800', color: '#CE1126', letterSpacing: 0.5 },
   cardName: { marginHorizontal: 10, marginTop: 4, fontSize: 13, fontWeight: '700', color: '#1C1917', lineHeight: 17 },

@@ -2,6 +2,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
+import { useProductsStore } from '@/lib/products-store'
 import { fmt } from '@/lib/data'
 
 const SHIPPING = 120
@@ -9,8 +10,9 @@ const SHIPPING = 120
 export default function CarritoScreen() {
   const cart = useCartStore((s) => s.cart)
   const { add, sub, remove } = useCartStore()
-  const items = cartItems(cart)
-  const subtotal = cartSubtotal(cart)
+  const products = useProductsStore((s) => s.products)
+  const items = cartItems(cart, products)
+  const subtotal = cartSubtotal(cart, products)
   const total = subtotal + SHIPPING
 
   if (items.length === 0) {

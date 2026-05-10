@@ -6,14 +6,25 @@ import { api, type Order } from '@/lib/api'
 import { fmt } from '@/lib/data'
 
 const STATUS_LABEL: Record<string, string> = {
-  pendiente: 'Pendiente',
-  confirmado: 'Confirmado',
-  en_camino: 'En camino',
-  entregado: 'Entregado',
-  cancelado: 'Cancelado',
+  CREATED: 'Received',
+  ASSIGNED: 'Assigned',
+  IN_ROUTE: 'On the way',
+  DELIVERED: 'Delivered',
+  CANCELLED: 'Cancelled',
+  // legacy
+  pendiente: 'Received',
+  confirmado: 'Assigned',
+  en_camino: 'On the way',
+  entregado: 'Delivered',
+  cancelado: 'Cancelled',
 }
 
 const STATUS_COLOR: Record<string, [string, string]> = {
+  CREATED: ['#FEF9C3', '#92400E'],
+  ASSIGNED: ['#DBEAFE', '#1E40AF'],
+  IN_ROUTE: ['#FED7AA', '#9A3412'],
+  DELIVERED: ['rgba(0,99,65,0.1)', '#006341'],
+  CANCELLED: ['rgba(206,17,38,0.08)', '#CE1126'],
   pendiente: ['#FEF9C3', '#92400E'],
   confirmado: ['#DBEAFE', '#1E40AF'],
   en_camino: ['#FED7AA', '#9A3412'],

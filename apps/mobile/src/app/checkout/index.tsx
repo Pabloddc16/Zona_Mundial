@@ -4,6 +4,7 @@ import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
 import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
+import { useProductsStore } from '@/lib/products-store'
 import { api, type OrderPayload } from '@/lib/api'
 import { fmt } from '@/lib/data'
 
@@ -13,8 +14,9 @@ const PAYMENT_METHODS = ['Efectivo', 'Transferencia', 'Tarjeta']
 export default function CheckoutScreen() {
   const cart = useCartStore((s) => s.cart)
   const clear = useCartStore((s) => s.clear)
-  const items = cartItems(cart)
-  const subtotal = cartSubtotal(cart)
+  const products = useProductsStore((s) => s.products)
+  const items = cartItems(cart, products)
+  const subtotal = cartSubtotal(cart, products)
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
