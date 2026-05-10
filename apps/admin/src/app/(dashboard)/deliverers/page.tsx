@@ -8,7 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Sheet } from '@/components/ui/sheet'
-import { Route } from 'lucide-react'
+import { Route, UserPlus } from 'lucide-react'
+
+type FormValues = {
+  name: string; phone: string; vehicle: string; plate: string; zone: string; username: string; status?: string;
+  createAccount?: boolean; email?: string; password?: string
+}
 
 const STATUS_COLORS: Record<string, 'default' | 'success' | 'warning' | 'danger'> = {
   DISPONIBLE: 'success', EN_RUTA: 'warning', DESCANSO: 'default',
@@ -19,6 +24,7 @@ export default function DeliverersPage() {
   const [selected, setSelected] = useState<Deliverer | null>(null)
   const [creating, setCreating] = useState(false)
   const [routeDlg, setRouteDlg] = useState<string | null>(null)
+  const [accountError, setAccountError] = useState('')
 
   const { data: deliverers, isLoading } = useQuery({ queryKey: ['deliverers'], queryFn: api.deliverers.list })
   const { data: route } = useQuery({
@@ -28,8 +34,25 @@ export default function DeliverersPage() {
   })
 
   const createMut = useMutation({
-    mutationFn: (body: unknown) => api.deliverers.create(body),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['deliverers'] }); setCreating(false) },
+    mutationFn: (values: FormValues) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { createAccount: _ca, email: _e, password: _p, ...deliverer } = values
+      return api.deliverers.create(deliverer)
+    },
+    onSuccess: async (_, values) => {
+      qc.invalidateQueries({ queryKey: ['deliverers'] })
+      if (values.createAccount && values.username && values.email && values.password) {
+        try {
+          await api.users.create({ username: values.username, email: values.email, password: values.password, role: 'repartidor' })
+          setAccountError('')
+          setCreating(false)
+        } catch (e) {
+          setAccountError(`Deliverer saved. Account creation failed: ${(e as Error).message}. Create it manually from the Users page.`)
+        }
+      } else {
+        setCreating(false)
+      }
+    },
   })
 
   const updateMut = useMutation({
@@ -72,8 +95,13 @@ export default function DeliverersPage() {
 
       <DataTable columns={columns} data={deliverers ?? []} keyFn={(r) => r.id} loading={isLoading} />
 
-      <Sheet open={creating} onClose={() => setCreating(false)} title="New deliverer">
-        <DelivererForm onSave={(b) => createMut.mutate(b)} saving={createMut.isPending} error={createMut.isError ? (createMut.error as Error).message : ''} />
+      <Sheet open={creating} onClose={() => { setCreating(false); setAccountError('') }} title="New deliverer">
+        <DelivererForm
+          onSave={(b) => createMut.mutate(b as FormValues)}
+          saving={createMut.isPending}
+          error={accountError || (createMut.isError ? (createMut.error as Error).message : '')}
+          isNew
+        />
       </Sheet>
 
       <Sheet open={!!selected} onClose={() => setSelected(null)} title="Edit deliverer">
@@ -117,11 +145,12 @@ export default function DeliverersPage() {
   )
 }
 
-function DelivererForm({ initial, onSave, saving, error }: {
+function DelivererForm({ initial, onSave, saving, error, isNew }: {
   initial?: Deliverer
-  onSave: (b: unknown) => void
+  onSave: (b: Record<string, unknown>) => void
   saving: boolean
   error: string
+  isNew?: boolean
 }) {
   const [name, setName] = useState(initial?.name ?? '')
   const [phone, setPhone] = useState(initial?.phone ?? '')
@@ -130,6 +159,11 @@ function DelivererForm({ initial, onSave, saving, error }: {
   const [zone, setZone] = useState(initial?.zone ?? '')
   const [username, setUsername] = useState(initial?.username ?? '')
   const [status, setStatus] = useState(initial?.status ?? 'DISPONIBLE')
+  const [createAccount, setCreateAccount] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const accountIncomplete = createAccount && (!email || password.length < 8)
 
   return (
     <div className="space-y-3">
@@ -154,11 +188,44 @@ function DelivererForm({ initial, onSave, saving, error }: {
           </Select>
         </div>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {isNew && (
+        <div className="border-t border-white/10 pt-3 space-y-3">
+          <label className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2.5" style={{ background: createAccount ? 'oklch(0.55 0.18 145 / 0.10)' : 'oklch(1 0 0 / 0.03)', border: '1px solid oklch(1 0 0 / 0.08)' }}>
+            <input
+              type="checkbox"
+              checked={createAccount}
+              onChange={(e) => setCreateAccount(e.target.checked)}
+              className="h-4 w-4 rounded accent-green-500"
+            />
+            <UserPlus className="h-4 w-4 text-white/60" />
+            <span className="text-sm font-medium text-white/80">Create login account</span>
+          </label>
+          {createAccount && (
+            <>
+              <p className="text-xs text-white/40 px-1">Account will be created with role <span className="font-mono text-white/60">repartidor</span>. Username: <span className="font-mono text-white/60">{username || '(fill above)'}</span></p>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-white/75">Email</label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="deliverer@example.com" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-white/75">Password</label>
+                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 8 characters" />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
       <Button
         className="w-full"
-        disabled={saving || !name}
-        onClick={() => onSave({ name, phone, vehicle, plate, zone, username, ...(initial ? { status } : {}) })}
+        disabled={saving || !name || accountIncomplete}
+        onClick={() => onSave({
+          name, phone, vehicle, plate, zone, username,
+          ...(initial ? { status } : {}),
+          ...(isNew ? { createAccount, email, password } : {}),
+        })}
       >
         {saving ? 'Saving...' : 'Save'}
       </Button>
