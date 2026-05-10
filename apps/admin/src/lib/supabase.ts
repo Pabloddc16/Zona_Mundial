@@ -1,12 +1,15 @@
 'use client'
 import { createClient } from '@supabase/supabase-js'
 
-const url = process.env['NEXT_PUBLIC_SUPABASE_URL']!
-const key = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!
-
-export const supabase = createClient(url, key)
+function getSupabase() {
+  const url = process.env['NEXT_PUBLIC_SUPABASE_URL']
+  const key = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']
+  if (!url || !key) throw new Error('Supabase env vars not configured')
+  return createClient(url, key)
+}
 
 export async function uploadProductImage(file: File, productId: string): Promise<string> {
+  const supabase = getSupabase()
   const ext = file.name.split('.').pop()
   const path = `${productId}.${ext}`
 
