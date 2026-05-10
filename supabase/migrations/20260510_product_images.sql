@@ -7,20 +7,33 @@ VALUES ('product-images', 'product-images', true, 5242880, ARRAY['image/jpeg','i
 ON CONFLICT (id) DO NOTHING;
 
 -- Allow authenticated users to upload
-CREATE POLICY IF NOT EXISTS "auth upload product images"
-ON storage.objects FOR INSERT TO authenticated
-WITH CHECK (bucket_id = 'product-images');
+DO $$ BEGIN
+  CREATE POLICY "auth upload product images"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'product-images');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Allow public read
-CREATE POLICY IF NOT EXISTS "public read product images"
-ON storage.objects FOR SELECT TO public
-USING (bucket_id = 'product-images');
+DO $$ BEGIN
+  CREATE POLICY "public read product images"
+  ON storage.objects FOR SELECT TO public
+  USING (bucket_id = 'product-images');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- Allow authenticated users to update/delete their uploads
-CREATE POLICY IF NOT EXISTS "auth update product images"
-ON storage.objects FOR UPDATE TO authenticated
-USING (bucket_id = 'product-images');
+-- Allow authenticated users to update
+DO $$ BEGIN
+  CREATE POLICY "auth update product images"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'product-images');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY IF NOT EXISTS "auth delete product images"
-ON storage.objects FOR DELETE TO authenticated
-USING (bucket_id = 'product-images');
+-- Allow authenticated users to delete
+DO $$ BEGIN
+  CREATE POLICY "auth delete product images"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'product-images');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

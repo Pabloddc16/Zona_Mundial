@@ -7,7 +7,7 @@ import { api } from '@/lib/api'
 import {
   LayoutDashboard, ShoppingBag, ShoppingCart, Package, Users, Truck,
   Building2, Receipt, RotateCcw, UserCog, LogOut, Trophy,
-  ArrowLeftRight, GitMerge, FlaskConical, MapPin, TrendingUp, ChevronRight,
+  ArrowLeftRight, GitMerge, FlaskConical, MapPin, TrendingUp, ChevronRight, Landmark, BookOpen,
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -23,6 +23,7 @@ const NAV_SECTIONS = [
       { label: 'Wholesalers', href: '/wholesalers', icon: Building2 },
       { label: 'Expenses', href: '/expenses', icon: Receipt },
       { label: 'Returns', href: '/returns', icon: RotateCcw },
+      { label: 'Accounts', href: '/cuentas', icon: Landmark },
     ],
   },
   {
@@ -41,6 +42,7 @@ const NAV_SECTIONS = [
     adminOnly: true,
     items: [
       { label: 'Users', href: '/users', icon: UserCog, adminOnly: true },
+      { label: 'Guide', href: '/ayuda', icon: BookOpen, adminOnly: true },
     ],
   },
 ]

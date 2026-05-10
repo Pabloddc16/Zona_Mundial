@@ -6,8 +6,8 @@ import { randomUUID } from 'crypto'
 const VALID_ADJUSTMENT_REASONS = ['compra', 'merma', 'ajuste', 'devolucion', 'otro']
 
 const productsRoutes: FastifyPluginAsync = async (fastify) => {
-  // GET /api/products
-  fastify.get('/', { preHandler: fastify.authenticate }, async (req, reply) => {
+  // GET /api/products — public (mobile store needs this)
+  fastify.get('/', async (req, reply) => {
     const query = req.query as Record<string, string>
     const supabase = getClient()
 
@@ -47,8 +47,8 @@ const productsRoutes: FastifyPluginAsync = async (fastify) => {
     return data
   })
 
-  // GET /api/products/:id
-  fastify.get('/:id', { preHandler: fastify.authenticate }, async (req, reply) => {
+  // GET /api/products/:id — public
+  fastify.get('/:id', async (req, reply) => {
     const { id } = req.params as { id: string }
     const { data, error } = await getClient().from('products').select('*').eq('id', id).single()
     if (error || !data) return reply.notFound('Producto no encontrado')

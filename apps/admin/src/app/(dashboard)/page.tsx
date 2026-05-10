@@ -38,7 +38,8 @@ export default function DashboardPage() {
         <select
           value={range}
           onChange={(e) => setRange(Number(e.target.value))}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+          className="rounded-md px-3 py-1.5 text-sm font-medium"
+          style={{ background: 'oklch(0.24 0.012 260)', border: '1px solid oklch(1 0 0 / 0.12)', color: 'var(--text-secondary)' }}
         >
           <option value={7}>Last 7 days</option>
           <option value={30}>Last 30 days</option>

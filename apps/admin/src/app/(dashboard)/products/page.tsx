@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Sheet } from '@/components/ui/sheet'
-import { Plus, Trash2, ImageIcon } from 'lucide-react'
+import { Plus, Trash2, ImageIcon, Upload } from 'lucide-react'
 
 const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 const CATEGORIES = ['album', 'sobre', 'caja', 'set', 'jersey', 'playera', 'gorra', 'bufanda', 'bandera', 'accesorio', 'llavero', 'poster', 'pack', 'sticker', 'coleccion', 'papeleria']
@@ -174,6 +174,7 @@ function ProductForm({ initial, onSave, saving, error }: {
   initial?: Product; onSave: (b: unknown) => void; saving: boolean; error?: string
 }) {
   const rec = initial as unknown as Record<string, string | number>
+  const existingImageUrl = String(rec?.['image_url'] ?? '')
   const [name, setName] = useState(initial?.name ?? '')
   const [price, setPrice] = useState(String(initial?.price ?? ''))
   const [cost, setCost] = useState(String(initial?.cost ?? ''))
@@ -181,9 +182,9 @@ function ProductForm({ initial, onSave, saving, error }: {
   const [emoji, setEmoji] = useState(String(rec?.['emoji'] ?? ''))
   const [stock, setStock] = useState(String(rec?.['stock'] ?? '0'))
   const [barcode, setBarcode] = useState(initial?.barcode ?? '')
-  const [imageUrl, setImageUrl] = useState(String(rec?.['image_url'] ?? ''))
+  const [imageUrl, setImageUrl] = useState(existingImageUrl)
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState(String(rec?.['image_url'] ?? ''))
+  const [previewSrc, setPreviewSrc] = useState(existingImageUrl)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -192,18 +193,18 @@ function ProductForm({ initial, onSave, saving, error }: {
     const file = e.target.files?.[0]
     if (!file) return
     setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
+    setPreviewSrc(URL.createObjectURL(file))
     setUploadError('')
   }
 
   const handleSave = async () => {
-    let finalImageUrl = imageUrl
+    let finalUrl = imageUrl
     if (imageFile) {
       setUploading(true)
       try {
-        const tempId = initial?.id ?? `new-${Date.now()}`
-        finalImageUrl = await uploadProductImage(imageFile, tempId)
-        setImageUrl(finalImageUrl)
+        const id = initial?.id ?? `new-${Date.now()}`
+        finalUrl = await uploadProductImage(imageFile, id)
+        setImageUrl(finalUrl)
       } catch (e) {
         setUploadError((e as Error).message)
         setUploading(false)
@@ -214,7 +215,7 @@ function ProductForm({ initial, onSave, saving, error }: {
     onSave({
       name,
       emoji: emoji || undefined,
-      image_url: finalImageUrl || undefined,
+      image_url: finalUrl || undefined,
       price: Number(price),
       cost: cost ? Number(cost) : undefined,
       category: category || undefined,
@@ -229,39 +230,54 @@ function ProductForm({ initial, onSave, saving, error }: {
       <div>
         <label className="mb-1 block text-sm font-medium text-white/75">Product image</label>
         <div
-          className="flex items-center gap-3 cursor-pointer rounded-lg border border-dashed border-white/20 p-3 hover:border-white/40 transition-colors"
+          className="relative flex items-center gap-3 cursor-pointer rounded-xl border border-dashed p-3 transition-colors"
+          style={{ borderColor: previewSrc ? 'oklch(1 0 0 / 0.15)' : 'oklch(1 0 0 / 0.12)' }}
           onClick={() => fileRef.current?.click()}
         >
-          {imagePreview ? (
-            <img src={imagePreview} alt="preview" className="h-16 w-16 rounded object-cover shrink-0" />
+          {previewSrc ? (
+            <img src={previewSrc} alt="preview" className="h-20 w-20 rounded-lg object-cover shrink-0 border border-white/10" />
           ) : (
-            <span className="h-16 w-16 flex items-center justify-center rounded bg-white/10 shrink-0">
-              <ImageIcon className="h-6 w-6 text-white/30" />
+            <span className="h-20 w-20 flex items-center justify-center rounded-lg shrink-0" style={{ background: 'oklch(1 0 0 / 0.05)' }}>
+              <ImageIcon className="h-7 w-7 text-white/20" />
             </span>
           )}
           <div>
-            <p className="text-sm text-white/75">Click to {imagePreview ? 'change' : 'upload'} image</p>
-            <p className="text-xs text-white/40">JPG, PNG, WebP — max 5 MB</p>
+            <p className="text-sm font-medium text-white/70 flex items-center gap-1.5">
+              <Upload className="h-3.5 w-3.5" />
+              {previewSrc ? 'Click to replace image' : 'Click to upload image'}
+            </p>
+            <p className="text-xs text-white/30 mt-0.5">JPG, PNG, WebP — max 5 MB</p>
+            {previewSrc && (
+              <button
+                type="button"
+                className="mt-1.5 text-xs text-white/30 hover:text-red-400 transition-colors"
+                onClick={(e) => { e.stopPropagation(); setImageFile(null); setPreviewSrc(''); setImageUrl('') }}
+              >
+                Remove image
+              </button>
+            )}
           </div>
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-        {uploadError && <p className="mt-1 text-xs text-red-400">{uploadError}</p>}
-        {imagePreview && (
-          <button
-            type="button"
-            className="mt-1 text-xs text-white/40 hover:text-red-400"
-            onClick={() => { setImageFile(null); setImagePreview(''); setImageUrl('') }}
-          >
-            Remove image
-          </button>
+        {uploadError && (
+          <p className="mt-2 text-xs text-red-400 rounded-lg px-3 py-2" style={{ background: 'oklch(0.63 0.225 27 / 0.1)' }}>
+            Upload failed: {uploadError} — check Supabase credentials in .env.local
+          </p>
         )}
+        <p className="mt-1.5 text-xs text-white/30">Or paste a URL:</p>
+        <Input
+          className="mt-1"
+          value={imageUrl}
+          onChange={(e) => { setImageUrl(e.target.value); if (e.target.value.startsWith('http')) setPreviewSrc(e.target.value) }}
+          placeholder="https://..."
+        />
       </div>
 
       {[
         { label: 'Name *', value: name, set: setName, type: 'text' },
-        { label: 'Emoji (fallback)', value: emoji, set: setEmoji, type: 'text' },
-        { label: 'Price *', value: price, set: setPrice, type: 'number' },
-        { label: 'Cost', value: cost, set: setCost, type: 'number' },
+        { label: 'Emoji (fallback icon)', value: emoji, set: setEmoji, type: 'text' },
+        { label: 'Sale price *', value: price, set: setPrice, type: 'number' },
+        { label: 'Purchase cost', value: cost, set: setCost, type: 'number' },
         ...(!initial ? [{ label: 'Initial stock', value: stock, set: setStock, type: 'number' }] : []),
         { label: 'Barcode', value: barcode, set: setBarcode, type: 'text' },
       ].map(({ label, value, set, type }) => (

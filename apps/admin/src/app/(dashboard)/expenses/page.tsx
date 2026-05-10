@@ -13,6 +13,7 @@ import { format, subDays } from 'date-fns'
 
 const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 const CATEGORIES = ['compra-inventario', 'sueldos', 'renta', 'servicios', 'transporte', 'marketing', 'impuestos', 'otros']
+const PAYMENT_METHODS = ['efectivo', 'transferencia', 'pablo', 'lucho', 'rodrigo']
 
 export default function ExpensesPage() {
   const qc = useQueryClient()
@@ -139,7 +140,7 @@ function ExpenseForm({ initial, onSave, saving, error }: {
         <div>
           <label className="mb-1 block text-sm font-medium text-white/75">Payment method</label>
           <Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            {['efectivo', 'tarjeta', 'transferencia'].map((m) => <option key={m} value={m}>{m}</option>)}
+            {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
           </Select>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { CreateExpenseSchema, UpdateExpenseSchema } from '@pablo/validators'
 import { randomUUID } from 'crypto'
 
 const VALID_EXPENSE_CATEGORIES = ['compra-inventario', 'sueldos', 'renta', 'servicios', 'transporte', 'marketing', 'impuestos', 'otros']
-const VALID_PAYMENT_METHODS = ['efectivo', 'tarjeta', 'transferencia']
+const VALID_PAYMENT_METHODS = ['efectivo', 'tarjeta', 'transferencia', 'pablo', 'lucho', 'rodrigo']
 
 const expensesRoutes: FastifyPluginAsync = async (fastify) => {
   // GET /api/expenses
