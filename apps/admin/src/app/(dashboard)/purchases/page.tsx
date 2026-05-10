@@ -8,13 +8,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Dialog } from '@/components/ui/dialog'
+import { Sheet } from '@/components/ui/sheet'
 import { Plus, Package, CheckCircle2, Truck } from 'lucide-react'
 
-const fmt = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n)
+const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 
 const STATUS_BADGE: Record<string, 'default' | 'warning' | 'success' | 'danger'> = {
   draft: 'default', paid: 'warning', received: 'success', cancelled: 'danger',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Draft', paid: 'Paid', received: 'Received', cancelled: 'Cancelled',
 }
 
 export default function PurchasesPage() {
@@ -35,28 +39,28 @@ export default function PurchasesPage() {
 
   const columns = [
     { key: 'id', header: 'ID', cell: (r: Purchase) => <span className="font-mono text-xs" style={{ color: 'var(--amber)' }}>{r.id}</span> },
-    { key: 'supplier', header: 'Proveedor' },
-    { key: 'status', header: 'Estado', cell: (r: Purchase) => <Badge variant={STATUS_BADGE[r.status]}>{r.status}</Badge> },
+    { key: 'supplier', header: 'Supplier' },
+    { key: 'status', header: 'Status', cell: (r: Purchase) => <Badge variant={STATUS_BADGE[r.status]}>{STATUS_LABEL[r.status] ?? r.status}</Badge> },
     { key: 'total', header: 'Total', cell: (r: Purchase) => fmt(r.total), className: 'text-right font-medium' },
-    { key: 'created_at', header: 'Fecha', cell: (r: Purchase) => r.created_at.slice(0, 10) },
+    { key: 'created_at', header: 'Date', cell: (r: Purchase) => r.created_at.slice(0, 10) },
     { key: 'actions', header: '', cell: (r: Purchase) => (
       <div className="flex gap-1 justify-end">
         {r.status === 'draft' && (
           <Button size="sm" variant="ghost" onClick={() => payMut.mutate(r.id)} className="gap-1">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Pagada
+            <CheckCircle2 className="h-3.5 w-3.5" /> Mark paid
           </Button>
         )}
         {(r.status === 'draft' || r.status === 'paid') && (
           <Button size="sm" variant="ghost" onClick={() => {
-            if (confirm(`Marcar como recibida la compra ${r.id}? Esto generará movimientos de inventario.`)) receiveMut.mutate(r.id)
+            if (confirm(`Mark purchase ${r.id} as received? This will generate inventory movements.`)) receiveMut.mutate(r.id)
           }} className="gap-1">
-            <Truck className="h-3.5 w-3.5" /> Recibida
+            <Truck className="h-3.5 w-3.5" /> Receive
           </Button>
         )}
         {r.status === 'draft' && (
           <Button size="sm" variant="ghost" className="text-red-500" onClick={() => {
-            if (confirm('¿Cancelar compra?')) cancelMut.mutate(r.id)
-          }}>Cancelar</Button>
+            if (confirm('Cancel purchase?')) cancelMut.mutate(r.id)
+          }}>Cancel</Button>
         )}
       </div>
     ) },
@@ -69,22 +73,22 @@ export default function PurchasesPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'oklch(0.77 0.163 70 / 0.12)' }}>
             <Package className="h-5 w-5" style={{ color: 'var(--amber)' }} />
           </div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Compras</h1>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Purchases</h1>
         </div>
-        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nueva compra</Button>
+        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New purchase</Button>
       </div>
 
       <Select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1) }} className="w-40">
-        <option value="">Todos los estados</option>
-        {['draft', 'paid', 'received', 'cancelled'].map((s) => <option key={s} value={s}>{s}</option>)}
+        <option value="">All statuses</option>
+        {Object.entries(STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
       </Select>
 
-      <DataTable columns={columns} data={data?.items ?? []} keyFn={(r) => r.id} loading={isLoading} emptyMessage="Sin compras registradas" />
+      <DataTable columns={columns} data={data?.items ?? []} keyFn={(r) => r.id} loading={isLoading} emptyMessage="No purchases recorded" />
       <Pagination page={data?.page ?? 1} pages={data?.pages ?? 1} total={data?.total ?? 0} onPage={setPage} />
 
-      <Dialog open={creating} onClose={() => setCreating(false)} title="Nueva compra">
+      <Sheet open={creating} onClose={() => setCreating(false)} title="New purchase">
         <PurchaseForm onSave={(b) => createMut.mutate(b)} saving={createMut.isPending} error={createMut.isError ? (createMut.error as Error).message : ''} />
-      </Dialog>
+      </Sheet>
     </div>
   )
 }
@@ -92,10 +96,12 @@ export default function PurchasesPage() {
 function PurchaseForm({ onSave, saving, error }: { onSave: (b: unknown) => void; saving: boolean; error: string }) {
   const [supplier, setSupplier] = useState('')
   const [notes, setNotes] = useState('')
-  const [lines, setLines] = useState([{ sku_id: '', qty: '', unit_cost: '' }])
+  const [lines, setLines] = useState([{ sku_id: '', qty: '', unit_cost: '', received_to: '' }])
   const { data: products } = useQuery({ queryKey: ['products', 1, '', ''], queryFn: () => api.products.list({ limit: '100' }) })
+  const { data: locations } = useQuery({ queryKey: ['locations'], queryFn: api.locations.list })
+  const warehouses = (locations ?? []).filter((l) => l.active && !l.type.startsWith('wip'))
 
-  const addLine = () => setLines([...lines, { sku_id: '', qty: '', unit_cost: '' }])
+  const addLine = () => setLines([...lines, { sku_id: '', qty: '', unit_cost: '', received_to: '' }])
   const removeLine = (i: number) => setLines(lines.filter((_, idx) => idx !== i))
   const updateLine = (i: number, field: string, val: string) => setLines(lines.map((l, idx) => idx === i ? { ...l, [field]: val } : l))
 
@@ -104,36 +110,45 @@ function PurchaseForm({ onSave, saving, error }: { onSave: (b: unknown) => void;
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Proveedor *</label>
-        <Input value={supplier} onChange={(e) => setSupplier(e.target.value)} placeholder="Nombre del proveedor" />
+        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Supplier *</label>
+        <Input value={supplier} onChange={(e) => setSupplier(e.target.value)} placeholder="Supplier name" />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Notas</label>
-        <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Opcional" />
+        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Notes</label>
+        <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" />
       </div>
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Líneas de compra *</label>
-          <Button size="sm" variant="ghost" onClick={addLine}>+ Agregar</Button>
+          <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Line items *</label>
+          <Button size="sm" variant="ghost" onClick={addLine}>+ Add</Button>
         </div>
         <div className="space-y-2">
           {lines.map((l, i) => (
-            <div key={i} className="flex gap-2 rounded-lg p-2" style={{ background: 'var(--surface-deep)' }}>
-              <Select value={l.sku_id} onChange={(e) => updateLine(i, 'sku_id', e.target.value)} className="flex-1">
-                <option value="">Producto...</option>
-                {products?.items.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </Select>
-              <Input type="number" placeholder="Qty" value={l.qty} onChange={(e) => updateLine(i, 'qty', e.target.value)} className="w-20" />
-              <Input type="number" placeholder="Costo unit." value={l.unit_cost} onChange={(e) => updateLine(i, 'unit_cost', e.target.value)} className="w-28" step="0.01" />
-              {lines.length > 1 && <Button size="sm" variant="ghost" className="text-red-500" onClick={() => removeLine(i)}>×</Button>}
+            <div key={i} className="space-y-1.5 rounded-lg p-2" style={{ background: 'var(--surface-deep)' }}>
+              <div className="flex gap-2">
+                <Select value={l.sku_id} onChange={(e) => updateLine(i, 'sku_id', e.target.value)} className="flex-1">
+                  <option value="">Product...</option>
+                  {products?.items.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </Select>
+                <Input type="number" placeholder="Qty" value={l.qty} onChange={(e) => updateLine(i, 'qty', e.target.value)} className="w-20" />
+                <Input type="number" placeholder="Cost" value={l.unit_cost} onChange={(e) => updateLine(i, 'unit_cost', e.target.value)} className="w-24" step="0.01" />
+                {lines.length > 1 && <Button size="sm" variant="ghost" className="text-red-500" onClick={() => removeLine(i)}>×</Button>}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>Destination:</span>
+                <Select value={l.received_to} onChange={(e) => updateLine(i, 'received_to', e.target.value)} className="flex-1 text-xs">
+                  <option value="">Default warehouse</option>
+                  {warehouses.map((loc) => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
+                </Select>
+              </div>
             </div>
           ))}
         </div>
-        <p className="mt-2 text-right text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Total: <strong style={{ color: 'var(--text-primary)' }}>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(total)}</strong></p>
+        <p className="mt-2 text-right text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Total: <strong style={{ color: 'var(--text-primary)' }}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}</strong></p>
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
-      <Button className="w-full" disabled={saving || !supplier || lines.every((l) => !l.sku_id)} onClick={() => onSave({ supplier, notes: notes || undefined, lines: lines.filter((l) => l.sku_id).map((l) => ({ sku_id: l.sku_id, qty: Number(l.qty), unit_cost: Number(l.unit_cost) })) })}>
-        {saving ? 'Guardando...' : 'Crear compra'}
+      <Button className="w-full" disabled={saving || !supplier || lines.every((l) => !l.sku_id)} onClick={() => onSave({ supplier, notes: notes || undefined, lines: lines.filter((l) => l.sku_id).map((l) => ({ sku_id: l.sku_id, qty: Number(l.qty), unit_cost: Number(l.unit_cost), received_to: l.received_to || undefined })) })}>
+        {saving ? 'Saving...' : 'Create purchase'}
       </Button>
     </div>
   )

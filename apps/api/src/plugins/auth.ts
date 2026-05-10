@@ -35,11 +35,18 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
           return reply.code(401).send({ error: 'Invalid session' })
         }
 
+        const { data: userRow } = await supabase
+          .from('users').select('role, username, active').eq('id', user.id).single()
+
+        if (!userRow || userRow.active === false) {
+          return reply.code(401).send({ error: 'Invalid session' })
+        }
+
         req.user = {
           id: user.id,
           email: user.email ?? '',
-          role: user.user_metadata['role'] as string ?? 'capturista',
-          username: user.user_metadata['username'] as string ?? user.email ?? user.id,
+          role: userRow.role as string,
+          username: userRow.username as string,
         }
       } catch {
         return reply.code(401).send({ error: 'Unauthorized' })

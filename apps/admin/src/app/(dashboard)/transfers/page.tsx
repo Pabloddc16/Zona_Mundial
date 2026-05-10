@@ -8,11 +8,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Dialog } from '@/components/ui/dialog'
+import { Sheet } from '@/components/ui/sheet'
 import { Plus, ArrowLeftRight, CheckCircle2 } from 'lucide-react'
 
 const STATUS_BADGE: Record<string, 'default' | 'warning' | 'success' | 'danger'> = {
   draft: 'default', in_transit: 'warning', completed: 'success', cancelled: 'danger',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Draft', in_transit: 'In transit', completed: 'Completed', cancelled: 'Cancelled',
 }
 
 export default function TransfersPage() {
@@ -27,24 +31,24 @@ export default function TransfersPage() {
 
   const columns = [
     { key: 'id', header: 'ID', cell: (r: Transfer) => <span className="font-mono text-xs" style={{ color: 'var(--amber)' }}>{r.id}</span> },
-    { key: 'route', header: 'Ruta', cell: (r: Transfer) => (
+    { key: 'route', header: 'Route', cell: (r: Transfer) => (
       <div className="flex items-center gap-1.5 text-sm">
         <span style={{ color: 'var(--text-secondary)' }}>{(r as unknown as { from_location?: { name?: string } }).from_location?.name ?? r.from_loc}</span>
         <ArrowLeftRight className="h-3 w-3" style={{ color: 'var(--text-muted)' }} />
         <span style={{ color: 'var(--text-secondary)' }}>{(r as unknown as { to_location?: { name?: string } }).to_location?.name ?? r.to_loc}</span>
       </div>
     )},
-    { key: 'status', header: 'Estado', cell: (r: Transfer) => <Badge variant={STATUS_BADGE[r.status]}>{r.status}</Badge> },
-    { key: 'created_at', header: 'Fecha', cell: (r: Transfer) => r.created_at.slice(0, 10) },
+    { key: 'status', header: 'Status', cell: (r: Transfer) => <Badge variant={STATUS_BADGE[r.status]}>{STATUS_LABEL[r.status] ?? r.status}</Badge> },
+    { key: 'created_at', header: 'Date', cell: (r: Transfer) => r.created_at.slice(0, 10) },
     { key: 'actions', header: '', cell: (r: Transfer) => (
       <div className="flex gap-1 justify-end">
         {r.status === 'draft' && (
-          <Button size="sm" variant="ghost" onClick={() => { if (confirm('¿Completar transferencia? Esto moverá el stock entre locaciones.')) completeMut.mutate(r.id) }} className="gap-1">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Completar
+          <Button size="sm" variant="ghost" onClick={() => { if (confirm('Complete transfer? This will move stock between locations.')) completeMut.mutate(r.id) }} className="gap-1">
+            <CheckCircle2 className="h-3.5 w-3.5" /> Complete
           </Button>
         )}
         {r.status === 'draft' && (
-          <Button size="sm" variant="ghost" className="text-red-500" onClick={() => { if (confirm('¿Cancelar?')) cancelMut.mutate(r.id) }}>Cancelar</Button>
+          <Button size="sm" variant="ghost" className="text-red-500" onClick={() => { if (confirm('Cancel transfer?')) cancelMut.mutate(r.id) }}>Cancel</Button>
         )}
       </div>
     )},
@@ -57,17 +61,17 @@ export default function TransfersPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'oklch(0.62 0.20 260 / 0.12)' }}>
             <ArrowLeftRight className="h-5 w-5" style={{ color: 'oklch(0.72 0.19 260)' }} />
           </div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Transferencias</h1>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Transfers</h1>
         </div>
-        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nueva transferencia</Button>
+        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New transfer</Button>
       </div>
 
-      <DataTable columns={columns} data={data?.items ?? []} keyFn={(r) => r.id} loading={isLoading} emptyMessage="Sin transferencias registradas" />
+      <DataTable columns={columns} data={data?.items ?? []} keyFn={(r) => r.id} loading={isLoading} emptyMessage="No transfers recorded" />
       <Pagination page={data?.page ?? 1} pages={data?.pages ?? 1} total={data?.total ?? 0} onPage={setPage} />
 
-      <Dialog open={creating} onClose={() => setCreating(false)} title="Nueva transferencia">
+      <Sheet open={creating} onClose={() => setCreating(false)} title="New transfer">
         <TransferForm onSave={(b) => createMut.mutate(b)} saving={createMut.isPending} error={createMut.isError ? (createMut.error as Error).message : ''} />
-      </Dialog>
+      </Sheet>
     </div>
   )
 }
@@ -88,33 +92,33 @@ function TransferForm({ onSave, saving, error }: { onSave: (b: unknown) => void;
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Origen *</label>
+          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>From *</label>
           <Select value={fromLoc} onChange={(e) => setFromLoc(e.target.value)}>
-            <option value="">Seleccionar...</option>
+            <option value="">Select...</option>
             {locations?.filter((l) => !l.type.startsWith('wip')).map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </Select>
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Destino *</label>
+          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>To *</label>
           <Select value={toLoc} onChange={(e) => setToLoc(e.target.value)}>
-            <option value="">Seleccionar...</option>
+            <option value="">Select...</option>
             {locations?.filter((l) => !l.type.startsWith('wip') && l.id !== fromLoc).map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </Select>
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Notas</label>
-        <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Opcional" />
+        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Notes</label>
+        <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" />
       </div>
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Productos *</label>
-          <Button size="sm" variant="ghost" onClick={addLine}>+ Agregar</Button>
+          <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Products *</label>
+          <Button size="sm" variant="ghost" onClick={addLine}>+ Add</Button>
         </div>
         {lines.map((l, i) => (
           <div key={i} className="mb-2 flex gap-2 rounded-lg p-2" style={{ background: 'var(--surface-deep)' }}>
             <Select value={l.sku_id} onChange={(e) => updateLine(i, 'sku_id', e.target.value)} className="flex-1">
-              <option value="">Producto...</option>
+              <option value="">Product...</option>
               {products?.items.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </Select>
             <Input type="number" placeholder="Qty" value={l.qty} onChange={(e) => updateLine(i, 'qty', e.target.value)} className="w-24" />
@@ -124,7 +128,7 @@ function TransferForm({ onSave, saving, error }: { onSave: (b: unknown) => void;
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
       <Button className="w-full" disabled={saving || !fromLoc || !toLoc || lines.every((l) => !l.sku_id)} onClick={() => onSave({ from_loc: fromLoc, to_loc: toLoc, notes: notes || undefined, lines: lines.filter((l) => l.sku_id).map((l) => ({ sku_id: l.sku_id, qty: Number(l.qty) })) })}>
-        {saving ? 'Guardando...' : 'Crear transferencia'}
+        {saving ? 'Saving...' : 'Create transfer'}
       </Button>
     </div>
   )

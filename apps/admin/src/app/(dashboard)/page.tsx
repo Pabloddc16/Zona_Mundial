@@ -9,7 +9,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { format, subDays } from 'date-fns'
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(n)
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n)
 
 export default function DashboardPage() {
   const [range, setRange] = useState(30)
@@ -40,27 +40,27 @@ export default function DashboardPage() {
           onChange={(e) => setRange(Number(e.target.value))}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
         >
-          <option value={7}>Últimos 7 días</option>
-          <option value={30}>Últimos 30 días</option>
-          <option value={90}>Últimos 90 días</option>
+          <option value={7}>Last 7 days</option>
+          <option value={30}>Last 30 days</option>
+          <option value={90}>Last 90 days</option>
         </select>
       </div>
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Ingreso total" value={fmt(s?.ingresoTotal ?? 0)} accent="blue" />
-        <StatCard label="Cobrado" value={fmt(s?.cobrado ?? 0)} accent="green" />
-        <StatCard label="Por cobrar" value={fmt(s?.porCobrar ?? 0)} accent="yellow" />
-        <StatCard label="Utilidad neta" value={fmt(s?.utilidadNeta ?? 0)} accent={s?.utilidadNeta ?? 0 >= 0 ? 'green' : 'red'} />
-        <StatCard label="Egresos" value={fmt(s?.totalEgresos ?? 0)} accent="red" />
-        <StatCard label="Utilidad bruta" value={fmt(s?.utilidadBruta ?? 0)} accent="green" />
-        <StatCard label="Inventario (valor)" value={fmt(s?.valorInventario ?? 0)} />
-        <StatCard label="Inventario (unid.)" value={s?.unidadesInventario?.toLocaleString() ?? '0'} />
+        <StatCard label="Total revenue" value={fmt(s?.ingresoTotal ?? 0)} accent="blue" />
+        <StatCard label="Collected" value={fmt(s?.cobrado ?? 0)} accent="green" />
+        <StatCard label="Pending collection" value={fmt(s?.porCobrar ?? 0)} accent="yellow" />
+        <StatCard label="Net profit" value={fmt(s?.utilidadNeta ?? 0)} accent={s?.utilidadNeta ?? 0 >= 0 ? 'green' : 'red'} />
+        <StatCard label="Expenses" value={fmt(s?.totalEgresos ?? 0)} accent="red" />
+        <StatCard label="Gross profit" value={fmt(s?.utilidadBruta ?? 0)} accent="green" />
+        <StatCard label="Inventory (value)" value={fmt(s?.valorInventario ?? 0)} />
+        <StatCard label="Inventory (units)" value={s?.unidadesInventario?.toLocaleString() ?? '0'} />
       </div>
 
       {/* Revenue chart */}
       <Card>
-        <CardHeader><CardTitle>Ingresos diarios</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Daily revenue</CardTitle></CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={kpis?.dailyCashFlow ?? []}>
@@ -82,16 +82,16 @@ export default function DashboardPage() {
       {/* Revenue by source + Orders status */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle>Ingresos por fuente</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Revenue by source</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {['pos', 'wholesale', 'app'].map((src) => {
               const d = kpis?.bySource?.[src as keyof typeof kpis.bySource]
               return (
                 <div key={src} className="flex items-center justify-between">
-                  <span className="text-sm text-white/60 capitalize">{src === 'pos' ? 'POS' : src === 'wholesale' ? 'Mayoreo' : 'App'}</span>
+                  <span className="text-sm text-white/60 capitalize">{src === 'pos' ? 'POS' : src === 'wholesale' ? 'Wholesale' : 'App'}</span>
                   <div className="text-right">
                     <span className="text-sm font-medium">{fmt(d?.revenue ?? 0)}</span>
-                    <span className="ml-2 text-xs text-white/40">{d?.count} ventas</span>
+                    <span className="ml-2 text-xs text-white/40">{d?.count} sales</span>
                   </div>
                 </div>
               )
@@ -100,7 +100,7 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Estado de pedidos</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Order status</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {orders && Object.entries(orders.byStatus).map(([status, count]) => (
               <div key={status} className="flex items-center justify-between">
@@ -110,17 +110,17 @@ export default function DashboardPage() {
             ))}
             {orders && (
               <div className="mt-3 border-t border-white/5 pt-3 text-sm text-white/50">
-                Hoy: {orders.ordersToday} pedidos · {fmt(orders.revenueToday)}
+                Today: {orders.ordersToday} orders · {fmt(orders.revenueToday)}
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* CXC */}
+      {/* Accounts receivable */}
       {(kpis?.cuentasPorCobrar?.count ?? 0) > 0 && (
         <Card>
-          <CardHeader><CardTitle>Cuentas por cobrar — Mayoreo ({fmt(kpis!.cuentasPorCobrar.total)})</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Accounts receivable — Wholesale ({fmt(kpis!.cuentasPorCobrar.total)})</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-2">
               {(kpis!.cuentasPorCobrar.items as Array<{ id: string; wholesaler_name: string; saldo: number; status: string }>).slice(0, 10).map((c) => (

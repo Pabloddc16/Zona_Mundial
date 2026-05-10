@@ -6,10 +6,10 @@ import { DataTable } from '@/components/shared/data-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Dialog } from '@/components/ui/dialog'
+import { Sheet } from '@/components/ui/sheet'
 import { Plus, Trash2 } from 'lucide-react'
 
-const fmt = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(n)
+const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n)
 
 export default function CustomersPage() {
   const qc = useQueryClient()
@@ -43,17 +43,17 @@ export default function CustomersPage() {
   )
 
   const columns = [
-    { key: 'name', header: 'Nombre' },
-    { key: 'phone', header: 'Teléfono', cell: (r: Customer) => r.phone ?? '—' },
-    { key: 'email', header: 'Correo', cell: (r: Customer) => r.email ?? '—' },
-    { key: 'address', header: 'Dirección', cell: (r: Customer) => <span className="text-xs text-white/50 truncate max-w-xs block">{r.address ?? '—'}</span> },
-    { key: 'total_orders', header: 'Pedidos', cell: (r: Customer) => r.total_orders, className: 'text-center' },
-    { key: 'total_spent', header: 'Gastado', cell: (r: Customer) => fmt(r.total_spent), className: 'text-right' },
+    { key: 'name', header: 'Name' },
+    { key: 'phone', header: 'Phone', cell: (r: Customer) => r.phone ?? '—' },
+    { key: 'email', header: 'Email', cell: (r: Customer) => r.email ?? '—' },
+    { key: 'address', header: 'Address', cell: (r: Customer) => <span className="text-xs text-white/50 truncate max-w-xs block">{r.address ?? '—'}</span> },
+    { key: 'total_orders', header: 'Orders', cell: (r: Customer) => r.total_orders, className: 'text-center' },
+    { key: 'total_spent', header: 'Spent', cell: (r: Customer) => fmt(r.total_spent), className: 'text-right' },
     { key: 'actions', header: '', cell: (r: Customer) => (
       <div className="flex gap-1 justify-end">
-        <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>Editar</Button>
+        <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>Edit</Button>
         <Button size="sm" variant="ghost" className="text-red-600" onClick={() => {
-          if (confirm(`Eliminar a ${r.name}?`)) deleteMut.mutate(r.id)
+          if (confirm(`Delete ${r.name}?`)) deleteMut.mutate(r.id)
         }}><Trash2 className="h-3.5 w-3.5" /></Button>
       </div>
     ) },
@@ -62,28 +62,28 @@ export default function CustomersPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white/90">Clientes</h1>
-        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nuevo cliente</Button>
+        <h1 className="text-xl font-bold text-white/90">Customers</h1>
+        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New customer</Button>
       </div>
 
       <Input
-        placeholder="Buscar por nombre / teléfono / correo..."
+        placeholder="Search by name / phone / email..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="max-w-sm"
       />
 
-      <DataTable columns={columns} data={filtered} keyFn={(r) => r.id} loading={isLoading} emptyMessage="Sin clientes" />
+      <DataTable columns={columns} data={filtered} keyFn={(r) => r.id} loading={isLoading} emptyMessage="No customers" />
 
-      <Dialog open={creating} onClose={() => setCreating(false)} title="Nuevo cliente">
+      <Sheet open={creating} onClose={() => setCreating(false)} title="New customer">
         <CustomerForm
           onSave={(b) => createMut.mutate(b)}
           saving={createMut.isPending}
           error={createMut.isError ? (createMut.error as Error).message : ''}
         />
-      </Dialog>
+      </Sheet>
 
-      <Dialog open={!!editing} onClose={() => setEditing(null)} title="Editar cliente">
+      <Sheet open={!!editing} onClose={() => setEditing(null)} title="Edit customer">
         {editing && (
           <CustomerForm
             initial={editing}
@@ -92,7 +92,7 @@ export default function CustomersPage() {
             error={updateMut.isError ? (updateMut.error as Error).message : ''}
           />
         )}
-      </Dialog>
+      </Sheet>
     </div>
   )
 }
@@ -108,10 +108,10 @@ function CustomerForm({ initial, onSave, saving, error }: {
   return (
     <div className="space-y-4">
       {([
-        ['Nombre *', name, setName, 'text'],
-        ['Teléfono', phone, setPhone, 'tel'],
-        ['Correo', email, setEmail, 'email'],
-        ['Dirección', address, setAddress, 'text'],
+        ['Name *', name, setName, 'text'],
+        ['Phone', phone, setPhone, 'tel'],
+        ['Email', email, setEmail, 'email'],
+        ['Address', address, setAddress, 'text'],
       ] as [string, string, (v: string) => void, string][]).map(([label, value, set, type]) => (
         <div key={label}>
           <label className="mb-1 block text-sm font-medium text-white/75">{label}</label>
@@ -120,7 +120,7 @@ function CustomerForm({ initial, onSave, saving, error }: {
       ))}
       {error && <p className="text-sm text-red-600">{error}</p>}
       <Button className="w-full" disabled={saving || !name} onClick={() => onSave({ name, phone: phone || undefined, email: email || undefined, address: address || undefined })}>
-        {saving ? 'Guardando...' : 'Guardar'}
+        {saving ? 'Saving...' : 'Save'}
       </Button>
     </div>
   )

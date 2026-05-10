@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Dialog } from '@/components/ui/dialog'
+import { Sheet } from '@/components/ui/sheet'
 import { Route } from 'lucide-react'
 
 const STATUS_COLORS: Record<string, 'default' | 'success' | 'warning' | 'danger'> = {
@@ -44,20 +44,20 @@ export default function DeliverersPage() {
 
   const columns = [
     { key: 'id', header: 'ID', cell: (r: Deliverer) => <span className="font-mono text-xs text-white/50">{r.id}</span> },
-    { key: 'name', header: 'Nombre' },
-    { key: 'vehicle', header: 'Vehículo', cell: (r: Deliverer) => r.vehicle ?? '—' },
-    { key: 'zone', header: 'Zona', cell: (r: Deliverer) => r.zone ?? '—' },
-    { key: 'status', header: 'Estado', cell: (r: Deliverer) => <Badge variant={STATUS_COLORS[r.status] ?? 'default'}>{r.status}</Badge> },
+    { key: 'name', header: 'Name' },
+    { key: 'vehicle', header: 'Vehicle', cell: (r: Deliverer) => r.vehicle ?? '—' },
+    { key: 'zone', header: 'Zone', cell: (r: Deliverer) => r.zone ?? '—' },
+    { key: 'status', header: 'Status', cell: (r: Deliverer) => <Badge variant={STATUS_COLORS[r.status] ?? 'default'}>{r.status}</Badge> },
     { key: 'rating', header: 'Rating', cell: (r: Deliverer) => `⭐ ${r.rating}`, className: 'text-center' },
-    { key: 'deliveries_today', header: 'Hoy', className: 'text-center' },
+    { key: 'deliveries_today', header: 'Today', className: 'text-center' },
     {
       key: 'actions', header: '', cell: (r: Deliverer) => (
         <div className="flex gap-1 justify-end">
           <Button size="sm" variant="ghost" onClick={() => setRouteDlg(r.id)}><Route className="h-3.5 w-3.5" /></Button>
-          <Button size="sm" variant="ghost" onClick={() => setSelected(r)}>Editar</Button>
+          <Button size="sm" variant="ghost" onClick={() => setSelected(r)}>Edit</Button>
           <Button size="sm" variant="ghost" className="text-red-600" onClick={() => {
-            if (confirm(`Eliminar ${r.name}?`)) deleteMut.mutate(r.id)
-          }}>Eliminar</Button>
+            if (confirm(`Delete ${r.name}?`)) deleteMut.mutate(r.id)
+          }}>Delete</Button>
         </div>
       ),
     },
@@ -66,19 +66,17 @@ export default function DeliverersPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white/90">Repartidores</h1>
-        <Button onClick={() => setCreating(true)}>Nuevo repartidor</Button>
+        <h1 className="text-xl font-bold text-white/90">Deliverers</h1>
+        <Button onClick={() => setCreating(true)}>New deliverer</Button>
       </div>
 
       <DataTable columns={columns} data={deliverers ?? []} keyFn={(r) => r.id} loading={isLoading} />
 
-      {/* Create */}
-      <Dialog open={creating} onClose={() => setCreating(false)} title="Nuevo repartidor">
+      <Sheet open={creating} onClose={() => setCreating(false)} title="New deliverer">
         <DelivererForm onSave={(b) => createMut.mutate(b)} saving={createMut.isPending} error={createMut.isError ? (createMut.error as Error).message : ''} />
-      </Dialog>
+      </Sheet>
 
-      {/* Edit */}
-      <Dialog open={!!selected} onClose={() => setSelected(null)} title="Editar repartidor">
+      <Sheet open={!!selected} onClose={() => setSelected(null)} title="Edit deliverer">
         {selected && (
           <DelivererForm
             initial={selected}
@@ -87,14 +85,13 @@ export default function DeliverersPage() {
             error={updateMut.isError ? (updateMut.error as Error).message : ''}
           />
         )}
-      </Dialog>
+      </Sheet>
 
-      {/* Route */}
-      <Dialog open={!!routeDlg} onClose={() => setRouteDlg(null)} title="Ruta optimizada" className="max-w-2xl">
+      <Sheet open={!!routeDlg} onClose={() => setRouteDlg(null)} title="Optimized route" className="max-w-2xl">
         {route && (
           <div className="space-y-3">
             <div className="flex gap-4 text-sm text-white/60">
-              <span>{route.totals.stops} paradas</span>
+              <span>{route.totals.stops} stops</span>
               <span>{route.totals.distanceKm} km</span>
               <span>~{route.totals.etaMinutes} min</span>
             </div>
@@ -115,7 +112,7 @@ export default function DeliverersPage() {
             </div>
           </div>
         )}
-      </Dialog>
+      </Sheet>
     </div>
   )
 }
@@ -137,12 +134,12 @@ function DelivererForm({ initial, onSave, saving, error }: {
   return (
     <div className="space-y-3">
       {([
-        ['Nombre', name, setName],
-        ['Teléfono', phone, setPhone],
-        ['Vehículo', vehicle, setVehicle],
-        ['Placa', plate, setPlate],
-        ['Zona', zone, setZone],
-        ['Usuario', username, setUsername],
+        ['Name', name, setName],
+        ['Phone', phone, setPhone],
+        ['Vehicle', vehicle, setVehicle],
+        ['Plate', plate, setPlate],
+        ['Zone', zone, setZone],
+        ['Username', username, setUsername],
       ] as [string, string, (v: string) => void][]).map(([label, value, set]) => (
         <div key={label}>
           <label className="mb-1 block text-sm font-medium text-white/75">{label}</label>
@@ -151,7 +148,7 @@ function DelivererForm({ initial, onSave, saving, error }: {
       ))}
       {initial && (
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Estado</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Status</label>
           <Select value={status} onChange={(e) => setStatus(e.target.value)}>
             {['DISPONIBLE', 'EN_RUTA', 'DESCANSO'].map((s) => <option key={s} value={s}>{s}</option>)}
           </Select>
@@ -163,7 +160,7 @@ function DelivererForm({ initial, onSave, saving, error }: {
         disabled={saving || !name}
         onClick={() => onSave({ name, phone, vehicle, plate, zone, username, ...(initial ? { status } : {}) })}
       >
-        {saving ? 'Guardando...' : 'Guardar'}
+        {saving ? 'Saving...' : 'Save'}
       </Button>
     </div>
   )

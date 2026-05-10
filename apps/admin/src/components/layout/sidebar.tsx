@@ -12,35 +12,35 @@ import {
 
 const NAV_SECTIONS = [
   {
-    label: 'Ventas',
+    label: 'Sales',
     items: [
       { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-      { label: 'Pedidos', href: '/orders', icon: ShoppingBag },
+      { label: 'Orders', href: '/orders', icon: ShoppingBag },
       { label: 'POS', href: '/pos', icon: ShoppingCart },
-      { label: 'Productos', href: '/products', icon: Package },
-      { label: 'Clientes', href: '/customers', icon: Users },
-      { label: 'Repartidores', href: '/deliverers', icon: Truck },
-      { label: 'Mayoristas', href: '/wholesalers', icon: Building2 },
-      { label: 'Egresos', href: '/expenses', icon: Receipt },
-      { label: 'Devoluciones', href: '/returns', icon: RotateCcw },
+      { label: 'Products', href: '/products', icon: Package },
+      { label: 'Customers', href: '/customers', icon: Users },
+      { label: 'Deliverers', href: '/deliverers', icon: Truck },
+      { label: 'Wholesalers', href: '/wholesalers', icon: Building2 },
+      { label: 'Expenses', href: '/expenses', icon: Receipt },
+      { label: 'Returns', href: '/returns', icon: RotateCcw },
     ],
   },
   {
-    label: 'Inventario',
+    label: 'Inventory',
     items: [
       { label: 'Stock', href: '/inventory', icon: TrendingUp },
-      { label: 'Compras', href: '/purchases', icon: Package },
-      { label: 'Transferencias', href: '/transfers', icon: ArrowLeftRight },
-      { label: 'Conversiones', href: '/conversions', icon: GitMerge },
-      { label: 'Recetas', href: '/recipes', icon: FlaskConical },
-      { label: 'Locaciones', href: '/locations', icon: MapPin },
+      { label: 'Purchases', href: '/purchases', icon: Package },
+      { label: 'Transfers', href: '/transfers', icon: ArrowLeftRight },
+      { label: 'Conversions', href: '/conversions', icon: GitMerge },
+      { label: 'Recipes', href: '/recipes', icon: FlaskConical },
+      { label: 'Locations', href: '/locations', icon: MapPin },
     ],
   },
   {
     label: 'Admin',
     adminOnly: true,
     items: [
-      { label: 'Usuarios', href: '/users', icon: UserCog, adminOnly: true },
+      { label: 'Users', href: '/users', icon: UserCog, adminOnly: true },
     ],
   },
 ]
@@ -65,7 +65,7 @@ export function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-bold leading-none" style={{ color: 'var(--text-primary)' }}>Pablo Admin</p>
-          <p className="mt-0.5 text-[10px] leading-none" style={{ color: 'var(--text-muted)' }}>Mundial 2026</p>
+          <p className="mt-0.5 text-[10px] leading-none" style={{ color: 'var(--text-muted)' }}>World Cup 2026</p>
         </div>
       </div>
 
@@ -114,7 +114,7 @@ export function Sidebar() {
             {(user?.username ?? 'U')[0]?.toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{user?.username ?? 'Usuario'}</p>
+            <p className="truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{user?.username ?? 'User'}</p>
             <p className="text-[10px] capitalize" style={{ color: 'var(--text-muted)' }}>{user?.role}</p>
           </div>
         </div>
@@ -126,7 +126,7 @@ export function Sidebar() {
           onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)' }}
         >
           <LogOut className="h-3.5 w-3.5" />
-          Cerrar sesión
+          Sign out
         </button>
       </div>
     </aside>

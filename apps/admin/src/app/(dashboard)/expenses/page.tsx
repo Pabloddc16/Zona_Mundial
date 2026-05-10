@@ -7,11 +7,11 @@ import { Pagination } from '@/components/shared/pagination'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { Dialog } from '@/components/ui/dialog'
+import { Sheet } from '@/components/ui/sheet'
 import { Plus } from 'lucide-react'
 import { format, subDays } from 'date-fns'
 
-const fmt = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n)
+const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 const CATEGORIES = ['compra-inventario', 'sueldos', 'renta', 'servicios', 'transporte', 'marketing', 'impuestos', 'otros']
 
 export default function ExpensesPage() {
@@ -46,17 +46,17 @@ export default function ExpensesPage() {
   })
 
   const columns = [
-    { key: 'date', header: 'Fecha', cell: (r: Expense) => r.date },
-    { key: 'concept', header: 'Concepto' },
-    { key: 'category', header: 'Categoría', cell: (r: Expense) => r.category ?? 'otros' },
-    { key: 'payment_method', header: 'Método', cell: (r: Expense) => r.payment_method ?? '—' },
-    { key: 'amount', header: 'Monto', cell: (r: Expense) => fmt(r.amount), className: 'text-right font-medium' },
+    { key: 'date', header: 'Date', cell: (r: Expense) => r.date },
+    { key: 'concept', header: 'Concept' },
+    { key: 'category', header: 'Category', cell: (r: Expense) => r.category ?? 'otros' },
+    { key: 'payment_method', header: 'Method', cell: (r: Expense) => r.payment_method ?? '—' },
+    { key: 'amount', header: 'Amount', cell: (r: Expense) => fmt(r.amount), className: 'text-right font-medium' },
     { key: 'actions', header: '', cell: (r: Expense) => (
       <div className="flex gap-1 justify-end">
-        <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>Editar</Button>
+        <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>Edit</Button>
         <Button size="sm" variant="ghost" className="text-red-600" onClick={() => {
-          if (confirm('Eliminar este egreso?')) deleteMut.mutate(r.id)
-        }}>Eliminar</Button>
+          if (confirm('Delete this expense?')) deleteMut.mutate(r.id)
+        }}>Delete</Button>
       </div>
     ) },
   ]
@@ -64,15 +64,15 @@ export default function ExpensesPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white/90">Egresos</h1>
-        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nuevo</Button>
+        <h1 className="text-xl font-bold text-white/90">Expenses</h1>
+        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New</Button>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1) }} className="w-40" />
         <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1) }} className="w-40" />
         <Select value={category} onChange={(e) => { setCategory(e.target.value); setPage(1) }} className="w-48">
-          <option value="">Todas las categorías</option>
+          <option value="">All categories</option>
           {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </Select>
         {data && (
@@ -85,11 +85,11 @@ export default function ExpensesPage() {
       <DataTable columns={columns} data={data?.items ?? []} keyFn={(r) => r.id} loading={isLoading} />
       <Pagination page={data?.page ?? 1} pages={data?.pages ?? 1} total={data?.total ?? 0} onPage={setPage} />
 
-      <Dialog open={creating} onClose={() => setCreating(false)} title="Nuevo egreso">
+      <Sheet open={creating} onClose={() => setCreating(false)} title="New expense">
         <ExpenseForm onSave={(b) => createMut.mutate(b)} saving={createMut.isPending} error={createMut.isError ? (createMut.error as Error).message : ''} />
-      </Dialog>
+      </Sheet>
 
-      <Dialog open={!!editing} onClose={() => setEditing(null)} title="Editar egreso">
+      <Sheet open={!!editing} onClose={() => setEditing(null)} title="Edit expense">
         {editing && (
           <ExpenseForm
             initial={editing}
@@ -98,7 +98,7 @@ export default function ExpensesPage() {
             error={updateMut.isError ? (updateMut.error as Error).message : ''}
           />
         )}
-      </Dialog>
+      </Sheet>
     </div>
   )
 }
@@ -117,35 +117,35 @@ function ExpenseForm({ initial, onSave, saving, error }: {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Fecha</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Date</label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Monto</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Amount</label>
           <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} step="0.01" min="0.01" />
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-white/75">Concepto</label>
-        <Input value={concept} onChange={(e) => setConcept(e.target.value)} placeholder="Descripción del egreso" />
+        <label className="mb-1 block text-sm font-medium text-white/75">Concept</label>
+        <Input value={concept} onChange={(e) => setConcept(e.target.value)} placeholder="Expense description" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Categoría</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Category</label>
           <Select value={category} onChange={(e) => setCategory(e.target.value)}>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </Select>
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Método de pago</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Payment method</label>
           <Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
             {['efectivo', 'tarjeta', 'transferencia'].map((m) => <option key={m} value={m}>{m}</option>)}
           </Select>
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-white/75">Notas</label>
-        <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Opcional" />
+        <label className="mb-1 block text-sm font-medium text-white/75">Notes</label>
+        <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <Button
@@ -153,7 +153,7 @@ function ExpenseForm({ initial, onSave, saving, error }: {
         disabled={saving || !concept || !amount}
         onClick={() => onSave({ date, concept, category, amount: Number(amount), payment_method: paymentMethod, notes })}
       >
-        {saving ? 'Guardando...' : 'Guardar'}
+        {saving ? 'Saving...' : 'Save'}
       </Button>
     </div>
   )

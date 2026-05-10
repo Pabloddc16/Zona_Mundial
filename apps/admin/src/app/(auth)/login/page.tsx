@@ -26,7 +26,7 @@ export default function LoginPage() {
       setUser(user)
       router.replace('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Credenciales inválidas')
+      setError(err instanceof Error ? err.message : 'Invalid credentials')
     } finally {
       setLoading(false)
     }
@@ -55,7 +55,7 @@ export default function LoginPage() {
             Pablo Admin
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
-            Mundial 2026 — Panel de control
+            World Cup 2026 — Control Panel
           </p>
         </div>
 
@@ -64,13 +64,13 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                Correo electrónico
+                Email
               </label>
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@ejemplo.com"
+                placeholder="admin@example.com"
                 required
                 autoFocus
                 className="h-10"
@@ -80,7 +80,7 @@ export default function LoginPage() {
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                  Contraseña
+                  Password
                 </label>
                 <Link
                   href="/forgot-password"
@@ -89,7 +89,7 @@ export default function LoginPage() {
                   onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--amber-hover)')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--amber)')}
                 >
-                  ¿Olvidaste tu contraseña?
+                  Forgot password?
                 </Link>
               </div>
               <div className="relative">
@@ -128,9 +128,9 @@ export default function LoginPage() {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Iniciando sesión...
+                  Signing in...
                 </span>
-              ) : 'Iniciar sesión'}
+              ) : 'Sign in'}
             </Button>
           </form>
         </div>

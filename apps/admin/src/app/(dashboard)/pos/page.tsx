@@ -10,7 +10,7 @@ import { Plus, Minus, Trash2, Receipt } from 'lucide-react'
 
 interface CartItem { product: Product; quantity: number; unit_price: number }
 
-const fmt = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n)
+const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 
 export default function POSPage() {
   const qc = useQueryClient()
@@ -77,10 +77,10 @@ export default function POSPage() {
     <div className="flex h-full gap-0">
       {/* Left — product search */}
       <div className="flex-1 overflow-y-auto p-6 border-r border-white/8">
-        <h1 className="mb-4 text-xl font-bold text-white/90">Punto de venta</h1>
+        <h1 className="mb-4 text-xl font-bold text-white/90">Point of Sale</h1>
         <Input
           ref={searchRef}
-          placeholder="Buscar producto por nombre o ID..."
+          placeholder="Search by product name or ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
@@ -88,7 +88,7 @@ export default function POSPage() {
         />
         {success && (
           <div className="mb-4 rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-medium">
-            Venta registrada correctamente
+            Sale recorded successfully
           </div>
         )}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
@@ -98,7 +98,15 @@ export default function POSPage() {
               onClick={() => addToCart(p)}
               className="text-left rounded-lg border border-white/8 bg-surface-elevated p-3 hover:border-brand-400 hover:bg-brand-50 transition-colors"
             >
-              <div className="text-2xl mb-1">{p.emoji ?? '📦'}</div>
+              {(p as unknown as Record<string, string>)['image_url'] ? (
+                <img
+                  src={(p as unknown as Record<string, string>)['image_url']}
+                  alt={p.name}
+                  className="h-16 w-full rounded object-cover mb-2"
+                />
+              ) : (
+                <div className="text-2xl mb-1">{p.emoji ?? '📦'}</div>
+              )}
               <div className="text-sm font-medium text-white/90 truncate">{p.name}</div>
               <div className="text-xs text-white/50 mt-0.5">{fmt(p.price)}</div>
               <div className="mt-1">
@@ -121,7 +129,7 @@ export default function POSPage() {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {cart.length === 0 && (
-            <p className="text-center text-sm text-white/40 mt-8">Agrega productos</p>
+            <p className="text-center text-sm text-white/40 mt-8">Add products</p>
           )}
           {cart.map((item) => (
             <div key={item.product.id} className="rounded-md border border-white/5 p-3 space-y-2">
@@ -164,14 +172,14 @@ export default function POSPage() {
 
         <div className="border-t border-white/8 p-4 space-y-3">
           <Input
-            placeholder="Nombre del cliente (opcional)"
+            placeholder="Customer name (optional)"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
           />
           <Select value={payment} onChange={(e) => setPayment(e.target.value)}>
-            <option value="efectivo">Efectivo</option>
-            <option value="tarjeta">Tarjeta</option>
-            <option value="transferencia">Transferencia</option>
+            <option value="efectivo">Cash</option>
+            <option value="tarjeta">Card</option>
+            <option value="transferencia">Transfer</option>
           </Select>
           <div className="flex items-center justify-between text-base font-bold text-white/90">
             <span>Total</span>
@@ -182,7 +190,7 @@ export default function POSPage() {
             disabled={cart.length === 0 || saleMut.isPending}
             onClick={checkout}
           >
-            {saleMut.isPending ? 'Procesando...' : 'Cobrar'}
+            {saleMut.isPending ? 'Processing...' : 'Charge'}
           </Button>
           {saleMut.isError && (
             <p className="text-xs text-red-600 text-center">

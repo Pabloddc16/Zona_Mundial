@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Dialog } from '@/components/ui/dialog'
+import { Sheet } from '@/components/ui/sheet'
 import { Plus, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -39,16 +39,16 @@ export default function UsersPage() {
   })
 
   const columns = [
-    { key: 'username', header: 'Usuario', cell: (r: AdminUser) => <span className="font-mono text-sm">{r.username}</span> },
-    { key: 'email', header: 'Correo', cell: (r: AdminUser) => r.email ?? '—' },
-    { key: 'role', header: 'Rol', cell: (r: AdminUser) => <Badge variant={ROLE_COLORS[r.role] ?? 'default'}>{r.role}</Badge> },
-    { key: 'active', header: 'Activo', cell: (r: AdminUser) => <Badge variant={r.active ? 'success' : 'danger'}>{r.active ? 'Sí' : 'No'}</Badge>, className: 'text-center' },
-    { key: 'created_at', header: 'Creado', cell: (r: AdminUser) => format(new Date(r.created_at), 'dd/MM/yy') },
+    { key: 'username', header: 'Username', cell: (r: AdminUser) => <span className="font-mono text-sm">{r.username}</span> },
+    { key: 'email', header: 'Email', cell: (r: AdminUser) => r.email ?? '—' },
+    { key: 'role', header: 'Role', cell: (r: AdminUser) => <Badge variant={ROLE_COLORS[r.role] ?? 'default'}>{r.role}</Badge> },
+    { key: 'active', header: 'Active', cell: (r: AdminUser) => <Badge variant={r.active ? 'success' : 'danger'}>{r.active ? 'Yes' : 'No'}</Badge>, className: 'text-center' },
+    { key: 'created_at', header: 'Created', cell: (r: AdminUser) => format(new Date(r.created_at), 'MM/dd/yy') },
     { key: 'actions', header: '', cell: (r: AdminUser) => (
       <div className="flex gap-1 justify-end">
-        <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>Editar</Button>
+        <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>Edit</Button>
         <Button size="sm" variant="ghost" className="text-red-600" onClick={() => {
-          if (confirm(`Eliminar ${r.username}? Esta acción no se puede deshacer.`)) deleteMut.mutate(r.id)
+          if (confirm(`Delete ${r.username}? This cannot be undone.`)) deleteMut.mutate(r.id)
         }}>
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
@@ -59,17 +59,17 @@ export default function UsersPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white/90">Usuarios</h1>
-        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nuevo usuario</Button>
+        <h1 className="text-xl font-bold text-white/90">Users</h1>
+        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New user</Button>
       </div>
 
       <DataTable columns={columns} data={users ?? []} keyFn={(r) => r.id} loading={isLoading} />
 
-      <Dialog open={creating} onClose={() => setCreating(false)} title="Nuevo usuario">
+      <Sheet open={creating} onClose={() => setCreating(false)} title="New user">
         <UserForm onSave={(b) => createMut.mutate(b)} saving={createMut.isPending} error={createMut.isError ? (createMut.error as Error).message : ''} />
-      </Dialog>
+      </Sheet>
 
-      <Dialog open={!!editing} onClose={() => setEditing(null)} title="Editar usuario">
+      <Sheet open={!!editing} onClose={() => setEditing(null)} title="Edit user">
         {editing && (
           <EditUserForm
             user={editing}
@@ -78,7 +78,7 @@ export default function UsersPage() {
             error={updateMut.isError ? (updateMut.error as Error).message : ''}
           />
         )}
-      </Dialog>
+      </Sheet>
     </div>
   )
 }
@@ -91,21 +91,21 @@ function UserForm({ onSave, saving, error }: { onSave: (b: unknown) => void; sav
 
   return (
     <div className="space-y-4">
-      {([['Usuario', username, setUsername, 'text'], ['Correo', email, setEmail, 'email'], ['Contraseña (mín 8 chars)', password, setPassword, 'password']] as [string, string, (v: string) => void, string][]).map(([label, value, set, type]) => (
+      {([['Username', username, setUsername, 'text'], ['Email', email, setEmail, 'email'], ['Password (min 8 chars)', password, setPassword, 'password']] as [string, string, (v: string) => void, string][]).map(([label, value, set, type]) => (
         <div key={label}>
           <label className="mb-1 block text-sm font-medium text-white/75">{label}</label>
           <Input type={type} value={value} onChange={(e) => set(e.target.value)} />
         </div>
       ))}
       <div>
-        <label className="mb-1 block text-sm font-medium text-white/75">Rol</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Role</label>
         <Select value={role} onChange={(e) => setRole(e.target.value)}>
           {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
         </Select>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <Button className="w-full" disabled={saving || !username || !password} onClick={() => onSave({ username, email, password, role })}>
-        {saving ? 'Creando...' : 'Crear usuario'}
+        {saving ? 'Creating...' : 'Create user'}
       </Button>
     </div>
   )
@@ -119,24 +119,24 @@ function EditUserForm({ user, onSave, saving, error }: { user: AdminUser; onSave
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-white/50">Usuario: <strong>{user.username}</strong></p>
+      <p className="text-sm text-white/50">User: <strong>{user.username}</strong></p>
       <div>
-        <label className="mb-1 block text-sm font-medium text-white/75">Correo</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Email</label>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-white/75">Nueva contraseña (vacío = no cambiar)</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">New password (leave blank to keep current)</label>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-white/75">Rol</label>
+        <label className="mb-1 block text-sm font-medium text-white/75">Role</label>
         <Select value={role} onChange={(e) => setRole(e.target.value)}>
           {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
         </Select>
       </div>
       <div className="flex items-center gap-3">
         <input type="checkbox" id="active" checked={active} onChange={(e) => setActive(e.target.checked)} />
-        <label htmlFor="active" className="text-sm font-medium text-white/75">Usuario activo</label>
+        <label htmlFor="active" className="text-sm font-medium text-white/75">User active</label>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <Button
@@ -144,7 +144,7 @@ function EditUserForm({ user, onSave, saving, error }: { user: AdminUser; onSave
         disabled={saving}
         onClick={() => onSave({ role, active, email: email || undefined, ...(password ? { password } : {}) })}
       >
-        {saving ? 'Guardando...' : 'Guardar'}
+        {saving ? 'Saving...' : 'Save'}
       </Button>
     </div>
   )

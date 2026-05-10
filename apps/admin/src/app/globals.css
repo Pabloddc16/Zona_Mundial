@@ -49,6 +49,11 @@
   ::-webkit-scrollbar-thumb:hover { background: oklch(1 0 0 / 0.20); }
 }
 
+@keyframes sheet-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
 @layer utilities {
   .glass {
     background: var(--glass-surface);

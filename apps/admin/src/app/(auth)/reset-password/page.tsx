@@ -22,14 +22,14 @@ export default function ResetPasswordPage() {
     const hash = window.location.hash
     const params = new URLSearchParams(hash.slice(1))
     const t = params.get('access_token') ?? ''
-    if (!t) setError('Enlace inválido o expirado. Solicita uno nuevo.')
+    if (!t) setError('Invalid or expired link. Please request a new one.')
     setToken(t)
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (password !== confirm) { setError('Las contraseñas no coinciden'); return }
-    if (password.length < 8) { setError('Mínimo 8 caracteres'); return }
+    if (password !== confirm) { setError('Passwords do not match'); return }
+    if (password.length < 8) { setError('Minimum 8 characters'); return }
     setError('')
     setLoading(true)
     try {
@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
       setDone(true)
       setTimeout(() => router.replace('/login'), 3000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al restablecer contraseña')
+      setError(err instanceof Error ? err.message : 'Failed to reset password')
     } finally {
       setLoading(false)
     }
@@ -57,8 +57,8 @@ export default function ResetPasswordPage() {
             <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, oklch(0.77 0.163 70), oklch(0.65 0.18 50))', boxShadow: '0 0 40px oklch(0.77 0.163 70 / 0.35), 0 8px 24px oklch(0 0 0 / 0.4)' }} />
             <Trophy className="relative h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Nueva contraseña</h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Elige una contraseña segura</p>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>New Password</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Choose a strong password</p>
         </div>
 
         <div className="rounded-2xl p-7" style={{ background: 'var(--surface-elevated)', border: '1px solid var(--glass-border)', boxShadow: '0 24px 64px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.06)' }}>
@@ -67,19 +67,19 @@ export default function ResetPasswordPage() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full" style={{ background: 'oklch(0.72 0.19 145 / 0.12)', border: '1px solid oklch(0.72 0.19 145 / 0.25)' }}>
                 <CheckCircle2 className="h-7 w-7" style={{ color: 'oklch(0.72 0.19 145)' }} />
               </div>
-              <h2 className="mb-2 text-base font-semibold" style={{ color: 'var(--text-primary)' }}>¡Contraseña actualizada!</h2>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Redirigiendo al inicio de sesión...</p>
+              <h2 className="mb-2 text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Password updated!</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Redirecting to sign in...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Nueva contraseña</label>
+                <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>New password</label>
                 <div className="relative">
                   <Input
                     type={showPass ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder="Minimum 8 characters"
                     required
                     autoFocus
                     className="h-10 pr-10"
@@ -91,12 +91,12 @@ export default function ResetPasswordPage() {
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Confirmar contraseña</label>
+                <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Confirm password</label>
                 <Input
                   type={showPass ? 'text' : 'password'}
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  placeholder="Repite la contraseña"
+                  placeholder="Repeat password"
                   required
                   className="h-10"
                   disabled={!token}
@@ -114,9 +114,9 @@ export default function ResetPasswordPage() {
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Guardando...
+                    Saving...
                   </span>
-                ) : 'Establecer nueva contraseña'}
+                ) : 'Set new password'}
               </Button>
             </form>
           )}
@@ -125,7 +125,7 @@ export default function ResetPasswordPage() {
         {!done && (
           <div className="mt-5 text-center">
             <Link href="/login" className="text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>
-              Volver al inicio de sesión
+              Back to sign in
             </Link>
           </div>
         )}

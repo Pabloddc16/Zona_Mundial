@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
       await api.auth.forgotPassword(email)
       setSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al enviar el correo')
+      setError(err instanceof Error ? err.message : 'Failed to send email')
     } finally {
       setLoading(false)
     }
@@ -40,8 +40,8 @@ export default function ForgotPasswordPage() {
             <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, oklch(0.77 0.163 70), oklch(0.65 0.18 50))', boxShadow: '0 0 40px oklch(0.77 0.163 70 / 0.35), 0 8px 24px oklch(0 0 0 / 0.4)' }} />
             <Trophy className="relative h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Recuperar contraseña</h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Te enviaremos un enlace de recuperación</p>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Reset Password</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>We&apos;ll send you a recovery link</p>
         </div>
 
         <div className="rounded-2xl p-7" style={{ background: 'var(--surface-elevated)', border: '1px solid var(--glass-border)', boxShadow: '0 24px 64px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.06)' }}>
@@ -50,19 +50,19 @@ export default function ForgotPasswordPage() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full" style={{ background: 'oklch(0.72 0.19 145 / 0.12)', border: '1px solid oklch(0.72 0.19 145 / 0.25)' }}>
                 <CheckCircle2 className="h-7 w-7" style={{ color: 'oklch(0.72 0.19 145)' }} />
               </div>
-              <h2 className="mb-2 text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Correo enviado</h2>
+              <h2 className="mb-2 text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Email sent</h2>
               <p className="mb-6 text-sm" style={{ color: 'var(--text-muted)' }}>
-                Si <strong style={{ color: 'var(--text-secondary)' }}>{email}</strong> existe en el sistema, recibirás un enlace de recuperación en los próximos minutos.
+                If <strong style={{ color: 'var(--text-secondary)' }}>{email}</strong> exists in the system, you&apos;ll receive a recovery link within a few minutes.
               </p>
               <Link href="/login">
-                <Button variant="outline" className="w-full">Volver al inicio de sesión</Button>
+                <Button variant="outline" className="w-full">Back to sign in</Button>
               </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                  Correo electrónico
+                  Email
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu@correo.com"
+                    placeholder="you@example.com"
                     required
                     autoFocus
                     className="h-10 pl-9"
@@ -89,9 +89,9 @@ export default function ForgotPasswordPage() {
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Enviando...
+                    Sending...
                   </span>
-                ) : 'Enviar enlace de recuperación'}
+                ) : 'Send recovery link'}
               </Button>
             </form>
           )}
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
         <div className="mt-5 text-center">
           <Link href="/login" className="inline-flex items-center gap-1.5 text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>
             <ArrowLeft className="h-3.5 w-3.5" />
-            Volver al inicio de sesión
+            Back to sign in
           </Link>
         </div>
       </div>

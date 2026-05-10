@@ -8,11 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Dialog } from '@/components/ui/dialog'
+import { Sheet } from '@/components/ui/sheet'
 import { Plus, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 
-const fmt = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n)
+const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 const REASONS = ['defecto', 'error_pedido', 'arrepentimiento', 'otro']
 const SOURCES = ['pos', 'app', 'wholesale']
 
@@ -38,14 +38,14 @@ export default function ReturnsPage() {
 
   const columns = [
     { key: 'id', header: 'ID', cell: (r: Return) => <span className="font-mono text-xs text-white/50">{r.id.slice(-8)}</span> },
-    { key: 'source', header: 'Fuente', cell: (r: Return) => <Badge>{r.source}</Badge> },
-    { key: 'reason', header: 'Razón' },
-    { key: 'refund_method', header: 'Método', cell: (r: Return) => r.refund_method },
-    { key: 'refund_amount', header: 'Monto', cell: (r: Return) => fmt(r.refund_amount), className: 'text-right font-medium' },
-    { key: 'created_at', header: 'Fecha', cell: (r: Return) => format(new Date(r.created_at), 'dd/MM/yy HH:mm') },
+    { key: 'source', header: 'Source', cell: (r: Return) => <Badge>{r.source}</Badge> },
+    { key: 'reason', header: 'Reason' },
+    { key: 'refund_method', header: 'Method', cell: (r: Return) => r.refund_method },
+    { key: 'refund_amount', header: 'Amount', cell: (r: Return) => fmt(r.refund_amount), className: 'text-right font-medium' },
+    { key: 'created_at', header: 'Date', cell: (r: Return) => format(new Date(r.created_at), 'MM/dd/yy HH:mm') },
     { key: 'actions', header: '', cell: (r: Return) => (
       <Button size="sm" variant="ghost" className="text-red-600" onClick={() => {
-        if (confirm('Eliminar esta devolución?')) deleteMut.mutate(r.id)
+        if (confirm('Delete this return?')) deleteMut.mutate(r.id)
       }}>
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
@@ -55,20 +55,20 @@ export default function ReturnsPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white/90">Devoluciones</h1>
-        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />Nueva</Button>
+        <h1 className="text-xl font-bold text-white/90">Returns</h1>
+        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New</Button>
       </div>
 
       <DataTable columns={columns} data={data?.items ?? []} keyFn={(r) => r.id} loading={isLoading} />
       <Pagination page={data?.page ?? 1} pages={data?.pages ?? 1} total={data?.total ?? 0} onPage={setPage} />
 
-      <Dialog open={creating} onClose={() => setCreating(false)} title="Nueva devolución">
+      <Sheet open={creating} onClose={() => setCreating(false)} title="New return">
         <ReturnForm
           onSave={(b) => createMut.mutate(b)}
           saving={createMut.isPending}
           error={createMut.isError ? (createMut.error as Error).message : ''}
         />
-      </Dialog>
+      </Sheet>
     </div>
   )
 }
@@ -91,13 +91,13 @@ function ReturnForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Fuente</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Source</label>
           <Select value={source} onChange={(e) => setSource(e.target.value)}>
             {SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
           </Select>
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Razón</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Reason</label>
           <Select value={reason} onChange={(e) => setReason(e.target.value)}>
             {REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
           </Select>
@@ -105,11 +105,11 @@ function ReturnForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Monto devuelto</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Refund amount</label>
           <Input type="number" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} step="0.01" />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-white/75">Método</label>
+          <label className="mb-1 block text-sm font-medium text-white/75">Method</label>
           <Select value={refundMethod} onChange={(e) => setRefundMethod(e.target.value)}>
             {['efectivo', 'tarjeta', 'transferencia'].map((m) => <option key={m} value={m}>{m}</option>)}
           </Select>
@@ -118,22 +118,22 @@ function ReturnForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
 
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-medium text-white/75">Artículos</label>
+          <label className="text-sm font-medium text-white/75">Items</label>
           <Button size="sm" variant="ghost" onClick={addItem}><Plus className="h-3 w-3" /></Button>
         </div>
         {items.map((item, i) => (
           <div key={i} className="flex gap-2 mb-2 items-center">
-            <Input placeholder="Nombre" value={item.name} onChange={(e) => setItem(i, 'name', e.target.value)} className="flex-1" />
+            <Input placeholder="Name" value={item.name} onChange={(e) => setItem(i, 'name', e.target.value)} className="flex-1" />
             <input type="number" className="w-16 rounded-md border border-gray-300 px-2 py-1.5 text-sm" value={item.qty} min={1} onChange={(e) => setItem(i, 'qty', Number(e.target.value))} />
-            <Input placeholder="Precio" type="number" className="w-24" value={item.unit_price} onChange={(e) => setItem(i, 'unit_price', e.target.value)} />
+            <Input placeholder="Price" type="number" className="w-24" value={item.unit_price} onChange={(e) => setItem(i, 'unit_price', e.target.value)} />
             <button onClick={() => removeItem(i)} className="text-gray-300 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
           </div>
         ))}
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-white/75">Notas</label>
-        <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Opcional" />
+        <label className="mb-1 block text-sm font-medium text-white/75">Notes</label>
+        <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" />
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -148,7 +148,7 @@ function ReturnForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
           items: items.map((i) => ({ name: i.name, qty: i.qty, unit_price: i.unit_price ? Number(i.unit_price) : undefined })),
         })}
       >
-        {saving ? 'Guardando...' : 'Guardar'}
+        {saving ? 'Saving...' : 'Save'}
       </Button>
     </div>
   )
