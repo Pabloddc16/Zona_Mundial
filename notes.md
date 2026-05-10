@@ -8,3 +8,9 @@ if they confirm then we stop harrasing them(contact jay for that)
 
 FINANCIAL AUDITING
 Liabilities and assets, gross profit margin, marketing and website, and revenue.        
+
+
+[01:33, 11/05/2026] Pablo Diaz: Admin@gmail.com
+[01:33, 11/05/2026] Pablo Diaz: Pw: Admin123
+
+lbapDdc16
