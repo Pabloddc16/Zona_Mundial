@@ -5,7 +5,10 @@ const SUPABASE_URL = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? 'https://skjlfwg
 const SUPABASE_ANON_KEY = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNramxmd2dtZmF5c3JkdHBycnZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NzM1MDQsImV4cCI6MjA5MzI0OTUwNH0.Up8Z5pFmOBfL6vjkRDWMdxiSRpXbw4TDpkkUUdRoynU'
 
 function getSupabase() {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  const at = typeof window !== 'undefined' ? localStorage.getItem('pablo-at') : null
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: at ? { Authorization: `Bearer ${at}` } : {} },
+  })
 }
 
 export async function uploadProductImage(file: File, productId: string): Promise<string> {
