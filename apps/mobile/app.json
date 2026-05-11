@@ -32,7 +32,6 @@
       ],
       "expo-font",
       "expo-asset",
-      "@sentry/react-native",
       "expo-secure-store"
     ],
     "experiments": {
