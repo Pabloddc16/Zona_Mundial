@@ -29,7 +29,11 @@
         {
           "faceIDPermission": "Para acceder a la app de forma segura."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-asset",
+      "@sentry/react-native",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
