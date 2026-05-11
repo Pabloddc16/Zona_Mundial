@@ -44,7 +44,7 @@ Run: `pnpm --filter @pablo/api seed` (add to package.json scripts)
 | GET | `/api/products/:id` | ✅ done |
 | **POST** | `/api/products` | ❌ missing |
 | PATCH | `/api/products/:id` | ✅ done |
-| PATCH | `/api/products/:id/stock` | ✅ done |
+| PATCH | `/api/products/:id/stock` | ✅ done |d
 | **DELETE** | `/api/products/:id` | ❌ missing |
 
 ### Customers
