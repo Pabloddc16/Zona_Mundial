@@ -13,12 +13,20 @@ export const storeAT = (t: string | null) => {
 const getRT = () => typeof window !== 'undefined' ? localStorage.getItem(RT_KEY) : null
 const getAT = () => typeof window !== 'undefined' ? localStorage.getItem(AT_KEY) : null
 
+function getTokenExpiry(token: string): number {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]!)) as { exp?: number }
+    return (payload.exp ?? 0) * 1000
+  } catch { return 0 }
+}
+
 let _refreshing: Promise<boolean> | null = null
 async function tryRefresh(): Promise<boolean> {
   if (_refreshing) return _refreshing
   _refreshing = (async () => {
     const rt = getRT()
     if (!rt) return false
+    const rtAtStart = rt
     try {
       const res = await fetch(`${API}/api/auth/refresh`, {
         method: 'POST',
@@ -27,7 +35,14 @@ async function tryRefresh(): Promise<boolean> {
         body: JSON.stringify({ refreshToken: rt }),
       })
       if (!res.ok) {
-        if (res.status === 401 || res.status === 403) { storeRT(null); storeAT(null) }
+        if (res.status === 401 || res.status === 403) {
+          // Cross-tab race: another tab may have already refreshed with this RT.
+          // If the RT in localStorage changed, use those new tokens instead of wiping.
+          const currentRT = getRT()
+          if (currentRT && currentRT !== rtAtStart) return true
+          storeRT(null)
+          storeAT(null)
+        }
         return false
       }
       const data = await res.json() as { accessToken: string; refreshToken: string }
@@ -54,6 +69,18 @@ function authHeaders(extra?: HeadersInit): Record<string, string> {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  // Proactively refresh if AT expires in < 90 seconds — avoids reactive 401 cycle
+  const isAuthPath = path === '/api/auth/login' || path === '/api/auth/refresh'
+  if (!isAuthPath) {
+    const at = getAT()
+    if (at) {
+      const exp = getTokenExpiry(at)
+      if (exp > 0 && exp - Date.now() < 90_000) {
+        await tryRefresh()
+      }
+    }
+  }
+
   const res = await fetch(`${API}${path}`, {
     credentials: 'include',
     ...init,
