@@ -6,16 +6,17 @@ import { api } from '@/lib/api'
 import { Sidebar } from '@/components/layout/sidebar'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, setUser } = useAuthStore()
+  const { user, setUser, _hydrated } = useAuthStore()
   const router = useRouter()
 
   useEffect(() => {
+    if (!_hydrated) return
     if (!user) {
       api.auth.me().then(setUser).catch(() => router.replace('/login'))
     }
-  }, [user, setUser, router])
+  }, [user, setUser, router, _hydrated])
 
-  if (!user) {
+  if (!_hydrated || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />

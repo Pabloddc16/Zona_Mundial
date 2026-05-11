@@ -5,6 +5,7 @@ import type { AuthUser } from './api'
 
 interface AuthState {
   user: AuthUser | null
+  _hydrated: boolean
   setUser: (u: AuthUser | null) => void
 }
 
@@ -12,8 +13,14 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      _hydrated: false,
       setUser: (user) => set({ user }),
     }),
-    { name: 'pablo-auth' },
+    {
+      name: 'pablo-auth',
+      onRehydrateStorage: () => (state) => {
+        if (state) state._hydrated = true
+      },
+    },
   ),
 )
