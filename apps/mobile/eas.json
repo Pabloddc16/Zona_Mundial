@@ -12,6 +12,9 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com"
+      },
       "ios": {
         "simulator": false
       },

@@ -5,12 +5,6 @@
     "version": "1.0.0",
     "scheme": "pablo",
     "orientation": "portrait",
-    "icon": "./src/assets/icon.png",
-    "splash": {
-      "image": "./src/assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#006341"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.pabloapp.mundial2026",
@@ -19,23 +13,35 @@
     "android": {
       "package": "com.pabloapp.mundial2026",
       "versionCode": 1,
-      "adaptiveIcon": {
-        "foregroundImage": "./src/assets/adaptive-icon.png",
-        "backgroundColor": "#006341"
-      }
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
     "plugins": [
       "expo-router",
       "expo-camera",
-      "expo-haptics",
       "expo-notifications",
       [
         "expo-local-authentication",
-        { "faceIDPermission": "Para acceder a la app de forma segura." }
+        {
+          "faceIDPermission": "Para acceder a la app de forma segura."
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "732ed138-a83a-41dc-8886-4f8217289d4f"
+      }
+    },
+    "owner": "brankostula"
   }
 }
