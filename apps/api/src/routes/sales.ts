@@ -55,7 +55,7 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
     const parsed = CreateSaleSchema.safeParse(req.body)
     if (!parsed.success) return reply.badRequest(parsed.error.message)
 
-    const { items, payment_method, notes, customer_name, customer_phone } = parsed.data
+    const { items, payment_method, notes, customer_name, customer_phone, discount_type, discount_value } = parsed.data
 
     if (!VALID_PAYMENT_METHODS.includes(payment_method)) {
       return reply.badRequest('Método de pago inválido')
@@ -84,8 +84,12 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
       })
     }
 
+    const discountInput = discount_type && discount_value != null
+      ? { type: discount_type, value: discount_value }
+      : null
     const totals = computeSaleTotals(
       enrichedItems.map((i) => ({ quantity: i.quantity, unitPrice: i.unit_price, subtotal: i.subtotal, mode: i.mode })),
+      discountInput,
     )
     if (!totals.ok) return reply.badRequest(totals.error)
 
@@ -117,6 +121,31 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
 
     reply.code(201)
     return { ...sale, sale_items: enrichedItems, subtotal: totals.subtotal, total: totals.total }
+  })
+  // DELETE /api/sales/:id — restores stock
+  fastify.delete('/:id', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const supabase = getClient()
+
+    const { data: sale, error: fetchErr } = await supabase
+      .from('sales').select('*, sale_items(*)').eq('id', id).single()
+    if (fetchErr || !sale) return reply.notFound('Sale not found')
+
+    // Restore stock for each item that has a product_id
+    for (const item of (sale.sale_items ?? [])) {
+      if (item.product_id) {
+        const qty = Math.ceil(Number(item.quantity))
+        const { data: prod } = await supabase.from('products').select('stock').eq('id', item.product_id).single()
+        if (prod) {
+          await supabase.from('products').update({ stock: Number(prod.stock) + qty }).eq('id', item.product_id)
+        }
+      }
+    }
+
+    const { error } = await supabase.from('sales').delete().eq('id', id)
+    if (error) return reply.internalServerError(error.message)
+
+    return { ok: true }
   })
 }
 

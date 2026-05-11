@@ -70,6 +70,19 @@ HAVING SUM(qty) > 0;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_stock_sku_loc ON stock(sku_id, location_id);
 
+-- Function called by the API after every movement write
+CREATE OR REPLACE FUNCTION refresh_stock()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW CONCURRENTLY stock;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION refresh_stock() TO service_role;
+
 -- Avg cost per (sku, location) — updated on each inbound movement
 CREATE TABLE IF NOT EXISTS avg_costs (
   sku_id      text NOT NULL REFERENCES products(id),

@@ -111,6 +111,8 @@ export const CreateSaleSchema = z.object({
   customer_phone: z.string().optional(),
   payment_method: z.string().min(1),
   notes: z.string().optional(),
+  discount_type: z.enum(['percent', 'amount']).optional(),
+  discount_value: z.number().nonnegative().optional(),
   items: z.array(SaleItemSchema).min(1),
 })
 

@@ -23,10 +23,6 @@ export default function ProductsPage() {
   const [category, setCategory] = useState('')
   const [creating, setCreating] = useState(false)
   const [selected, setSelected] = useState<Product | null>(null)
-  const [stockDlg, setStockDlg] = useState<Product | null>(null)
-  const [delta, setDelta] = useState('')
-  const [reason, setReason] = useState('ajuste')
-  const [note, setNote] = useState('')
 
   const { data, isLoading } = useQuery({
     queryKey: ['products', page, search, category],
@@ -36,11 +32,6 @@ export default function ProductsPage() {
   const updateMut = useMutation({
     mutationFn: ({ id, body }: { id: string; body: unknown }) => api.products.update(id, body),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['products'] }); setSelected(null) },
-  })
-
-  const stockMut = useMutation({
-    mutationFn: ({ id, body }: { id: string; body: unknown }) => api.products.adjustStock(id, body),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['products'] }); setStockDlg(null); setDelta(''); setNote('') },
   })
 
   const createMut = useMutation({
@@ -81,7 +72,6 @@ export default function ProductsPage() {
     { key: 'actions', header: '', cell: (r: Product) => (
       <div className="flex gap-1 justify-end">
         <Button size="sm" variant="ghost" onClick={() => setSelected(r)}>Edit</Button>
-        <Button size="sm" variant="ghost" onClick={() => setStockDlg(r)}>Stock</Button>
         <Button size="sm" variant="ghost" className="text-red-600" onClick={() => {
           if (confirm(`Delete ${r.name}?`)) deleteMut.mutate(r.id)
         }}><Trash2 className="h-3.5 w-3.5" /></Button>
@@ -136,36 +126,6 @@ export default function ProductsPage() {
         )}
       </Sheet>
 
-      {/* Stock adjustment */}
-      <Sheet open={!!stockDlg} onClose={() => setStockDlg(null)} title={`Adjust stock — ${stockDlg?.name}`}>
-        {stockDlg && (
-          <div className="space-y-4">
-            <p className="text-sm text-white/50">Current stock: <strong>{stockDlg.stock}</strong></p>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-white/75">Delta (positive = in, negative = out)</label>
-              <Input type="number" value={delta} onChange={(e) => setDelta(e.target.value)} placeholder="e.g. -5 or +20" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-white/75">Reason</label>
-              <Select value={reason} onChange={(e) => setReason(e.target.value)}>
-                {['compra', 'merma', 'ajuste', 'devolucion', 'otro'].map((r) => <option key={r} value={r}>{r}</option>)}
-              </Select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-white/75">Note</label>
-              <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional" />
-            </div>
-            <Button
-              className="w-full"
-              disabled={!delta || stockMut.isPending}
-              onClick={() => stockMut.mutate({ id: stockDlg.id, body: { delta: Number(delta), reason, note } })}
-            >
-              {stockMut.isPending ? 'Saving...' : 'Apply'}
-            </Button>
-            {stockMut.isError && <p className="text-sm text-red-600">{(stockMut.error as Error).message}</p>}
-          </div>
-        )}
-      </Sheet>
     </div>
   )
 }

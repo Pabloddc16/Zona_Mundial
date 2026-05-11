@@ -63,11 +63,9 @@ export default function OrdersPage() {
           <Button size="sm" variant="ghost" onClick={() => linkMut.mutate(r.order_number)}>
             <ExternalLink className="h-3 w-3" />
           </Button>
-          {r.status === 'CREATED' && (
-            <Button size="sm" variant="ghost" className="text-red-600" onClick={() => {
-              if (confirm(`Delete ${r.order_number}?`)) deleteMut.mutate(r.order_number)
-            }}>Delete</Button>
-          )}
+          <Button size="sm" variant="ghost" className="text-red-600" onClick={() => {
+            if (confirm(`Delete ${r.order_number}?`)) deleteMut.mutate(r.order_number)
+          }}>Delete</Button>
         </div>
       ),
     },

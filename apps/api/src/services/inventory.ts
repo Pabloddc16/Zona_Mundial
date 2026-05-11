@@ -86,7 +86,8 @@ export async function recordMovements(inputs: MovementInput[]) {
 
 export async function refreshStock() {
   const sb = getClient()
-  await sb.rpc('refresh_stock' as never)
+  const { error } = await sb.rpc('refresh_stock' as never)
+  if (error) console.error('[inventory] refresh_stock failed:', error.message)
 }
 
 async function updateAvgCost(skuId: string, locationId: string, inboundQty: number, inboundCost: number) {

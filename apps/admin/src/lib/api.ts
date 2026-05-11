@@ -125,6 +125,7 @@ export const api = {
     list: (params?: Record<string, string>) => get<Paginated<Sale>>(`/api/sales?${new URLSearchParams(params).toString()}`),
     today: () => get<SalesToday>('/api/sales/today'),
     create: (body: unknown) => post<Sale>('/api/sales', body),
+    delete: (id: string) => del<{ ok: boolean }>(`/api/sales/${id}`),
   },
 
   // ─── Products ───────────────────────────────────────────────────────────────
