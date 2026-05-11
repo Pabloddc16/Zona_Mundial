@@ -32,13 +32,15 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
         const { data: { user }, error } = await supabase.auth.getUser(token)
 
         if (error || !user) {
+          req.log.warn({ authError: error?.message ?? 'no user', step: 'getUser' }, 'auth failed')
           return reply.code(401).send({ error: 'Invalid session' })
         }
 
-        const { data: userRow } = await supabase
+        const { data: userRow, error: rowError } = await supabase
           .from('users').select('role, username, active').eq('id', user.id).single()
 
         if (!userRow || userRow.active === false) {
+          req.log.warn({ userId: user.id, rowError: rowError?.message, hasRow: !!userRow, step: 'usersTable' }, 'auth failed')
           return reply.code(401).send({ error: 'Invalid session' })
         }
 
@@ -48,7 +50,8 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
           role: userRow.role as string,
           username: userRow.username as string,
         }
-      } catch {
+      } catch (err) {
+        req.log.error({ err }, 'auth exception')
         return reply.code(401).send({ error: 'Unauthorized' })
       }
     },
