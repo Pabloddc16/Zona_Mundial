@@ -20,9 +20,9 @@ export default function InventoryPage() {
   const [movePage, setMovePage] = useState(1)
   const [idleDays, setIdleDays] = useState('30')
 
-  const { data: summary } = useQuery({ queryKey: ['stock-summary'], queryFn: () => api.stock.summary() })
-  const { data: stock, isLoading: stockLoading } = useQuery({ queryKey: ['stock'], queryFn: () => api.stock.list(), enabled: tab === 'stock' })
-  const { data: wip, isLoading: wipLoading } = useQuery({ queryKey: ['stock-wip'], queryFn: () => api.stock.wip(), enabled: tab === 'wip' })
+  const { data: summary } = useQuery({ queryKey: ['stock-summary'], queryFn: () => api.stock.summary(), refetchOnWindowFocus: true })
+  const { data: stock, isLoading: stockLoading } = useQuery({ queryKey: ['stock'], queryFn: () => api.stock.list(), enabled: tab === 'stock', refetchOnWindowFocus: true })
+  const { data: wip, isLoading: wipLoading } = useQuery({ queryKey: ['stock-wip'], queryFn: () => api.stock.wip(), enabled: tab === 'wip', refetchOnWindowFocus: true })
   const { data: idle, isLoading: idleLoading } = useQuery({ queryKey: ['stock-idle', idleDays], queryFn: () => api.stock.idle(Number(idleDays)), enabled: tab === 'idle' })
   const { data: movements, isLoading: moveLoading } = useQuery({ queryKey: ['movements', movePage], queryFn: () => api.stock.movements({ page: String(movePage) }), enabled: tab === 'movements' })
 

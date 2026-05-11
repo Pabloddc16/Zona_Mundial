@@ -23,15 +23,23 @@ export default function ConversionsPage() {
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
   const [creating, setCreating] = useState(false)
+  const [mutError, setMutError] = useState('')
 
   const { data, isLoading } = useQuery({
     queryKey: ['conversions', page, statusFilter],
     queryFn: () => api.conversions.list({ page: String(page), ...(statusFilter ? { status: statusFilter } : {}) }),
   })
 
-  const startMut = useMutation({ mutationFn: (id: string) => api.conversions.start(id), onSuccess: () => { qc.invalidateQueries({ queryKey: ['conversions'] }); qc.invalidateQueries({ queryKey: ['stock'] }) } })
-  const finishMut = useMutation({ mutationFn: (id: string) => api.conversions.finish(id), onSuccess: () => { qc.invalidateQueries({ queryKey: ['conversions'] }); qc.invalidateQueries({ queryKey: ['stock'] }) } })
-  const cancelMut = useMutation({ mutationFn: (id: string) => api.conversions.cancel(id), onSuccess: () => { qc.invalidateQueries({ queryKey: ['conversions'] }); qc.invalidateQueries({ queryKey: ['stock'] }) } })
+  const invalidateStock = () => {
+    qc.invalidateQueries({ queryKey: ['conversions'] })
+    qc.invalidateQueries({ queryKey: ['stock'] })
+    qc.invalidateQueries({ queryKey: ['stock-wip'] })
+    qc.invalidateQueries({ queryKey: ['stock-summary'] })
+  }
+
+  const startMut = useMutation({ mutationFn: (id: string) => api.conversions.start(id), onSuccess: invalidateStock, onError: (e: Error) => setMutError(e.message) })
+  const finishMut = useMutation({ mutationFn: (id: string) => api.conversions.finish(id), onSuccess: invalidateStock, onError: (e: Error) => setMutError(e.message) })
+  const cancelMut = useMutation({ mutationFn: (id: string) => api.conversions.cancel(id), onSuccess: invalidateStock, onError: (e: Error) => setMutError(e.message) })
   const createMut = useMutation({ mutationFn: (b: unknown) => api.conversions.create(b), onSuccess: () => { qc.invalidateQueries({ queryKey: ['conversions'] }); setCreating(false) } })
 
   const columns = [
@@ -78,6 +86,13 @@ export default function ConversionsPage() {
         </div>
         <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New conversion</Button>
       </div>
+
+      {mutError && (
+        <div className="rounded-lg px-4 py-3 text-sm text-red-400 flex items-center justify-between" style={{ background: 'oklch(0.63 0.225 27 / 0.12)', border: '1px solid oklch(0.63 0.225 27 / 0.25)' }}>
+          <span>{mutError}</span>
+          <button onClick={() => setMutError('')} className="ml-3 opacity-60 hover:opacity-100">✕</button>
+        </div>
+      )}
 
       <div className="flex items-center gap-3 flex-wrap">
         <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }} className="w-44">
