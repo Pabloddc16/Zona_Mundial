@@ -17,8 +17,27 @@ export function getClient() {
     throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set')
   }
 
+  // Verify the key is actually a service_role key — if it's anon, RLS will block
+  // every query on tables without explicit anon policies (causing 401s on auth check)
+  try {
+    const parts = key.split('.')
+    if (parts.length === 3) {
+      const payload = JSON.parse(Buffer.from(parts[1]!, 'base64').toString())
+      if (payload.role !== 'service_role') {
+        console.error(`[db] FATAL: SUPABASE_SERVICE_ROLE_KEY has role="${payload.role}" — expected "service_role". RLS will block queries. Check Render env vars.`)
+      } else {
+        console.log('[db] Supabase client initialized with service_role key')
+      }
+    }
+  } catch {
+    console.warn('[db] Could not decode SUPABASE_SERVICE_ROLE_KEY as JWT')
+  }
+
+  // Force explicit Authorization header — prevents any session-state contamination
+  // from auth.getUser(token) accidentally swapping the bearer to a user JWT
   _client = createClient(url, key, {
-    auth: { persistSession: false },
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${key}` } },
   })
 
   return _client

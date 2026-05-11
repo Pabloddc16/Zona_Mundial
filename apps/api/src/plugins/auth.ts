@@ -36,12 +36,24 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
           return reply.code(401).send({ error: 'Invalid session' })
         }
 
+        // .maybeSingle() returns null on 0 rows instead of throwing PGRST116
         const { data: userRow, error: rowError } = await supabase
-          .from('users').select('role, username, active').eq('id', user.id).single()
+          .from('users').select('role, username, active').eq('id', user.id).maybeSingle()
 
-        if (!userRow || userRow.active === false) {
-          req.log.warn({ userId: user.id, rowError: rowError?.message, hasRow: !!userRow, step: 'usersTable' }, 'auth failed')
-          return reply.code(401).send({ error: 'Invalid session' })
+        if (rowError) {
+          // Real DB error (connection, RLS, syntax) — log loudly so we can fix the env
+          req.log.error({ userId: user.id, rowError: rowError.message, code: rowError.code, hint: rowError.hint, step: 'usersTable' }, 'auth DB error')
+          return reply.code(500).send({ error: 'Auth check failed' })
+        }
+
+        if (!userRow) {
+          req.log.warn({ userId: user.id, email: user.email, step: 'usersTable' }, 'auth failed: no row in public.users for this auth user')
+          return reply.code(401).send({ error: 'User profile missing' })
+        }
+
+        if (userRow.active === false) {
+          req.log.warn({ userId: user.id, step: 'inactive' }, 'auth failed: user deactivated')
+          return reply.code(401).send({ error: 'User deactivated' })
         }
 
         req.user = {
