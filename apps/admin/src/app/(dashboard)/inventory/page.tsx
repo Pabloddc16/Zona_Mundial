@@ -99,7 +99,7 @@ export default function InventoryPage() {
       <div className="flex border border-white/8 rounded-md overflow-hidden w-fit">
         {(['stock', 'wip', 'idle', 'movements'] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-1.5 text-sm font-medium transition-colors ${tab === t ? 'bg-brand-600 text-white' : 'bg-surface-elevated text-white/60 hover:bg-white/5'}`}>
-            {t === 'stock' ? 'All stock' : t === 'wip' ? 'In progress' : t === 'idle' ? 'Idle' : 'Movements'}
+            {t === 'stock' ? 'All stock' : t === 'wip' ? 'WIP' : t === 'idle' ? 'Idle' : 'Movements'}
           </button>
         ))}
       </div>

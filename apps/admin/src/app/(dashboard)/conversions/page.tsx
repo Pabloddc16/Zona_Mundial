@@ -79,10 +79,15 @@ export default function ConversionsPage() {
         <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New conversion</Button>
       </div>
 
-      <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }} className="w-44">
-        <option value="">All statuses</option>
-        {Object.entries(STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-      </Select>
+      <div className="flex items-center gap-3 flex-wrap">
+        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }} className="w-44">
+          <option value="">All statuses</option>
+          {Object.entries(STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </Select>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          WIP (in-progress) stock visible in <a href="/inventory" className="underline" style={{ color: 'var(--brand-400)' }}>Inventory → WIP tab</a>
+        </p>
+      </div>
 
       <DataTable columns={columns} data={data?.items ?? []} keyFn={(r) => r.id} loading={isLoading} emptyMessage="No conversions recorded" />
       <Pagination page={data?.page ?? 1} pages={data?.pages ?? 1} total={data?.total ?? 0} onPage={setPage} />
