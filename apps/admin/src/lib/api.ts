@@ -1,11 +1,17 @@
 const API = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000'
 const RT_KEY = 'pablo-rt'
+const AT_KEY = 'pablo-at'
 
 export const storeRT = (t: string | null) => {
   if (typeof window === 'undefined') return
   t ? localStorage.setItem(RT_KEY, t) : localStorage.removeItem(RT_KEY)
 }
+export const storeAT = (t: string | null) => {
+  if (typeof window === 'undefined') return
+  t ? localStorage.setItem(AT_KEY, t) : localStorage.removeItem(AT_KEY)
+}
 const getRT = () => typeof window !== 'undefined' ? localStorage.getItem(RT_KEY) : null
+const getAT = () => typeof window !== 'undefined' ? localStorage.getItem(AT_KEY) : null
 
 let _refreshing: Promise<boolean> | null = null
 async function tryRefresh(): Promise<boolean> {
@@ -20,8 +26,9 @@ async function tryRefresh(): Promise<boolean> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: rt }),
       })
-      if (!res.ok) { storeRT(null); return false }
-      const data = await res.json() as { refreshToken: string }
+      if (!res.ok) { storeRT(null); storeAT(null); return false }
+      const data = await res.json() as { accessToken: string; refreshToken: string }
+      storeAT(data.accessToken)
       storeRT(data.refreshToken)
       return true
     } catch {
@@ -34,11 +41,20 @@ async function tryRefresh(): Promise<boolean> {
   return _refreshing
 }
 
+function authHeaders(extra?: HeadersInit): Record<string, string> {
+  const at = getAT()
+  return {
+    'Content-Type': 'application/json',
+    ...(at ? { Authorization: `Bearer ${at}` } : {}),
+    ...(extra as Record<string, string> ?? {}),
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
+    headers: authHeaders(init?.headers),
   })
 
   if (res.status === 401 && path !== '/api/auth/login' && path !== '/api/auth/refresh') {
@@ -46,8 +62,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     if (ok) {
       const retry = await fetch(`${API}${path}`, {
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', ...init?.headers },
         ...init,
+        headers: authHeaders(init?.headers),
       })
       if (!retry.ok) {
         const body = await retry.json().catch(() => ({}))
@@ -56,6 +72,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       return retry.json() as Promise<T>
     }
     storeRT(null)
+    storeAT(null)
     if (typeof window !== 'undefined') window.location.href = '/login'
     throw new Error('Session expired')
   }

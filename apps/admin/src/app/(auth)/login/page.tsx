@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { api, storeRT } from '@/lib/api'
+import { api, storeRT, storeAT } from '@/lib/api'
 import { useAuthStore } from '@/lib/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,7 +22,8 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const { user, refreshToken } = await api.auth.login(email, password)
+      const { user, accessToken, refreshToken } = await api.auth.login(email, password)
+      storeAT(accessToken)
       storeRT(refreshToken)
       setUser(user)
       router.replace('/')
