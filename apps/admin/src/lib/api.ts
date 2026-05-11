@@ -26,13 +26,16 @@ async function tryRefresh(): Promise<boolean> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: rt }),
       })
-      if (!res.ok) { storeRT(null); storeAT(null); return false }
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) { storeRT(null); storeAT(null) }
+        return false
+      }
       const data = await res.json() as { accessToken: string; refreshToken: string }
       storeAT(data.accessToken)
       storeRT(data.refreshToken)
       return true
     } catch {
-      storeRT(null)
+      // Network error (API down/restarting) — keep tokens, don't wipe
       return false
     } finally {
       _refreshing = null
@@ -71,9 +74,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       }
       return retry.json() as Promise<T>
     }
-    storeRT(null)
-    storeAT(null)
-    if (typeof window !== 'undefined') window.location.href = '/login'
+    // Only redirect to login if tokens are gone (real auth failure, not network blip)
+    if (!getAT() && !getRT()) {
+      if (typeof window !== 'undefined') window.location.href = '/login'
+    }
     throw new Error('Session expired')
   }
 
