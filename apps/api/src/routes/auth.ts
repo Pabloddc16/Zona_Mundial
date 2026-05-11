@@ -36,6 +36,30 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         username: userRow?.username ?? data.user.email,
       },
       accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+    }
+  })
+
+  // POST /api/auth/refresh
+  fastify.post('/refresh', async (req, reply) => {
+    const body = req.body as { refreshToken?: string }
+    const refreshToken = String(body?.refreshToken ?? '')
+    if (!refreshToken) return reply.badRequest('refreshToken required')
+
+    const { data, error } = await getClient().auth.refreshSession({ refresh_token: refreshToken })
+    if (error || !data.session) return reply.unauthorized('Session expired, please log in again')
+
+    reply.setCookie('sb-token', data.session.access_token, {
+      httpOnly: true,
+      secure: process.env['NODE_ENV'] === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: data.session.expires_in,
+    })
+
+    return {
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
     }
   })
 

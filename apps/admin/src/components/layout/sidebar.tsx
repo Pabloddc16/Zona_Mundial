@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/cn'
 import { useAuthStore } from '@/lib/auth-store'
-import { api } from '@/lib/api'
+import { api, storeRT } from '@/lib/api'
 import {
   LayoutDashboard, ShoppingBag, ShoppingCart, Package, Users, Truck,
   Building2, Receipt, RotateCcw, UserCog, LogOut, Trophy,
@@ -53,6 +53,7 @@ export function Sidebar() {
 
   async function logout() {
     await api.auth.logout().catch(() => {})
+    storeRT(null)
     setUser(null)
   }
 

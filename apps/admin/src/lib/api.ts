@@ -1,4 +1,38 @@
 const API = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000'
+const RT_KEY = 'pablo-rt'
+
+export const storeRT = (t: string | null) => {
+  if (typeof window === 'undefined') return
+  t ? localStorage.setItem(RT_KEY, t) : localStorage.removeItem(RT_KEY)
+}
+const getRT = () => typeof window !== 'undefined' ? localStorage.getItem(RT_KEY) : null
+
+let _refreshing: Promise<boolean> | null = null
+async function tryRefresh(): Promise<boolean> {
+  if (_refreshing) return _refreshing
+  _refreshing = (async () => {
+    const rt = getRT()
+    if (!rt) return false
+    try {
+      const res = await fetch(`${API}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: rt }),
+      })
+      if (!res.ok) { storeRT(null); return false }
+      const data = await res.json() as { refreshToken: string }
+      storeRT(data.refreshToken)
+      return true
+    } catch {
+      storeRT(null)
+      return false
+    } finally {
+      _refreshing = null
+    }
+  })()
+  return _refreshing
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {
@@ -6,6 +40,26 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   })
+
+  if (res.status === 401 && path !== '/api/auth/login' && path !== '/api/auth/refresh') {
+    const ok = await tryRefresh()
+    if (ok) {
+      const retry = await fetch(`${API}${path}`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...init?.headers },
+        ...init,
+      })
+      if (!retry.ok) {
+        const body = await retry.json().catch(() => ({}))
+        throw new Error((body as { error?: string }).error ?? `HTTP ${retry.status}`)
+      }
+      return retry.json() as Promise<T>
+    }
+    storeRT(null)
+    if (typeof window !== 'undefined') window.location.href = '/login'
+    throw new Error('Session expired')
+  }
+
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
@@ -22,7 +76,7 @@ const del = <T>(path: string) => request<T>(path, { method: 'DELETE' })
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 export const api = {
   auth: {
-    login: (email: string, password: string) => post<{ user: AuthUser; accessToken: string }>('/api/auth/login', { email, password }),
+    login: (email: string, password: string) => post<{ user: AuthUser; accessToken: string; refreshToken: string }>('/api/auth/login', { email, password }),
     logout: () => post<{ ok: boolean }>('/api/auth/logout', {}),
     me: () => get<AuthUser & { profile: unknown; deliverer: unknown }>('/api/auth/me'),
     forgotPassword: (email: string) => post<{ ok: boolean }>('/api/auth/request-reset', { email }),
