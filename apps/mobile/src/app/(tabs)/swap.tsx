@@ -1,23 +1,29 @@
 import { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Clipboard } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import * as Clipboard from 'expo-clipboard'
 import * as Haptics from 'expo-haptics'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import QRCode from 'react-native-qrcode-svg'
+import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useAlbumStore } from '@/lib/album-store'
+import { useAuthStore } from '@/lib/auth-store'
 import { ALBUM } from '@/lib/data'
+import { encodeOffer, decodePayload } from '@/lib/swap-qr'
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 type Mode = 'offer' | 'scan'
-interface SwapPayload { extras: string[]; needed: string[]; v: number }
 
 export default function SwapScreen() {
   const [mode, setMode] = useState<Mode>('offer')
-  const [code, setCode] = useState('')
-  const [parsed, setParsed] = useState<SwapPayload | null>(null)
-  const [parseError, setParseError] = useState('')
+  const [scanned, setScanned] = useState<{ extras: string[]; needed: string[]; user: string } | null>(null)
+  const [permission, requestPermission] = useCameraPermissions()
+  const [scanLock, setScanLock] = useState(false)
+
   const album = useAlbumStore((s) => s.album)
+  const user = useAuthStore((s) => s.user)
 
   const extras: string[] = []
   const needed: string[] = []
-
   for (const g of ALBUM) {
     const gs = album[g.id] ?? {}
     for (const s of g.stickers) {
@@ -27,30 +33,31 @@ export default function SwapScreen() {
     }
   }
 
-  const payload: SwapPayload = { extras, needed, v: 1 }
-  const encoded = Buffer.from(JSON.stringify(payload)).toString('base64')
+  const username = user?.username ?? 'anon'
+  const qrPayload = encodeOffer({ username, repetidas: extras, faltantes: needed })
 
   function copyCode() {
-    Clipboard.setString(encoded)
+    Clipboard.setStringAsync(qrPayload)
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
     Alert.alert('Copied', 'Share the code with another collector.')
   }
 
-  function parseScan() {
-    setParseError('')
-    try {
-      const decoded = JSON.parse(Buffer.from(code.trim(), 'base64').toString()) as SwapPayload
-      if (!decoded.extras || !decoded.needed) throw new Error('invalid')
-      setParsed(decoded)
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
-    } catch {
-      setParseError('Invalid code.')
+  function handleScan({ data }: { data: string }) {
+    if (scanLock) return
+    setScanLock(true)
+    const decoded = decodePayload(data)
+    if (!decoded || decoded.t !== 'o') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {})
+      Alert.alert('Invalid code', 'This QR is not a Mundial 26 swap offer.')
+      setTimeout(() => setScanLock(false), 1500)
+      return
     }
+    setScanned({ extras: decoded.r, needed: decoded.n ?? [], user: decoded.u })
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
   }
 
-  const theyHaveINeed = parsed ? parsed.extras.filter((c) => needed.includes(c)) : []
-  const iHaveTheyNeed = parsed ? extras.filter((c) => parsed.needed.includes(c)) : []
+  const theyHaveINeed = scanned ? scanned.extras.filter((c) => needed.includes(c)) : []
+  const iHaveTheyNeed = scanned ? extras.filter((c) => scanned.needed.includes(c)) : []
 
   return (
     <SafeAreaView style={s.safe}>
@@ -59,36 +66,38 @@ export default function SwapScreen() {
 
         <View style={s.tabRow}>
           {(['offer', 'scan'] as Mode[]).map((m) => (
-            <TouchableOpacity key={m} onPress={() => setMode(m)} style={[s.tabBtn, mode === m && s.tabActive]}>
+            <TouchableOpacity key={m} onPress={() => { setMode(m); setScanned(null); setScanLock(false) }} style={[s.tabBtn, mode === m && s.tabActive]}>
               <Text style={[s.tabLabel, mode === m && s.tabLabelActive]}>{m === 'offer' ? 'My offer' : 'Scan'}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {mode === 'offer' && (
-          <View style={{ gap: 12 }}>
+          <View style={{ gap: SPACING.md }}>
             <View style={s.statRow}>
               <View style={[s.statCard, { backgroundColor: 'rgba(0,99,65,0.08)' }]}>
-                <Text style={[s.statNum, { color: '#006341' }]}>{extras.length}</Text>
-                <Text style={[s.statLabel, { color: '#006341' }]}>Duplicates</Text>
+                <Text style={[s.statNum, { color: COLORS.green }]}>{extras.length}</Text>
+                <Text style={[s.statLabel, { color: COLORS.green }]}>Duplicates</Text>
               </View>
               <View style={[s.statCard, { backgroundColor: 'rgba(206,17,38,0.08)' }]}>
-                <Text style={[s.statNum, { color: '#CE1126' }]}>{needed.length}</Text>
-                <Text style={[s.statLabel, { color: '#CE1126' }]}>Needed</Text>
+                <Text style={[s.statNum, { color: COLORS.red }]}>{needed.length}</Text>
+                <Text style={[s.statLabel, { color: COLORS.red }]}>Needed</Text>
               </View>
             </View>
 
             {extras.length === 0 && needed.length === 0 ? (
               <View style={s.emptyBox}>
-                <Text style={{ fontSize: 40, marginBottom: 8 }}>📚</Text>
+                <Text style={{ fontSize: 40, marginBottom: SPACING.sm }}>📚</Text>
                 <Text style={s.emptyText}>Mark stickers in your album to generate your swap code</Text>
               </View>
             ) : (
               <>
-                {extras.length > 0 && <ChipGroup label={`My duplicates (${extras.length})`} codes={extras} color="#006341" bg="rgba(0,99,65,0.1)" />}
-                {needed.length > 0 && <ChipGroup label={`Needed (${needed.length})`} codes={needed} color="#CE1126" bg="rgba(206,17,38,0.08)" />}
+                <View style={s.qrCard}>
+                  <QRCode value={qrPayload} size={220} color={COLORS.ink} backgroundColor={COLORS.paper} />
+                  <Text style={s.qrCaption}>Show this to a friend</Text>
+                </View>
                 <TouchableOpacity style={s.btn} onPress={copyCode}>
-                  <Text style={s.btnText}>Copy my swap code</Text>
+                  <Text style={s.btnText}>Copy code (fallback)</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -96,30 +105,39 @@ export default function SwapScreen() {
         )}
 
         {mode === 'scan' && (
-          <View style={{ gap: 12 }}>
-            <TextInput
-              value={code}
-              onChangeText={setCode}
-              placeholder="Pega aquí el código de swap..."
-              multiline
-              numberOfLines={4}
-              style={s.input}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            {parseError ? <Text style={{ color: '#CE1126', fontSize: 13 }}>{parseError}</Text> : null}
-            <TouchableOpacity style={s.btn} onPress={parseScan}>
-              <Text style={s.btnText}>Ver coincidencias</Text>
-            </TouchableOpacity>
-
-            {parsed && (
-              <View style={{ gap: 10 }}>
-                {theyHaveINeed.length > 0
-                  ? <ChipGroup label={`Ellos tienen lo que buscas (${theyHaveINeed.length})`} codes={theyHaveINeed} color="#006341" bg="rgba(0,99,65,0.08)" />
-                  : <Text style={s.emptyText}>No tienen estampas que busques</Text>}
-                {iHaveTheyNeed.length > 0
-                  ? <ChipGroup label={`Tú tienes lo que buscan (${iHaveTheyNeed.length})`} codes={iHaveTheyNeed} color="#92400E" bg="rgba(255,209,0,0.15)" />
-                  : <Text style={s.emptyText}>No tienes extras que ellos busquen</Text>}
+          <View style={{ gap: SPACING.md }}>
+            {!permission?.granted ? (
+              <View style={s.emptyBox}>
+                <Text style={{ fontSize: 40, marginBottom: SPACING.sm }}>📷</Text>
+                <Text style={s.emptyText}>Camera permission needed to scan QR codes</Text>
+                <TouchableOpacity style={[s.btn, { marginTop: SPACING.md }]} onPress={requestPermission}>
+                  <Text style={s.btnText}>Allow camera</Text>
+                </TouchableOpacity>
+              </View>
+            ) : scanned ? (
+              <>
+                <View style={s.scanResult}>
+                  <Text style={s.scanResultUser}>From: @{scanned.user}</Text>
+                  {theyHaveINeed.length > 0
+                    ? <ChipGroup label={`They have what you need (${theyHaveINeed.length})`} codes={theyHaveINeed} color={COLORS.green} bg="rgba(0,99,65,0.08)" />
+                    : <Text style={s.emptyText}>No matches for stickers you need</Text>}
+                  {iHaveTheyNeed.length > 0
+                    ? <ChipGroup label={`You have what they need (${iHaveTheyNeed.length})`} codes={iHaveTheyNeed} color={COLORS.goldDark} bg="rgba(255,209,0,0.18)" />
+                    : <Text style={s.emptyText}>No matches for stickers they need</Text>}
+                </View>
+                <TouchableOpacity style={s.btn} onPress={() => { setScanned(null); setScanLock(false) }}>
+                  <Text style={s.btnText}>Scan another</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <View style={s.cameraWrap}>
+                <CameraView
+                  style={s.camera}
+                  facing="back"
+                  barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                  onBarcodeScanned={handleScan}
+                />
+                <Text style={s.cameraHint}>Point at a Mundial 26 swap QR code</Text>
               </View>
             )}
           </View>
@@ -132,11 +150,11 @@ export default function SwapScreen() {
 function ChipGroup({ label, codes, color, bg }: { label: string; codes: string[]; color: string; bg: string }) {
   return (
     <View>
-      <Text style={{ fontSize: 11, fontWeight: '700', color: '#9CA3AF', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>{label}</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+      <Text style={s.chipLabel}>{label}</Text>
+      <View style={s.chipRow}>
         {codes.map((c) => (
-          <View key={c} style={{ backgroundColor: bg, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 }}>
-            <Text style={{ color, fontWeight: '700', fontSize: 11, fontFamily: 'monospace' }}>{c}</Text>
+          <View key={c} style={[s.chip, { backgroundColor: bg }]}>
+            <Text style={[s.chipText, { color }]}>{c}</Text>
           </View>
         ))}
       </View>
@@ -145,21 +163,31 @@ function ChipGroup({ label, codes, color, bg }: { label: string; codes: string[]
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FEFCE8' },
-  scroll: { padding: 16, paddingBottom: 32 },
-  title: { fontSize: 26, fontWeight: '800', color: '#1C1917', marginBottom: 16 },
-  tabRow: { flexDirection: 'row', backgroundColor: '#F3F4F6', borderRadius: 12, padding: 4, marginBottom: 16, gap: 4 },
-  tabBtn: { flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
-  tabActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
-  tabLabel: { fontSize: 13, fontWeight: '600', color: '#9CA3AF' },
-  tabLabelActive: { color: '#1C1917' },
-  statRow: { flexDirection: 'row', gap: 12 },
-  statCard: { flex: 1, borderRadius: 16, padding: 16, alignItems: 'center' },
-  statNum: { fontSize: 32, fontWeight: '900' },
-  statLabel: { fontSize: 12, fontWeight: '600', marginTop: 2 },
-  emptyBox: { alignItems: 'center', paddingVertical: 32 },
-  emptyText: { fontSize: 13, color: '#9CA3AF', textAlign: 'center' },
-  btn: { backgroundColor: '#006341', borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
-  btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  input: { backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', padding: 12, fontSize: 13, minHeight: 100, textAlignVertical: 'top', fontFamily: 'monospace' },
+  safe: { flex: 1, backgroundColor: COLORS.cream },
+  scroll: { padding: SPACING.lg, paddingBottom: SPACING.xxxl },
+  title: { fontSize: FONT.size.displayXL, fontWeight: FONT.weight.black, color: COLORS.ink, marginBottom: SPACING.lg },
+  tabRow: { flexDirection: 'row', backgroundColor: COLORS.surface2, borderRadius: RADIUS.md, padding: 4, marginBottom: SPACING.lg, gap: 4 },
+  tabBtn: { flex: 1, paddingVertical: SPACING.sm, borderRadius: RADIUS.sm, alignItems: 'center' },
+  tabActive: { backgroundColor: COLORS.paper, ...SHADOW.sm },
+  tabLabel: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.textMuted },
+  tabLabelActive: { color: COLORS.ink },
+  statRow: { flexDirection: 'row', gap: SPACING.md },
+  statCard: { flex: 1, borderRadius: RADIUS.xl, padding: SPACING.lg, alignItems: 'center' },
+  statNum: { fontSize: 36, fontWeight: FONT.weight.black },
+  statLabel: { fontSize: FONT.size.bodyS, fontWeight: FONT.weight.bold, textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 },
+  emptyBox: { alignItems: 'center', paddingVertical: SPACING.xxl, paddingHorizontal: SPACING.lg },
+  emptyText: { fontSize: FONT.size.bodyM, color: COLORS.textMuted, textAlign: 'center' },
+  qrCard: { backgroundColor: COLORS.paper, borderRadius: RADIUS.xxl, padding: SPACING.xl, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, ...SHADOW.md },
+  qrCaption: { fontSize: FONT.size.bodyM, color: COLORS.textMuted, marginTop: SPACING.md, fontWeight: FONT.weight.medium },
+  btn: { backgroundColor: COLORS.ink, borderRadius: RADIUS.lg, paddingVertical: SPACING.lg, alignItems: 'center' },
+  btnText: { color: COLORS.paper, fontWeight: FONT.weight.bold, fontSize: FONT.size.bodyL },
+  cameraWrap: { borderRadius: RADIUS.xxl, overflow: 'hidden', backgroundColor: COLORS.ink, alignItems: 'center', padding: SPACING.md },
+  camera: { width: '100%', aspectRatio: 1, borderRadius: RADIUS.xl, overflow: 'hidden' },
+  cameraHint: { color: COLORS.paper, opacity: 0.7, fontSize: FONT.size.bodyM, marginTop: SPACING.md },
+  scanResult: { backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, padding: SPACING.lg, borderWidth: 1, borderColor: COLORS.border, gap: SPACING.md },
+  scanResultUser: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.ink },
+  chipLabel: { fontSize: FONT.size.label, fontWeight: FONT.weight.bold, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: SPACING.sm },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  chip: { borderRadius: RADIUS.full, paddingHorizontal: SPACING.md, paddingVertical: 4 },
+  chipText: { fontWeight: FONT.weight.bold, fontSize: FONT.size.bodyS, fontFamily: 'monospace' },
 })
