@@ -4,34 +4,59 @@ import { recordMovements } from '../services/inventory.js'
 import { randomUUID } from 'crypto'
 
 const stockRoutes: FastifyPluginAsync = async (fastify) => {
-  // GET /api/stock — stock by sku/location
+  // GET /api/stock — stock by sku/location (joins resolved manually since
+  // mat views don't carry FK constraints PostgREST can introspect)
   fastify.get('/', { preHandler: fastify.authenticate }, async (req) => {
     const { sku_id, location_id } = req.query as Record<string, string>
     const sb = getClient()
-    let q = sb.from('stock').select('*, product:products!sku_id(name, sku, unit_type, avg_cost), location:locations!location_id(name, type)')
+    let q = sb.from('stock').select('sku_id, location_id, qty')
     if (sku_id) q = q.eq('sku_id', sku_id) as typeof q
     if (location_id) q = q.eq('location_id', location_id) as typeof q
     const { data, error } = await q.order('qty', { ascending: false })
     if (error) throw new Error(error.message)
-    return data
+    const rows = (data ?? []) as Array<{ sku_id: string; location_id: string; qty: number }>
+    if (rows.length === 0) return []
+
+    const skuIds = [...new Set(rows.map((r) => r.sku_id))]
+    const locIds = [...new Set(rows.map((r) => r.location_id))]
+    const [{ data: products }, { data: locations }] = await Promise.all([
+      sb.from('products').select('id, name, sku, unit_type, avg_cost').in('id', skuIds),
+      sb.from('locations').select('id, name, type').in('id', locIds),
+    ])
+    const productById = new Map((products ?? []).map((p) => [p.id, p]))
+    const locationById = new Map((locations ?? []).map((l) => [l.id, l]))
+
+    return rows.map((r) => ({
+      ...r,
+      product: productById.get(r.sku_id) ?? null,
+      location: locationById.get(r.location_id) ?? null,
+    }))
   })
 
   // GET /api/stock/summary
   fastify.get('/summary', { preHandler: fastify.authenticate }, async () => {
     const sb = getClient()
-    const { data: stockRows } = await sb
-      .from('stock')
-      .select('sku_id, location_id, qty, product:products!sku_id(name, sku, avg_cost), location:locations!location_id(name, type)')
-    const rows = (stockRows ?? []) as unknown as Array<{ sku_id: string; location_id: string; qty: number; product: { avg_cost?: number } | null; location: { name: string; type: string } | null }>
+    const { data: stockRows } = await sb.from('stock').select('sku_id, location_id, qty')
+    const rows = (stockRows ?? []) as Array<{ sku_id: string; location_id: string; qty: number }>
+
+    const skuIds = [...new Set(rows.map((r) => r.sku_id))]
+    const locIds = [...new Set(rows.map((r) => r.location_id))]
+    const [{ data: products }, { data: locations }] = await Promise.all([
+      skuIds.length ? sb.from('products').select('id, avg_cost').in('id', skuIds) : Promise.resolve({ data: [] }),
+      locIds.length ? sb.from('locations').select('id, name, type').in('id', locIds) : Promise.resolve({ data: [] }),
+    ])
+    const avgCostBySku = new Map((products ?? []).map((p) => [p.id, Number(p.avg_cost ?? 0)]))
+    const locationById = new Map((locations ?? []).map((l) => [l.id, l]))
 
     const byLocation: Record<string, { location_id: string; location_name: string; location_type: string; skus: number; units: number; value: number }> = {}
     let totalSkus = 0, totalUnits = 0, totalValue = 0, wipUnits = 0
 
     for (const r of rows) {
       const loc = r.location_id
-      const locName = r.location?.name ?? loc
-      const locType = r.location?.type ?? ''
-      const avgCost = r.product?.avg_cost ?? 0
+      const locInfo = locationById.get(loc)
+      const locName = locInfo?.name ?? loc
+      const locType = locInfo?.type ?? ''
+      const avgCost = avgCostBySku.get(r.sku_id) ?? 0
       const value = r.qty * avgCost
 
       if (!byLocation[loc]) byLocation[loc] = { location_id: loc, location_name: locName, location_type: locType, skus: 0, units: 0, value: 0 }
@@ -51,12 +76,24 @@ const stockRoutes: FastifyPluginAsync = async (fastify) => {
 
   // GET /api/stock/wip
   fastify.get('/wip', { preHandler: fastify.authenticate }, async () => {
-    const { data, error } = await getClient()
+    const sb = getClient()
+    const { data, error } = await sb
       .from('stock')
-      .select('*, product:products!sku_id(name, sku, unit_type), location:locations!location_id(name, type)')
+      .select('sku_id, location_id, qty')
       .in('location_id', ['loc_wip_conv', 'loc_wip_assembly'])
     if (error) throw new Error(error.message)
-    return data
+    const rows = (data ?? []) as Array<{ sku_id: string; location_id: string; qty: number }>
+    if (rows.length === 0) return []
+
+    const skuIds = [...new Set(rows.map((r) => r.sku_id))]
+    const locIds = [...new Set(rows.map((r) => r.location_id))]
+    const [{ data: products }, { data: locations }] = await Promise.all([
+      sb.from('products').select('id, name, sku, unit_type').in('id', skuIds),
+      sb.from('locations').select('id, name, type').in('id', locIds),
+    ])
+    const productById = new Map((products ?? []).map((p) => [p.id, p]))
+    const locationById = new Map((locations ?? []).map((l) => [l.id, l]))
+    return rows.map((r) => ({ ...r, product: productById.get(r.sku_id) ?? null, location: locationById.get(r.location_id) ?? null }))
   })
 
   // GET /api/stock/idle?days=30
