@@ -31,11 +31,15 @@
       "channel": "preview"
     },
     "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com"
+      },
       "ios": {
         "autoIncrement": true
       },
       "android": {
-        "autoIncrement": true
+        "autoIncrement": true,
+        "buildType": "app-bundle"
       },
       "channel": "production"
     }
