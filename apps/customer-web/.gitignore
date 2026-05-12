@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Environment variables (NUNCA subir secretos)
+.env
+.env.local
+.env.*.local
+server/.env
+server/.env.local
+
+# Build output (lo regenera Netlify/Vercel)
+dist/
+coverage/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# macOS duplicates
+* 2.*
+* 3.*

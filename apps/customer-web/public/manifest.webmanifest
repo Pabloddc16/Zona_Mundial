@@ -1,0 +1,70 @@
+{
+  "name": "Mundial 26 — Panini",
+  "short_name": "Mundial 26",
+  "description": "App oficial Mundial 26. Controla tu álbum, pide estampas, compra en Zona Mundial y gana dinero compartiendo tu código.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "es-MX",
+  "dir": "ltr",
+  "theme_color": "#006341",
+  "background_color": "#FAF6EE",
+  "categories": ["sports", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon-master.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Control del álbum",
+      "short_name": "Álbum",
+      "description": "Ir directo al control de tu álbum",
+      "url": "./index.html#album",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tienda Zona Mundial",
+      "short_name": "Tienda",
+      "description": "Comprar productos Panini, jerseys y más",
+      "url": "./index.html#tienda",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Pedido de Lista",
+      "short_name": "Lista",
+      "description": "Pedir estampas por número",
+      "url": "./index.html#pedido-lista",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Gana dinero",
+      "short_name": "Referidos",
+      "description": "Comparte tu código y gana",
+      "url": "./index.html#gana-dinero",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

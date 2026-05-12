@@ -1,0 +1,21 @@
+# All hashed assets are content-addressed (Vite stamps a hash into the
+# filename), so they can be cached forever. This dramatically cuts
+# repeat-visit bandwidth: returning users don't re-download the bundle on
+# every page load.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# index.html and the service worker MUST be revalidated on every visit so
+# new deploys actually reach users (otherwise the SW serves last week's
+# bundle from cache forever — same class of problem we just had with
+# "QR lib no cargó" persisting across pushes).
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Block search-engine indexing of assets so crawlers don't repeatedly
+# enumerate `/assets/*` and burn quota on the heavy ONNX/scanner chunks.
+# The HTML shell stays indexable.
+/assets/*
+  X-Robots-Tag: noindex

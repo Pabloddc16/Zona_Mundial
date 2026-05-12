@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mundial 26 — Preview (estático)</title>
+<style>
+  :root {
+    --green: #006341;
+    --red: #CE1126;
+    --gold: #FFD100;
+    --cream: #FAF6EE;
+    --ink: #0B1F15;
+    --paper: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--cream); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .display { font-family: "SF Pro Display", system-ui, sans-serif; font-weight: 900; letter-spacing: -0.02em; }
+  .label { font-size: 10px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(0,0,0,0.5); }
+  .tap { cursor: pointer; transition: transform .1s; }
+  .tap:active { transform: scale(.97); }
+
+  /* LAYOUT: 3 "teléfonos" uno al lado del otro para preview */
+  .stage {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .phone {
+    background: var(--cream);
+    border-radius: 36px;
+    overflow: hidden;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.15);
+    border: 10px solid #111;
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+  }
+  .phone-label {
+    text-align: center;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(0,0,0,0.55);
+    margin-bottom: 10px;
+  }
+
+  /* HEADER */
+  .top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px; background: rgba(250,246,238,0.95); backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; }
+  .logo .badge {
+    width: 28px; height: 28px; border-radius: 999px; background: var(--green); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px;
+  }
+  .logo .word { font-weight: 900; font-size: 14px; letter-spacing: -0.02em; }
+  .logo .word span { color: var(--red); }
+  .cart-icon {
+    position: relative; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  }
+  .cart-icon svg { width: 22px; height: 22px; stroke: var(--ink); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .cart-badge {
+    position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 4px;
+    background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
+    border-radius: 999px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* HOME hero */
+  .greet { padding: 12px 16px 2px; }
+  .hero {
+    margin: 10px 14px; border-radius: 28px; padding: 20px; color: #fff; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--green) 0%, var(--red) 60%, var(--gold) 130%);
+    min-height: 240px;
+  }
+  .hero .rings {
+    position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; opacity: 0.22;
+    background:
+      radial-gradient(circle, transparent 68%, #fff 69%, #fff 70%, transparent 71%) 0 0/100% 100% no-repeat,
+      radial-gradient(circle, transparent 54%, #fff 55%, #fff 56%, transparent 57%) 0 0/100% 100% no-repeat,
+      radial-gradient(circle, transparent 40%, #fff 41%, #fff 42%, transparent 43%) 0 0/100% 100% no-repeat,
+      radial-gradient(circle, transparent 26%, #fff 27%, #fff 28%, transparent 29%) 0 0/100% 100% no-repeat;
+  }
+  .hero .kicker { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: .9; font-weight: 700; }
+  .hero h1 { font-size: 30px; margin-top: 4px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.02; }
+  .hero p { font-size: 13px; margin-top: 6px; opacity: .9; }
+  .hero .stats {
+    background: rgba(0,0,0,0.25); border-radius: 18px; padding: 12px; margin-top: 14px;
+  }
+  .hero .stats .row { display: flex; justify-content: space-between; align-items: flex-end; }
+  .hero .big { font-size: 34px; font-weight: 900; line-height: 1; letter-spacing: -0.02em; }
+  .hero .big .dim { font-size: 18px; opacity: .75; }
+  .bar { height: 10px; background: rgba(255,255,255,0.15); border-radius: 999px; margin-top: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; width: 37%; background: var(--gold); border-radius: 999px; }
+  .open-btn {
+    display: inline-flex; align-items: center; gap: 6px; background: #fff; color: var(--ink);
+    padding: 9px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; margin-top: 14px;
+  }
+
+  /* 2x2 grid */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
+  .tile {
+    border-radius: 18px; padding: 14px; min-height: 130px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  .tile .ico {
+    width: 36px; height: 36px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .tile .t { font-weight: 900; font-size: 16px; letter-spacing: -0.02em; }
+  .tile .s { font-size: 11px; opacity: .8; margin-top: 2px; }
+  .tile.ink   { background: var(--ink);   color: #fff; }
+  .tile.ink   .ico { background: rgba(255,209,0,.2); color: var(--gold); }
+  .tile.gold  { background: var(--gold);  color: var(--ink); }
+  .tile.gold  .ico { background: rgba(206,17,38,.2); color: var(--red); }
+  .tile.red   { background: var(--red);   color: #fff; }
+  .tile.red   .ico { background: rgba(255,209,0,.2); color: var(--gold); }
+  .tile.green { background: var(--green); color: #fff; }
+  .tile.green .ico { background: rgba(255,209,0,.2); color: var(--gold); }
+
+  /* Destacado */
+  .highlight { margin: 8px 14px 14px; background: var(--paper); border-radius: 18px; border: 1px solid rgba(0,0,0,0.05); padding: 12px; display: flex; align-items: center; gap: 10px; }
+  .highlight .box { width: 44px; height: 44px; border-radius: 12px; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .highlight .t { font-weight: 900; font-size: 14px; letter-spacing: -0.02em; }
+  .highlight .s { font-size: 11px; color: rgba(0,0,0,0.6); margin-top: 2px; }
+  .highlight .arr { margin-left: auto; width: 32px; height: 32px; border-radius: 999px; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; }
+
+  /* Bottom nav */
+  .nav {
+    position: sticky; bottom: 0; background: #fff; border-top: 1px solid rgba(0,0,0,0.08);
+    display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 0;
+  }
+  .nav a { text-align: center; font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.55); text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .nav a .dot { width: 36px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .nav a.active { color: var(--green); }
+  .nav a.active .dot { background: var(--green); color: #fff; }
+
+  /* ========= PHONE 2: ÁLBUM ========= */
+  .album-header { margin: 10px 14px 6px; border-radius: 24px; padding: 18px; color: #fff; background: linear-gradient(135deg, var(--green), var(--ink)); }
+  .album-header .row1 { display: flex; justify-content: space-between; align-items: flex-end; }
+  .album-header .n { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -0.02em; }
+  .album-header .pct { font-size: 40px; font-weight: 900; color: var(--gold); line-height: 1; }
+  .album-header .stats-row { display: flex; gap: 6px; margin-top: 12px; }
+  .album-header .st { flex: 1; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 8px; text-align: center; }
+  .album-header .st.hl { background: var(--gold); color: var(--ink); }
+  .album-header .st .v { font-weight: 900; font-size: 20px; }
+
+  .cta-red {
+    margin: 0 14px; background: var(--red); color: #fff; border-radius: 18px; padding: 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .cta-red .icon-box { width: 36px; height: 36px; border-radius: 999px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .cta-red .t { font-weight: 900; font-size: 14px; letter-spacing: -0.02em; }
+  .cta-red .s { font-size: 11px; opacity: .85; margin-top: 2px; }
+
+  .chips { display: flex; gap: 6px; padding: 10px 14px; overflow-x: auto; }
+  .chip { flex-shrink: 0; padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid rgba(0,0,0,0.1); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(0,0,0,0.7); }
+  .chip.active { background: var(--ink); color: #fff; border-color: transparent; }
+
+  .groups { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 14px 14px; }
+  .gcard { background: #fff; border-radius: 18px; border: 1px solid rgba(0,0,0,0.05); padding: 10px; position: relative; }
+  .gcard .em { font-size: 26px; line-height: 1; }
+  .gcard .n { font-weight: 900; font-size: 13px; letter-spacing: -0.02em; margin-top: 4px; }
+  .gcard .region { font-size: 9px; color: rgba(0,0,0,0.5); font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+  .gcard .prog { display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; }
+  .gcard .prog .c { font-weight: 700; }
+  .gcard .minibar { height: 6px; background: rgba(0,0,0,0.05); border-radius: 999px; overflow: hidden; margin-top: 4px; }
+  .gcard .minibar > div { height: 100%; background: var(--gold); }
+  .gcard.done .minibar > div { background: var(--green); }
+  .gcard .tick { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 999px; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+  /* ========= PHONE 3: TIENDA ========= */
+  .search { margin: 10px 14px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 999px; padding: 10px 14px; display: flex; align-items: center; gap: 8px; font-size: 14px; color: rgba(0,0,0,0.4); }
+  .prods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 14px 14px; }
+  .pcard { background: #fff; border-radius: 18px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+  .pcard .img { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; font-size: 56px; position: relative; }
+  .pcard .img .bd { position: absolute; top: 8px; left: 8px; padding: 2px 8px; background: rgba(0,0,0,0.7); color: #fff; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 999px; }
+  .pcard .body { padding: 10px 12px; }
+  .pcard .n { font-weight: 900; font-size: 12px; letter-spacing: -0.02em; line-height: 1.25; min-height: 30px; }
+  .pcard .foot { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6px; }
+  .pcard .price { font-weight: 900; font-size: 15px; color: var(--green); letter-spacing: -0.02em; }
+  .pcard .addbtn { width: 28px; height: 28px; border-radius: 999px; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+
+  /* Regla de jerarquía footer */
+  .rule {
+    max-width: 1400px; margin: 0 auto; padding: 8px 24px 32px;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; font-size: 11px;
+  }
+  .rule .pill { padding: 6px 14px; border-radius: 999px; font-weight: 700; }
+  .rule .pill.green { background: var(--green); color: #fff; }
+  .rule .pill.ink { background: var(--ink); color: #fff; }
+  .rule .pill.gold { background: var(--gold); color: var(--ink); }
+  .rule .pill.red { background: var(--red); color: #fff; }
+  .rule .sep { color: rgba(0,0,0,0.3); align-self: center; }
+
+  h2.section { padding: 20px 24px 6px; font-weight: 900; letter-spacing: -0.02em; font-size: 22px; max-width: 1400px; margin: 0 auto; }
+  p.subtxt { padding: 0 24px 14px; font-size: 13px; color: rgba(0,0,0,0.6); max-width: 1400px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<h2 class="section">Mundial 26 — Vista de diseño</h2>
+<p class="subtxt">Preview estático de las 5 secciones principales. Para ver la app funcional abre <b>http://localhost:8000</b> en Safari o Chrome.</p>
+
+<div class="stage">
+
+  <!-- ===================== PHONE 1: HOME ===================== -->
+  <div>
+  <div class="phone-label">Home · 5 secciones</div>
+  <div class="phone">
+    <div class="top">
+      <div class="logo">
+        <div class="badge">26</div>
+        <div class="word">MUNDIAL<span>26</span></div>
+      </div>
+      <div class="cart-icon">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-badge">2</span>
+      </div>
+    </div>
+
+    <div class="greet">
+      <div class="label">Mundial 26 · CDMX</div>
+      <div class="display" style="font-size:22px;">Hola, Pablo 👋</div>
+    </div>
+
+    <div class="hero tap">
+      <div class="rings"></div>
+      <div class="kicker">SECCIÓN PRINCIPAL</div>
+      <h1>Control del álbum</h1>
+      <p>Lleva tu progreso, marca estampas y pide las que te faltan.</p>
+      <div class="stats">
+        <div class="row">
+          <div>
+            <div class="big">248<span class="dim">/670</span></div>
+            <div style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; opacity:.8; margin-top:2px;">estampas pegadas</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="big">37%</div>
+            <div style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; opacity:.8; margin-top:2px;">completo</div>
+          </div>
+        </div>
+        <div class="bar"><div class="bar-fill"></div></div>
+      </div>
+      <div class="open-btn">Abrir álbum →</div>
+    </div>
+
+    <div class="grid">
+      <div class="tile ink tap">
+        <div class="ico">👤</div>
+        <div><div class="t">My Panini</div><div class="s">Tu perfil, pedidos y colección</div></div>
+      </div>
+      <div class="tile gold tap">
+        <div class="ico">✅</div>
+        <div><div class="t">Pedido de Lista</div><div class="s">Pide estampas específicas por número</div></div>
+      </div>
+      <div class="tile red tap">
+        <div class="ico">🛍</div>
+        <div><div class="t">Tienda Zona Mundial</div><div class="s">Jerseys, balones, trofeos y más</div></div>
+      </div>
+      <div class="tile green tap">
+        <div class="ico">🎁</div>
+        <div><div class="t">Gana dinero</div><div class="s">Comparte PABLO26 y gana 10%</div></div>
+      </div>
+    </div>
+
+    <div style="padding: 0 14px 10px;"><div class="label">Destacado</div></div>
+    <div class="highlight">
+      <div class="box">💵</div>
+      <div>
+        <div class="t">Has ganado $980 con tu código</div>
+        <div class="s">7 amigos han comprado · $420 pendiente</div>
+      </div>
+      <div class="arr">→</div>
+    </div>
+
+    <nav class="nav">
+      <a class="active"><div class="dot">🏠</div>Inicio</a>
+      <a><div class="dot">📖</div>Álbum</a>
+      <a><div class="dot">🛍</div>Tienda</a>
+      <a><div class="dot">✅</div>Lista</a>
+      <a><div class="dot">👤</div>My Panini</a>
+    </nav>
+  </div>
+  </div>
+
+  <!-- ===================== PHONE 2: ÁLBUM ===================== -->
+  <div>
+  <div class="phone-label">Control del álbum</div>
+  <div class="phone">
+    <div class="top">
+      <div class="logo" style="gap:4px;">
+        <span style="font-size:20px; color: var(--ink);">‹</span>
+        <div class="word" style="margin-left:4px;">Control del álbum</div>
+      </div>
+      <div class="cart-icon">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      </div>
+    </div>
+
+    <div class="album-header">
+      <div class="row1">
+        <div>
+          <div class="label" style="color: rgba(255,255,255,0.8);">Progreso total</div>
+          <div class="n">248<span style="font-size:22px; opacity:.7;">/670</span></div>
+        </div>
+        <div class="pct">37%</div>
+      </div>
+      <div class="bar"><div class="bar-fill" style="width:37%;"></div></div>
+      <div class="stats-row">
+        <div class="st"><div class="v">248</div><div style="font-size:9px; opacity:.8; letter-spacing:1.2px; text-transform:uppercase; margin-top:2px;">Pegadas</div></div>
+        <div class="st hl"><div class="v">422</div><div style="font-size:9px; opacity:.75; letter-spacing:1.2px; text-transform:uppercase; margin-top:2px;">Faltan</div></div>
+        <div class="st"><div class="v">34</div><div style="font-size:9px; opacity:.8; letter-spacing:1.2px; text-transform:uppercase; margin-top:2px;">Repetidas</div></div>
+      </div>
+    </div>
+
+    <div class="cta-red tap">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="icon-box">✅</div>
+        <div>
+          <div class="t">Pedir las 422 faltantes</div>
+          <div class="s">$2,110 a $5 c/u · arma tu pedido</div>
+        </div>
+      </div>
+      <div style="font-size:18px;">→</div>
+    </div>
+
+    <div class="chips">
+      <div class="chip active">Todos</div>
+      <div class="chip">Incompletos</div>
+      <div class="chip">Anfitriones</div>
+      <div class="chip">Sudamérica</div>
+      <div class="chip">Europa</div>
+    </div>
+
+    <div class="groups">
+      <div class="gcard"><div class="em">🇲🇽</div><div class="n">México</div><div class="region">Anfitriones</div><div class="prog"><span class="c">14/18</span><span style="color:rgba(0,0,0,0.5);">78%</span></div><div class="minibar"><div style="width:78%;"></div></div></div>
+      <div class="gcard done"><div class="tick">✓</div><div class="em">🇦🇷</div><div class="n">Argentina</div><div class="region">Sudamérica</div><div class="prog"><span class="c">18/18</span><span style="color:rgba(0,0,0,0.5);">100%</span></div><div class="minibar"><div style="width:100%;"></div></div></div>
+      <div class="gcard"><div class="em">🇧🇷</div><div class="n">Brasil</div><div class="region">Sudamérica</div><div class="prog"><span class="c">9/18</span><span style="color:rgba(0,0,0,0.5);">50%</span></div><div class="minibar"><div style="width:50%;"></div></div></div>
+      <div class="gcard"><div class="em">🇪🇸</div><div class="n">España</div><div class="region">Europa</div><div class="prog"><span class="c">6/18</span><span style="color:rgba(0,0,0,0.5);">33%</span></div><div class="minibar"><div style="width:33%;"></div></div></div>
+      <div class="gcard"><div class="em">🇫🇷</div><div class="n">Francia</div><div class="region">Europa</div><div class="prog"><span class="c">11/18</span><span style="color:rgba(0,0,0,0.5);">61%</span></div><div class="minibar"><div style="width:61%;"></div></div></div>
+      <div class="gcard"><div class="em">🏆</div><div class="n">Leyendas</div><div class="region">Sección especial</div><div class="prog"><span class="c">3/24</span><span style="color:rgba(0,0,0,0.5);">12%</span></div><div class="minibar"><div style="width:12%;"></div></div></div>
+    </div>
+
+    <nav class="nav">
+      <a><div class="dot">🏠</div>Inicio</a>
+      <a class="active"><div class="dot">📖</div>Álbum</a>
+      <a><div class="dot">🛍</div>Tienda</a>
+      <a><div class="dot">✅</div>Lista</a>
+      <a><div class="dot">👤</div>My Panini</a>
+    </nav>
+  </div>
+  </div>
+
+  <!-- ===================== PHONE 3: TIENDA ===================== -->
+  <div>
+  <div class="phone-label">Tienda Zona Mundial</div>
+  <div class="phone">
+    <div class="top">
+      <div class="logo" style="gap:4px;">
+        <span style="font-size:20px; color: var(--ink);">‹</span>
+        <div class="word" style="margin-left:4px;">Tienda Zona Mundial</div>
+      </div>
+      <div class="cart-icon">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-badge">2</span>
+      </div>
+    </div>
+
+    <div class="search">🔍 Buscar jerseys, sobres, balones…</div>
+
+    <div class="chips">
+      <div class="chip active">Todos</div>
+      <div class="chip">Packs</div>
+      <div class="chip">Sobres</div>
+      <div class="chip">Álbumes</div>
+      <div class="chip">Jerseys</div>
+      <div class="chip">Balones</div>
+    </div>
+
+    <div class="prods">
+      <div class="pcard">
+        <div class="img" style="background: linear-gradient(135deg, #FFD100, #006341);">
+          <div class="bd">RECOMENDADO</div>🏆
+        </div>
+        <div class="body">
+          <div class="n">Colección completa</div>
+          <div class="foot">
+            <div class="price">$3,500</div>
+            <div class="addbtn">+</div>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="img" style="background: linear-gradient(135deg, #CE1126, #8B0B1C); color: #fff;">
+          <div class="bd">MEJOR VOLUMEN</div>📦
+        </div>
+        <div class="body">
+          <div class="n">Caja 100 sobres</div>
+          <div class="foot">
+            <div class="price">$2,500</div>
+            <div class="addbtn">+</div>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="img" style="background: linear-gradient(135deg, #CE1126, #FFD100);">
+          <div class="bd">EDICIÓN ESPECIAL</div>🥤
+        </div>
+        <div class="body">
+          <div class="n">Set Coca-Cola</div>
+          <div class="foot">
+            <div class="price">$490</div>
+            <div class="addbtn">+</div>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="img" style="background: linear-gradient(135deg, #006341, #CE1126);">
+          <div class="bd">OFICIAL</div>🇲🇽
+        </div>
+        <div class="body">
+          <div class="n">Jersey México Local 26</div>
+          <div class="foot">
+            <div class="price">$2,199</div>
+            <div class="addbtn">+</div>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="img" style="background: linear-gradient(135deg, #CE1126, #FFD100);">
+          <div class="bd">FIFA QUALITY</div>⚽
+        </div>
+        <div class="body">
+          <div class="n">Balón oficial Mundial 26</div>
+          <div class="foot">
+            <div class="price">$3,499</div>
+            <div class="addbtn">+</div>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="img" style="background: linear-gradient(135deg, #FFD100, #B27D00);">
+          <div class="bd">EDICIÓN LIMITADA</div>🏆
+        </div>
+        <div class="body">
+          <div class="n">Copa FIFA réplica 1:1</div>
+          <div class="foot">
+            <div class="price">$3,999</div>
+            <div class="addbtn">+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a><div class="dot">🏠</div>Inicio</a>
+      <a><div class="dot">📖</div>Álbum</a>
+      <a class="active"><div class="dot">🛍</div>Tienda</a>
+      <a><div class="dot">✅</div>Lista</a>
+      <a><div class="dot">👤</div>My Panini</a>
+    </nav>
+  </div>
+  </div>
+
+</div>
+
+<div class="rule">
+  <span class="pill green">Verde = marca</span>
+  <span class="sep">·</span>
+  <span class="pill ink">Ink = acción</span>
+  <span class="sep">·</span>
+  <span class="pill gold">Oro = celebración</span>
+  <span class="sep">·</span>
+  <span class="pill red">Rojo = urgencia</span>
+</div>
+
+</body>
+</html>

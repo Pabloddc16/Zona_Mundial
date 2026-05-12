@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<!--
+  Content Security Policy (meta form).
+  In production the deploy server should also send this as a HTTP header —
+  frame-ancestors, report-uri, and report-to are HTTP-only and are ignored
+  when delivered via <meta>.
+
+  Deviations from a fully strict policy, intentional and acceptable for now:
+    • script-src 'unsafe-inline': rendered HTML uses inline event handlers
+      (onclick=…) emitted from JS templates. Replacing all of them requires
+      event delegation across ~100 sites; tracked as deferred work.
+    • script-src 'unsafe-eval': WASM/glue used by @imgly/background-removal.
+    • style-src 'unsafe-inline': dynamic inline style="…" for gradients, etc.
+    • script-src https://cdn.jsdelivr.net: jsqr from CDN (lz-string and
+      qrcode are now bundled via npm).
+    • connect-src whitelists: Sentry, MercadoPago, Supabase, model/CDN hosts.
+
+  Still enforced: object-src 'none', base-uri 'self', frame-ancestors 'none',
+  no eval of user input, all template strings escape via esc().
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://maps.googleapis.com; connect-src 'self' https://*.onrender.com https://*.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.sentry.io https://cdn.jsdelivr.net https://*.imgly.com https://staticimgly.com https://*.huggingface.co https://maps.googleapis.com https://places.googleapis.com; worker-src 'self' blob:; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
+<script>
+  (() => {
+    const k = "%VITE_GOOGLE_MAPS_API_KEY%";
+    if (!k || k.indexOf("VITE_") === 0) return;
+    const s = document.createElement("script");
+    s.src = "https://maps.googleapis.com/maps/api/js?key=" + k + "&libraries=places&loading=async&v=weekly";
+    s.async = true; s.defer = true;
+    document.head.appendChild(s);
+  })();
+</script>
+<title>Mundial 26 — Panini App</title>
+<link rel="manifest" href="./manifest.webmanifest" />
+<meta name="theme-color" content="#006341" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Mundial 26" />
+<link rel="icon" type="image/svg+xml" href="./icons/icon-master.svg" />
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png" />
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="modal-root"></div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

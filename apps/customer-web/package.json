@@ -1,0 +1,35 @@
+{
+  "name": "@pablo/customer-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test tests/a11y.spec.js",
+    "test:a11y:install": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.48.0",
+    "@testing-library/dom": "^10.4.1",
+    "@vitest/coverage-v8": "^4.1.5",
+    "sharp": "^0.34.5",
+    "vite": "^5.4.0",
+    "vitest": "^4.1.5"
+  },
+  "dependencies": {
+    "@imgly/background-removal": "^1.7.0",
+    "@sentry/browser": "^10.51.0",
+    "@supabase/supabase-js": "^2.105.1",
+    "@zxing/browser": "^0.2.0",
+    "lz-string": "^1.5.0",
+    "qrcode": "^1.5.4",
+    "zod": "^4.4.1"
+  }
+}
