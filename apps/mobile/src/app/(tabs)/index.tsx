@@ -4,6 +4,7 @@ import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
 import { ALBUM, TOTAL_STICKERS } from '@/lib/data'
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 type Tab = 'All' | 'Missing' | 'Duplicates'
 const TABS: Tab[] = ['All', 'Missing', 'Duplicates']
@@ -78,27 +79,27 @@ export default function AlbumScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FEFCE8' },
-  scroll: { padding: 16, paddingBottom: 32 },
-  header: { marginBottom: 16 },
-  title: { fontSize: 26, fontWeight: '800', color: '#1C1917' },
-  subtitle: { fontSize: 13, color: '#9CA3AF', marginTop: 2 },
-  barBg: { height: 8, backgroundColor: '#E5E7EB', borderRadius: 99, marginTop: 8, overflow: 'hidden' },
-  barFill: { height: '100%', backgroundColor: '#006341', borderRadius: 99 },
-  barRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
-  barLabel: { fontSize: 11, color: '#9CA3AF' },
-  tabRow: { flexDirection: 'row', backgroundColor: '#F3F4F6', borderRadius: 12, padding: 4, marginBottom: 16, gap: 4 },
-  tabBtn: { flex: 1, paddingVertical: 6, borderRadius: 8, alignItems: 'center' },
-  tabActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
-  tabLabel: { fontSize: 12, fontWeight: '600', color: '#9CA3AF' },
-  tabLabelActive: { color: '#1C1917' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  card: { width: '47%', backgroundColor: '#fff', borderRadius: 16, padding: 14, borderWidth: 2, borderColor: '#E5E7EB' },
-  cardComplete: { borderColor: '#006341', backgroundColor: 'rgba(0,99,65,0.04)' },
-  cardEmoji: { fontSize: 28, marginBottom: 6 },
-  cardName: { fontSize: 13, fontWeight: '700', color: '#1C1917', lineHeight: 17 },
-  cardSub: { fontSize: 11, color: '#9CA3AF', marginTop: 2, marginBottom: 6 },
-  cardBarBg: { height: 5, backgroundColor: '#E5E7EB', borderRadius: 99, overflow: 'hidden' },
-  cardBarFill: { height: '100%', backgroundColor: '#006341', borderRadius: 99 },
-  cardCount: { fontSize: 11, color: '#9CA3AF', marginTop: 4 },
+  safe: { flex: 1, backgroundColor: COLORS.cream },
+  scroll: { padding: SPACING.lg, paddingBottom: SPACING.xxxl },
+  header: { marginBottom: SPACING.lg },
+  title: { fontSize: FONT.size.displayXL, fontWeight: FONT.weight.black, color: COLORS.ink },
+  subtitle: { fontSize: FONT.size.bodyM, color: COLORS.textMuted, marginTop: 2 },
+  barBg: { height: 10, backgroundColor: COLORS.surface2, borderRadius: RADIUS.full, marginTop: SPACING.sm, overflow: 'hidden' },
+  barFill: { height: '100%', backgroundColor: COLORS.green, borderRadius: RADIUS.full },
+  barRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: SPACING.xs },
+  barLabel: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, fontWeight: FONT.weight.medium },
+  tabRow: { flexDirection: 'row', backgroundColor: COLORS.surface2, borderRadius: RADIUS.md, padding: 4, marginBottom: SPACING.lg, gap: 4 },
+  tabBtn: { flex: 1, paddingVertical: SPACING.sm, borderRadius: RADIUS.sm, alignItems: 'center' },
+  tabActive: { backgroundColor: COLORS.paper, ...SHADOW.sm },
+  tabLabel: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.textMuted },
+  tabLabelActive: { color: COLORS.ink },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md },
+  card: { width: '47%', backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, padding: SPACING.lg, borderWidth: 1, borderColor: COLORS.border, ...SHADOW.sm },
+  cardComplete: { borderColor: COLORS.green, backgroundColor: 'rgba(0,99,65,0.04)' },
+  cardEmoji: { fontSize: 32, marginBottom: SPACING.sm },
+  cardName: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.ink, lineHeight: 17 },
+  cardSub: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, marginTop: 2, marginBottom: SPACING.sm },
+  cardBarBg: { height: 5, backgroundColor: COLORS.surface2, borderRadius: RADIUS.full, overflow: 'hidden' },
+  cardBarFill: { height: '100%', backgroundColor: COLORS.green, borderRadius: RADIUS.full },
+  cardCount: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, marginTop: SPACING.xs, fontWeight: FONT.weight.medium },
 })

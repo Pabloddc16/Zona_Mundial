@@ -32,7 +32,7 @@ const dashboardRoutes: FastifyPluginAsync = async (fastify) => {
       supabase.from('sales').select('*, sale_items(*)').gte('created_at', fromISO).lte('created_at', toISO),
       supabase.from('wholesale_sales').select('*, wholesale_sale_items(*)').gte('created_at', fromISO).lte('created_at', toISO),
       supabase.from('orders').select('*, order_items(*)').eq('deleted', false).gte('date', fromISO).lte('date', toISO),
-      supabase.from('products').select('id, stock, cost, price'),
+      supabase.from('products').select('id, cost, price, avg_cost'),
       supabase.from('expenses').select('*').gte('date', fromDate.toISOString().slice(0, 10)).lte('date', toDate.toISOString().slice(0, 10)),
       supabase.from('returns').select('*').gte('created_at', fromISO).lte('created_at', toISO),
     ])
@@ -111,9 +111,19 @@ const dashboardRoutes: FastifyPluginAsync = async (fastify) => {
     }
     Object.keys(expensesByCat).forEach((k) => { expensesByCat[k] = Math.round(expensesByCat[k]! * 100) / 100 })
 
-    // Inventory value
-    const inventoryValue = (products ?? []).reduce((s, p) => s + Number(p.stock ?? 0) * Number(p.cost ?? p.price ?? 0), 0)
-    const inventoryUnits = (products ?? []).reduce((s, p) => s + Number(p.stock ?? 0), 0)
+    // Inventory value: aggregate qty from the movements-backed stock view per SKU,
+    // then multiply by avg_cost (preferred) or fall back to cost/price.
+    const { data: stockAgg } = await supabase.from('stock').select('sku_id, qty')
+    const qtyBySku = new Map<string, number>()
+    for (const r of (stockAgg ?? []) as Array<{ sku_id: string; qty: number }>) {
+      qtyBySku.set(r.sku_id, (qtyBySku.get(r.sku_id) ?? 0) + Number(r.qty ?? 0))
+    }
+    const inventoryValue = (products ?? []).reduce((s, p) => {
+      const qty = qtyBySku.get(p.id as string) ?? 0
+      const unit = Number(p.avg_cost ?? p.cost ?? p.price ?? 0)
+      return s + qty * unit
+    }, 0)
+    const inventoryUnits = (products ?? []).reduce((s, p) => s + (qtyBySku.get(p.id as string) ?? 0), 0)
 
     // Accounts receivable (wholesale unpaid)
     const allWs = (await supabase.from('wholesale_sales').select('id, wholesaler_id, wholesaler_name, total, amount_paid, saldo, created_at, status').neq('status', 'pagado')).data ?? []
