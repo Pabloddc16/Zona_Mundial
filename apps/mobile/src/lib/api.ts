@@ -1,17 +1,93 @@
+import { getAT, getRT, setAT, setRT, clearTokens, getTokenExpiry } from './auth-storage'
+
 const API = process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:4000'
 
+let _refreshing: Promise<boolean> | null = null
+
+async function tryRefresh(): Promise<boolean> {
+  if (_refreshing) return _refreshing
+  _refreshing = (async () => {
+    const rt = await getRT()
+    if (!rt) return false
+    try {
+      const res = await fetch(`${API}/api/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: rt }),
+      })
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) await clearTokens()
+        return false
+      }
+      const data = (await res.json()) as { accessToken: string; refreshToken: string }
+      await setAT(data.accessToken)
+      await setRT(data.refreshToken)
+      return true
+    } catch {
+      // network error — keep tokens, don't wipe
+      return false
+    } finally {
+      _refreshing = null
+    }
+  })()
+  return _refreshing
+}
+
+async function authHeaders(extra?: Record<string, string>): Promise<Record<string, string>> {
+  const at = await getAT()
+  return {
+    'Content-Type': 'application/json',
+    ...(at ? { Authorization: `Bearer ${at}` } : {}),
+    ...(extra ?? {}),
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const isAuthPath = path === '/api/auth/login' || path === '/api/auth/refresh' || path === '/api/auth/register'
+
+  // Proactive refresh: if AT expires in < 90s, refresh first
+  if (!isAuthPath) {
+    const at = await getAT()
+    if (at) {
+      const exp = getTokenExpiry(at)
+      if (exp > 0 && exp - Date.now() < 90_000) await tryRefresh()
+    }
+  }
+
   const res = await fetch(`${API}${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
+    headers: await authHeaders(init?.headers as Record<string, string> | undefined),
   })
+
+  if (res.status === 401 && !isAuthPath) {
+    const ok = await tryRefresh()
+    if (ok) {
+      const retry = await fetch(`${API}${path}`, {
+        ...init,
+        headers: await authHeaders(init?.headers as Record<string, string> | undefined),
+      })
+      if (!retry.ok) {
+        const body = await retry.json().catch(() => ({}))
+        throw new Error((body as { error?: string }).error ?? `HTTP ${retry.status}`)
+      }
+      return retry.json() as Promise<T>
+    }
+    throw new Error('Session expired')
+  }
+
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
   }
   return res.json() as Promise<T>
 }
+
+const get = <T>(path: string) => request<T>(path)
+const post = <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body: JSON.stringify(body) })
+
+export interface AuthUser { id: string; email: string; username: string; role: string }
+export interface LoginResp { user: AuthUser; accessToken: string; refreshToken: string }
+export interface Product { id: string; name: string; price: number; emoji?: string; image?: string; category?: string; stock: number }
 
 export interface OrderPayload {
   customer_name: string
@@ -41,9 +117,24 @@ export interface Order {
 }
 
 export const api = {
+  auth: {
+    login: (email: string, password: string) =>
+      post<LoginResp>('/api/auth/login', { email, password }),
+    register: (body: { email: string; password: string; username?: string }) =>
+      post<LoginResp>('/api/auth/register', body),
+    me: () => get<AuthUser & { profile: unknown }>('/api/auth/me'),
+    logout: () => post<{ ok: boolean }>('/api/auth/logout', {}),
+  },
+  products: {
+    list: (params?: Record<string, string>) =>
+      get<{ items: Product[]; total: number; page: number; pages: number }>(
+        `/api/products?${new URLSearchParams(params ?? {}).toString()}`,
+      ),
+  },
   orders: {
-    create: (body: OrderPayload) =>
-      request<Order>('/api/orders', { method: 'POST', body: JSON.stringify(body) }),
-    get: (n: string) => request<Order>(`/api/orders/${n}`),
+    create: (body: OrderPayload) => post<Order>('/api/orders', body),
+    get: (n: string) => get<Order>(`/api/orders/${n}`),
   },
 }
+
+export { setAT, setRT, clearTokens }
