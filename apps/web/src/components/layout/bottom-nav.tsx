@@ -5,8 +5,8 @@ import { useCartStore, cartCount } from '@/lib/cart-store'
 import { cn } from '@/lib/cn'
 
 const TABS = [
-  { href: '/album', label: 'Álbum', icon: BookIcon },
-  { href: '/tienda', label: 'Tienda', icon: ShopIcon },
+  { href: '/album', label: 'Album', icon: BookIcon },
+  { href: '/tienda', label: 'Store', icon: ShopIcon },
   { href: '/stats', label: 'Stats', icon: ChartIcon },
   { href: '/swap', label: 'Swap', icon: QrIcon },
 ]
@@ -35,7 +35,7 @@ export function BottomNav() {
             <span className="absolute -top-1 -right-1 bg-rojo text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">{count > 99 ? '99+' : count}</span>
           )}
         </span>
-        <span>Carrito</span>
+        <span>Cart</span>
       </Link>
     </nav>
   )

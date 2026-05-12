@@ -1,20 +1,19 @@
 'use client'
-import { use } from 'react'
 import Link from 'next/link'
-import { groupById, PRICE_BY_TIER, fmt } from '@/lib/data'
+import { groupById, fmt } from '@/lib/data'
 import { useAlbumStore } from '@/lib/album-store'
 import { useCartStore } from '@/lib/cart-store'
 import { cn } from '@/lib/cn'
 
-export default function GroupPage({ params }: { params: Promise<{ groupId: string }> }) {
-  const { groupId } = use(params)
+export default function GroupPage({ params }: { params: { groupId: string } }) {
+  const { groupId } = params
   const group = groupById(groupId)
   const album = useAlbumStore((s) => s.album)
   const markOwned = useAlbumStore((s) => s.markOwned)
   const markNeeded = useAlbumStore((s) => s.markNeeded)
   const addToCart = useCartStore((s) => s.add)
 
-  if (!group) return <div className="p-8 text-center text-gray-400">Sección no encontrada</div>
+  if (!group) return <div className="p-8 text-center text-gray-400">Section not found</div>
 
   const groupState = album[groupId] ?? {}
 
@@ -29,7 +28,7 @@ export default function GroupPage({ params }: { params: Promise<{ groupId: strin
   const missing = group.stickers.filter((s) => !((groupState[s.n]?.owned ?? 0) > 0))
 
   function addMissingToCart() {
-    missing.forEach((s) => addToCart('CARTA-SUELTA', 1))
+    missing.forEach(() => addToCart('CARTA-SUELTA', 1))
   }
 
   return (
@@ -44,16 +43,16 @@ export default function GroupPage({ params }: { params: Promise<{ groupId: strin
             <span className="text-2xl">{group.emoji}</span>
             <h1 className="text-xl font-bold text-tinta">{group.name}</h1>
           </div>
-          <p className="text-sm text-gray-400">{group.subtitle} · {group.stickers.length} estampas</p>
+          <p className="text-sm text-gray-400">{group.subtitle} · {group.stickers.length} stickers</p>
         </div>
       </div>
 
       {/* Stats bar */}
       {missing.length > 0 && (
         <div className="mb-4 flex items-center justify-between bg-rojo/5 border border-rojo/20 rounded-xl p-3">
-          <p className="text-sm text-rojo font-medium">Te faltan {missing.length} estampas</p>
+          <p className="text-sm text-rojo font-medium">You're missing {missing.length} stickers</p>
           <button onClick={addMissingToCart} className="text-xs bg-rojo text-white px-3 py-1.5 rounded-lg font-medium">
-            Agregar al carrito
+            Add to cart
           </button>
         </div>
       )}
@@ -77,13 +76,13 @@ export default function GroupPage({ params }: { params: Promise<{ groupId: strin
                   onClick={() => handleSticker(s.n, 'owned')}
                   className={cn('flex-1 py-1 rounded-lg text-xs font-medium transition-colors', owned ? 'bg-verde text-white' : 'bg-gray-100 text-gray-600 hover:bg-verde/10')}
                 >
-                  {owned ? '✓' : 'Tengo'}
+                  {owned ? '✓' : 'Have'}
                 </button>
                 <button
                   onClick={() => handleSticker(s.n, 'needed')}
                   className={cn('flex-1 py-1 rounded-lg text-xs font-medium transition-colors', needed ? 'bg-dorado text-tinta' : 'bg-gray-100 text-gray-600 hover:bg-dorado/10')}
                 >
-                  {needed ? '★' : 'Busco'}
+                  {needed ? '★' : 'Need'}
                 </button>
               </div>
             </div>

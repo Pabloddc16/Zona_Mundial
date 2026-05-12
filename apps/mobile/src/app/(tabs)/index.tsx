@@ -5,19 +5,19 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
 import { ALBUM, TOTAL_STICKERS } from '@/lib/data'
 
-type Tab = 'Todo' | 'Me falta' | 'Tengo extra'
-const TABS: Tab[] = ['Todo', 'Me falta', 'Tengo extra']
+type Tab = 'All' | 'Missing' | 'Duplicates'
+const TABS: Tab[] = ['All', 'Missing', 'Duplicates']
 
 export default function AlbumScreen() {
-  const [tab, setTab] = useState<Tab>('Todo')
+  const [tab, setTab] = useState<Tab>('All')
   const album = useAlbumStore((s) => s.album)
   const stats = albumStats(album)
   const pct = Math.round((stats.owned / TOTAL_STICKERS) * 100)
 
   const filteredGroups = ALBUM.filter((g) => {
-    if (tab === 'Todo') return true
-    if (tab === 'Me falta') return g.stickers.some((s) => !((album[g.id]?.[s.n]?.owned ?? 0) > 0))
-    if (tab === 'Tengo extra') return g.stickers.some((s) => (album[g.id]?.[s.n]?.owned ?? 0) > 1)
+    if (tab === 'All') return true
+    if (tab === 'Missing') return g.stickers.some((s) => !((album[g.id]?.[s.n]?.owned ?? 0) > 0))
+    if (tab === 'Duplicates') return g.stickers.some((s) => (album[g.id]?.[s.n]?.owned ?? 0) > 1)
     return true
   })
 
@@ -26,14 +26,14 @@ export default function AlbumScreen() {
       <ScrollView contentContainerStyle={s.scroll}>
         {/* Header */}
         <View style={s.header}>
-          <Text style={s.title}>Mi Álbum</Text>
-          <Text style={s.subtitle}>{stats.owned} / {TOTAL_STICKERS} estampas</Text>
+          <Text style={s.title}>My Album</Text>
+          <Text style={s.subtitle}>{stats.owned} / {TOTAL_STICKERS} stickers</Text>
           <View style={s.barBg}>
             <View style={[s.barFill, { width: `${pct}%` }]} />
           </View>
           <View style={s.barRow}>
-            <Text style={s.barLabel}>{pct}% completado</Text>
-            <Text style={s.barLabel}>{stats.needed} buscadas · {stats.extras} extras</Text>
+            <Text style={s.barLabel}>{pct}% complete</Text>
+            <Text style={s.barLabel}>{stats.needed} needed · {stats.extras} extras</Text>
           </View>
         </View>
 

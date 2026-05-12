@@ -20,10 +20,10 @@ export default function CarritoScreen() {
       <SafeAreaView style={s.safe}>
         <View style={s.empty}>
           <Text style={{ fontSize: 56, marginBottom: 12 }}>🛒</Text>
-          <Text style={s.emptyTitle}>Tu carrito está vacío</Text>
-          <Text style={s.emptySub}>Agrega productos de la tienda</Text>
+          <Text style={s.emptyTitle}>Your cart is empty</Text>
+          <Text style={s.emptySub}>Add products from the store</Text>
           <TouchableOpacity style={s.goBtn} onPress={() => router.push('/tienda')}>
-            <Text style={s.goBtnText}>Ir a la tienda</Text>
+            <Text style={s.goBtnText}>Go to store</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -36,7 +36,7 @@ export default function CarritoScreen() {
         data={items}
         keyExtractor={(i) => i!.id}
         contentContainerStyle={s.list}
-        ListHeaderComponent={<Text style={s.title}>Carrito</Text>}
+        ListHeaderComponent={<Text style={s.title}>Cart</Text>}
         renderItem={({ item }) => (
           <View style={s.card}>
             <View style={[s.cardImg, { backgroundColor: item!.gradient[0] }]}>
@@ -53,7 +53,7 @@ export default function CarritoScreen() {
             </View>
             <View style={s.cardRight}>
               <Text style={s.lineTotal}>{fmt(item!.price * item!.qty)}</Text>
-              <TouchableOpacity onPress={() => remove(item!.id)}><Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>Quitar</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => remove(item!.id)}><Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>Remove</Text></TouchableOpacity>
             </View>
           </View>
         )}
@@ -61,17 +61,17 @@ export default function CarritoScreen() {
           <View style={{ marginTop: 8 }}>
             <View style={s.summary}>
               <Row label="Subtotal" value={fmt(subtotal)} />
-              <Row label="Envío estimado" value={fmt(SHIPPING)} />
+              <Row label="Estimated shipping" value={fmt(SHIPPING)} />
               <View style={[s.summaryRow, { borderTopWidth: 1, borderTopColor: '#F3F4F6', marginTop: 8, paddingTop: 8 }]}>
                 <Text style={{ fontWeight: '800', color: '#1C1917', fontSize: 15 }}>Total</Text>
                 <Text style={{ fontWeight: '800', color: '#1C1917', fontSize: 15 }}>{fmt(total)}</Text>
               </View>
             </View>
             <TouchableOpacity style={s.checkoutBtn} onPress={() => router.push('/checkout')}>
-              <Text style={s.checkoutBtnText}>Continuar pedido</Text>
+              <Text style={s.checkoutBtnText}>Continue to checkout</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/tienda')} style={{ alignItems: 'center', marginTop: 12 }}>
-              <Text style={{ color: '#006341', fontWeight: '600', fontSize: 14 }}>Seguir comprando</Text>
+              <Text style={{ color: '#006341', fontWeight: '600', fontSize: 14 }}>Keep shopping</Text>
             </TouchableOpacity>
           </View>
         }

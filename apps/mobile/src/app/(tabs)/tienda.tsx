@@ -24,7 +24,7 @@ export default function TiendaScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <View style={s.titleRow}><Text style={s.title}>Tienda</Text></View>
+      <View style={s.titleRow}><Text style={s.title}>Store</Text></View>
 
       {/* Category pills */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.catScroll}>

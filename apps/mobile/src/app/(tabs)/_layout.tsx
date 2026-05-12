@@ -28,11 +28,11 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'Álbum', tabBarIcon: ({ color, size }) => <Ionicons name="book-outline" size={size} color={color} /> }}
+        options={{ title: 'Album', tabBarIcon: ({ color, size }) => <Ionicons name="book-outline" size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="tienda"
-        options={{ title: 'Tienda', tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} /> }}
+        options={{ title: 'Store', tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="stats"
@@ -45,7 +45,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="carrito"
         options={{
-          title: 'Carrito',
+          title: 'Cart',
           tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" size={size} color={color} />,
           tabBarBadgeStyle: { backgroundColor: '#CE1126', fontSize: 10 },
           ...(count > 0 ? { tabBarBadge: count } : {}),

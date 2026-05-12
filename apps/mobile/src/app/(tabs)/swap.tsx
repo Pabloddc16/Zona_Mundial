@@ -33,7 +33,7 @@ export default function SwapScreen() {
   function copyCode() {
     Clipboard.setString(encoded)
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
-    Alert.alert('Copiado', 'Comparte el código con otro coleccionista.')
+    Alert.alert('Copied', 'Share the code with another collector.')
   }
 
   function parseScan() {
@@ -44,7 +44,7 @@ export default function SwapScreen() {
       setParsed(decoded)
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
     } catch {
-      setParseError('Código inválido.')
+      setParseError('Invalid code.')
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {})
     }
   }
@@ -60,7 +60,7 @@ export default function SwapScreen() {
         <View style={s.tabRow}>
           {(['offer', 'scan'] as Mode[]).map((m) => (
             <TouchableOpacity key={m} onPress={() => setMode(m)} style={[s.tabBtn, mode === m && s.tabActive]}>
-              <Text style={[s.tabLabel, mode === m && s.tabLabelActive]}>{m === 'offer' ? 'Mi oferta' : 'Escanear'}</Text>
+              <Text style={[s.tabLabel, mode === m && s.tabLabelActive]}>{m === 'offer' ? 'My offer' : 'Scan'}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -70,25 +70,25 @@ export default function SwapScreen() {
             <View style={s.statRow}>
               <View style={[s.statCard, { backgroundColor: 'rgba(0,99,65,0.08)' }]}>
                 <Text style={[s.statNum, { color: '#006341' }]}>{extras.length}</Text>
-                <Text style={[s.statLabel, { color: '#006341' }]}>Tengo extra</Text>
+                <Text style={[s.statLabel, { color: '#006341' }]}>Duplicates</Text>
               </View>
               <View style={[s.statCard, { backgroundColor: 'rgba(206,17,38,0.08)' }]}>
                 <Text style={[s.statNum, { color: '#CE1126' }]}>{needed.length}</Text>
-                <Text style={[s.statLabel, { color: '#CE1126' }]}>Busco</Text>
+                <Text style={[s.statLabel, { color: '#CE1126' }]}>Needed</Text>
               </View>
             </View>
 
             {extras.length === 0 && needed.length === 0 ? (
               <View style={s.emptyBox}>
                 <Text style={{ fontSize: 40, marginBottom: 8 }}>📚</Text>
-                <Text style={s.emptyText}>Marca estampas en el álbum para generar tu código de swap</Text>
+                <Text style={s.emptyText}>Mark stickers in your album to generate your swap code</Text>
               </View>
             ) : (
               <>
-                {extras.length > 0 && <ChipGroup label={`Mis extras (${extras.length})`} codes={extras} color="#006341" bg="rgba(0,99,65,0.1)" />}
-                {needed.length > 0 && <ChipGroup label={`Busco (${needed.length})`} codes={needed} color="#CE1126" bg="rgba(206,17,38,0.08)" />}
+                {extras.length > 0 && <ChipGroup label={`My duplicates (${extras.length})`} codes={extras} color="#006341" bg="rgba(0,99,65,0.1)" />}
+                {needed.length > 0 && <ChipGroup label={`Needed (${needed.length})`} codes={needed} color="#CE1126" bg="rgba(206,17,38,0.08)" />}
                 <TouchableOpacity style={s.btn} onPress={copyCode}>
-                  <Text style={s.btnText}>Copiar mi código de swap</Text>
+                  <Text style={s.btnText}>Copy my swap code</Text>
                 </TouchableOpacity>
               </>
             )}
