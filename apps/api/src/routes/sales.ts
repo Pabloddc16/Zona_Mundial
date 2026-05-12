@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify'
 import { getClient } from '@pablo/db'
 import { CreateSaleSchema } from '@pablo/validators'
 import { computeSaleTotals } from '../lib/calc.js'
+import { recordMovements } from '../services/inventory.js'
 import { randomUUID } from 'crypto'
 
 const VALID_PAYMENT_METHODS = ['efectivo', 'tarjeta', 'transferencia']
@@ -95,10 +96,24 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
 
     const saleId = randomUUID()
 
-    // Deduct stock
-    for (const item of enrichedItems) {
-      if (item.product_id) {
-        await supabase.rpc('decrement_stock', { product_id: item.product_id, qty: Math.ceil(item.quantity) })
+    // Deduct stock by recording movements (movements ledger is the single source of truth)
+    const saleMovements = enrichedItems
+      .filter((i) => i.product_id)
+      .map((i) => ({
+        sku_id: i.product_id as string,
+        qty: Math.ceil(i.quantity),
+        location_from: 'loc_warehouse',
+        location_to: null,
+        type: 'sale' as const,
+        ref_table: 'sales',
+        ref_id: saleId,
+        created_by: req.user?.username ?? null,
+      }))
+    if (saleMovements.length > 0) {
+      try {
+        await recordMovements(saleMovements)
+      } catch (err) {
+        return reply.badRequest((err as Error).message)
       }
     }
 
@@ -131,15 +146,22 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
       .from('sales').select('*, sale_items(*)').eq('id', id).single()
     if (fetchErr || !sale) return reply.notFound('Sale not found')
 
-    // Restore stock for each item that has a product_id
-    for (const item of (sale.sale_items ?? [])) {
-      if (item.product_id) {
-        const qty = Math.ceil(Number(item.quantity))
-        const { data: prod } = await supabase.from('products').select('stock').eq('id', item.product_id).single()
-        if (prod) {
-          await supabase.from('products').update({ stock: Number(prod.stock) + qty }).eq('id', item.product_id)
-        }
-      }
+    // Restore stock by recording an inbound 'adjustment' movement back into warehouse
+    const restoreMovements = (sale.sale_items ?? [])
+      .filter((it: { product_id?: string }) => it.product_id)
+      .map((it: { product_id: string; quantity: number }) => ({
+        sku_id: it.product_id,
+        qty: Math.ceil(Number(it.quantity)),
+        location_from: null,
+        location_to: 'loc_warehouse',
+        type: 'adjustment' as const,
+        ref_table: 'sales',
+        ref_id: id,
+        note: 'Reversal of deleted sale',
+        created_by: req.user?.username ?? null,
+      }))
+    if (restoreMovements.length > 0) {
+      await recordMovements(restoreMovements)
     }
 
     const { error } = await supabase.from('sales').delete().eq('id', id)

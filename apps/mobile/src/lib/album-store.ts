@@ -1,14 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { MMKV } from 'react-native-mmkv'
-
-const storage = new MMKV({ id: 'pablo-album' })
-
-const mmkvStorage = {
-  setItem: (key: string, value: string) => storage.set(key, value),
-  getItem: (key: string) => storage.getString(key) ?? null,
-  removeItem: (key: string) => storage.delete(key),
-}
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export type StickerState = { owned: number; needed: number }
 export type AlbumState = Record<string, Record<number, StickerState>>
@@ -71,7 +63,7 @@ export const useAlbumStore = create<AlbumStore>()(
 
       resetAll: () => set({ album: {}, timeline: [] }),
     }),
-    { name: 'pablo-album-v1', storage: createJSONStorage(() => mmkvStorage) },
+    { name: 'pablo-album-v1', storage: createJSONStorage(() => AsyncStorage) },
   ),
 )
 

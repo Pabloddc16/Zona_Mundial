@@ -47,8 +47,8 @@ const ordersRoutes: FastifyPluginAsync = async (fastify) => {
     return data
   })
 
-  // POST /api/orders
-  fastify.post('/', { preHandler: fastify.requireRole('admin', 'capturista') }, async (req, reply) => {
+  // POST /api/orders — admin/capturista create internal; customer create own orders from mobile
+  fastify.post('/', { preHandler: fastify.requireRole('admin', 'capturista', 'customer') }, async (req, reply) => {
     const parsed = CreateOrderSchema.safeParse(req.body)
     if (!parsed.success) return reply.badRequest(parsed.error.message)
 

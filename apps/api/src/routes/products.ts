@@ -7,6 +7,7 @@ const VALID_ADJUSTMENT_REASONS = ['compra', 'merma', 'ajuste', 'devolucion', 'ot
 
 const productsRoutes: FastifyPluginAsync = async (fastify) => {
   // GET /api/products — public (mobile store needs this)
+  // Stock is computed from the movements ledger (stock materialized view), not from the legacy products.stock column.
   fastify.get('/', async (req, reply) => {
     const query = req.query as Record<string, string>
     const supabase = getClient()
@@ -18,10 +19,22 @@ const productsRoutes: FastifyPluginAsync = async (fastify) => {
     const { data, error } = await q
     if (error) return reply.internalServerError(error.message)
 
+    // Compute total stock per SKU across all locations from the movements-backed stock view
+    const { data: stockRows } = await supabase.from('stock').select('sku_id, qty')
+    const stockBySku = new Map<string, number>()
+    for (const r of (stockRows ?? []) as Array<{ sku_id: string; qty: number }>) {
+      stockBySku.set(r.sku_id, (stockBySku.get(r.sku_id) ?? 0) + Number(r.qty ?? 0))
+    }
+
+    const enriched = (data ?? []).map((p: Record<string, unknown>) => ({
+      ...p,
+      stock: stockBySku.get(p['id'] as string) ?? 0,
+    }))
+
     const page = Math.max(1, Number(query['page'] ?? 1))
     const limit = Math.min(Math.max(Number(query['limit'] ?? 25), 1), 200)
-    const total = data?.length ?? 0
-    return { items: data?.slice((page - 1) * limit, page * limit) ?? [], total, page, pages: Math.ceil(total / limit), limit }
+    const total = enriched.length
+    return { items: enriched.slice((page - 1) * limit, page * limit), total, page, pages: Math.ceil(total / limit), limit }
   })
 
   // POST /api/products
