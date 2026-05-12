@@ -47,7 +47,12 @@ const NAV_SECTIONS = [
   },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen: boolean
+  onCloseMobile: () => void
+}
+
+export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
   const pathname = usePathname()
   const { user, setUser } = useAuthStore()
 
@@ -60,10 +65,10 @@ export function Sidebar() {
 
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
 
-  return (
-    <aside className="flex h-screen w-[var(--sidebar-width)] flex-col" style={{ background: 'oklch(0.178 0.011 260)', borderRight: '1px solid oklch(1 0 0 / 0.06)' }}>
+  const sidebarContent = (
+    <>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-[18px]" style={{ borderBottom: '1px solid oklch(1 0 0 / 0.06)' }}>
+      <div className="flex items-center gap-3 px-4 py-[18px] shrink-0" style={{ borderBottom: '1px solid oklch(1 0 0 / 0.06)' }}>
         <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, oklch(0.77 0.163 70), oklch(0.65 0.18 50))', boxShadow: '0 2px 8px oklch(0.77 0.163 70 / 0.3)' }}>
           <Trophy className="h-4 w-4 text-white" />
         </div>
@@ -92,6 +97,7 @@ export function Sidebar() {
                   <Link
                     key={href}
                     href={href}
+                    onClick={onCloseMobile}
                     className={cn('group mb-0.5 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all')}
                     style={active
                       ? { background: 'oklch(0.77 0.163 70 / 0.13)', color: 'oklch(0.84 0.150 80)' }
@@ -112,7 +118,7 @@ export function Sidebar() {
       </nav>
 
       {/* User footer */}
-      <div className="px-3 pb-3 pt-2" style={{ borderTop: '1px solid oklch(1 0 0 / 0.06)' }}>
+      <div className="px-3 pb-3 pt-2 shrink-0" style={{ borderTop: '1px solid oklch(1 0 0 / 0.06)' }}>
         <div className="mb-2 flex items-center gap-2.5 rounded-lg px-2 py-2" style={{ background: 'oklch(1 0 0 / 0.03)' }}>
           <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: 'oklch(0.77 0.163 70 / 0.15)', color: 'var(--amber)' }}>
             {(user?.username ?? 'U')[0]?.toUpperCase()}
@@ -133,6 +139,34 @@ export function Sidebar() {
           Sign out
         </button>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Desktop: static sidebar */}
+      <aside
+        className="hidden md:flex h-screen w-[var(--sidebar-width)] flex-col shrink-0"
+        style={{ background: 'oklch(0.178 0.011 260)', borderRight: '1px solid oklch(1 0 0 / 0.06)' }}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile: backdrop + slide-in drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCloseMobile} />
+        </div>
+      )}
+      <aside
+        className={cn(
+          'md:hidden fixed inset-y-0 left-0 z-50 w-[260px] flex flex-col transition-transform duration-200 ease-out',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full',
+        )}
+        style={{ background: 'oklch(0.178 0.011 260)', borderRight: '1px solid oklch(1 0 0 / 0.06)' }}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   )
 }

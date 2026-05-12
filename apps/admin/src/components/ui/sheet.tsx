@@ -22,11 +22,16 @@ export function Sheet({ open, onClose, title, description, children, width = 'md
 
   if (!open) return null
 
-  const widths = { sm: 'w-80', md: 'w-[440px]', lg: 'w-[560px]', xl: 'w-[680px]' }
+  const widths = {
+    sm: 'w-full sm:w-80',
+    md: 'w-full sm:w-[440px]',
+    lg: 'w-full sm:w-[560px]',
+    xl: 'w-full sm:w-[680px]',
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      <div className="flex-1 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="hidden sm:block flex-1 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
         className={`${widths[width]} flex flex-col h-full shadow-2xl${className ? ` ${className}` : ''}`}
         style={{
