@@ -23,6 +23,8 @@ import purchasesRoutes from './routes/purchases.js'
 import transfersRoutes from './routes/transfers.js'
 import conversionsRoutes from './routes/conversions.js'
 import stockRoutes, { movementsRoutes } from './routes/stock.js'
+import albumRoutes from './routes/album.js'
+import tradesRoutes from './routes/trades.js'
 import stripeWebhook from './routes/webhooks/stripe.js'
 import mercadopagoWebhook from './routes/webhooks/mercadopago.js'
 
@@ -74,6 +76,8 @@ await app.register(transfersRoutes, { prefix: '/api/transfers' })
 await app.register(conversionsRoutes, { prefix: '/api/conversions' })
 await app.register(stockRoutes, { prefix: '/api/stock' })
 await app.register(movementsRoutes, { prefix: '/api/movements' })
+await app.register(albumRoutes, { prefix: '/api/album' })
+await app.register(tradesRoutes, { prefix: '/api/trades' })
 
 const port = Number(process.env['PORT'] ?? 4000)
 const host = process.env['HOST'] ?? '0.0.0.0'

@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics'
 import { CATEGORIES, fmt } from '@/lib/data'
 import { useCartStore } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 export default function TiendaScreen() {
   const [cat, setCat] = useState('all')
@@ -69,25 +70,25 @@ export default function TiendaScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FEFCE8' },
-  titleRow: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
-  title: { fontSize: 26, fontWeight: '800', color: '#1C1917' },
-  catScroll: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, flexDirection: 'row' },
-  pill: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 99, borderWidth: 1.5, borderColor: '#E5E7EB', backgroundColor: '#fff' },
-  pillActive: { backgroundColor: '#006341', borderColor: '#006341' },
-  pillText: { fontSize: 13, fontWeight: '600', color: '#6B7280' },
-  pillTextActive: { color: '#fff' },
-  list: { paddingHorizontal: 12, paddingBottom: 32 },
-  row: { gap: 12, marginBottom: 12 },
-  card: { flex: 1, backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#F3F4F6' },
-  cardImg: { height: 120, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  safe: { flex: 1, backgroundColor: COLORS.cream },
+  titleRow: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.xs },
+  title: { fontSize: FONT.size.displayXL, fontWeight: FONT.weight.black, color: COLORS.ink },
+  catScroll: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm, gap: SPACING.sm, flexDirection: 'row' },
+  pill: { paddingHorizontal: SPACING.lg, paddingVertical: 6, borderRadius: RADIUS.full, borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.paper },
+  pillActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
+  pillText: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.textMuted },
+  pillTextActive: { color: COLORS.paper },
+  list: { paddingHorizontal: SPACING.md, paddingBottom: SPACING.xxxl },
+  row: { gap: SPACING.md, marginBottom: SPACING.md },
+  card: { flex: 1, backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border, ...SHADOW.sm },
+  cardImg: { height: 130, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   cardImage: { width: '100%', height: '100%' },
-  cardEmoji: { fontSize: 44 },
-  badge: { marginHorizontal: 10, marginTop: 6, fontSize: 10, fontWeight: '800', color: '#CE1126', letterSpacing: 0.5 },
-  cardName: { marginHorizontal: 10, marginTop: 4, fontSize: 13, fontWeight: '700', color: '#1C1917', lineHeight: 17 },
-  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10 },
-  price: { fontSize: 14, fontWeight: '800', color: '#006341' },
-  addBtn: { width: 32, height: 32, borderRadius: 99, backgroundColor: 'rgba(0,99,65,0.12)', alignItems: 'center', justifyContent: 'center' },
-  addBtnDone: { backgroundColor: '#006341' },
-  addBtnText: { fontSize: 18, fontWeight: '700', color: '#006341', lineHeight: 22 },
+  cardEmoji: { fontSize: 48 },
+  badge: { marginHorizontal: SPACING.md, marginTop: SPACING.sm, fontSize: FONT.size.label, fontWeight: FONT.weight.black, color: COLORS.red, letterSpacing: 1 },
+  cardName: { marginHorizontal: SPACING.md, marginTop: SPACING.xs, fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.ink, lineHeight: 17 },
+  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SPACING.md },
+  price: { fontSize: FONT.size.bodyL, fontWeight: FONT.weight.black, color: COLORS.green },
+  addBtn: { width: 36, height: 36, borderRadius: RADIUS.full, backgroundColor: COLORS.ink, alignItems: 'center', justifyContent: 'center' },
+  addBtnDone: { backgroundColor: COLORS.green },
+  addBtnText: { fontSize: 20, fontWeight: FONT.weight.bold, color: COLORS.paper, lineHeight: 22 },
 })

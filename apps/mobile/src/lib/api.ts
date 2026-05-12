@@ -116,6 +116,17 @@ export interface Order {
   order_items?: Array<{ name: string; qty: number; price: number; product_id?: string }>
 }
 
+const put = <T>(path: string, body: unknown) => request<T>(path, { method: 'PUT', body: JSON.stringify(body) })
+
+export interface StickerState { owned: number; needed: number }
+export interface TradeMatch {
+  user_id: string
+  username: string
+  they_have_i_need: string[]
+  i_have_they_need: string[]
+  score: number
+}
+
 export const api = {
   auth: {
     login: (email: string, password: string) =>
@@ -134,6 +145,16 @@ export const api = {
   orders: {
     create: (body: OrderPayload) => post<Order>('/api/orders', body),
     get: (n: string) => get<Order>(`/api/orders/${n}`),
+  },
+  album: {
+    fetch: () => get<{ album: Record<string, Record<number, StickerState>> }>('/api/album'),
+    upsertSticker: (body: { group_id: string; sticker_n: number; owned: number; needed: number }) =>
+      put<{ ok: boolean }>('/api/album/sticker', body),
+    bulk: (stickers: Array<{ group_id: string; sticker_n: number; owned: number; needed: number }>) =>
+      post<{ ok: boolean; count: number }>('/api/album/bulk', { stickers }),
+  },
+  trades: {
+    matches: () => get<{ matches: TradeMatch[] }>('/api/trades/matches'),
   },
 }
 

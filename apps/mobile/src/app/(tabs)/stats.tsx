@@ -2,6 +2,7 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
 import { ALBUM, TOTAL_STICKERS } from '@/lib/data'
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 export default function StatsScreen() {
   const album = useAlbumStore((s) => s.album)
@@ -21,17 +22,17 @@ export default function StatsScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.scroll}>
-        <Text style={s.title}>Estadísticas</Text>
+        <Text style={s.title}>Stats</Text>
 
         {/* Big card */}
         <View style={s.heroCard}>
           <Text style={s.heroPct}>{pct}%</Text>
-          <Text style={s.heroSub}>completado</Text>
+          <Text style={s.heroSub}>complete</Text>
           <View style={s.heroStats}>
-            <StatItem label="Tengo" value={stats.owned} />
-            <StatItem label="Me falta" value={TOTAL_STICKERS - stats.owned} />
-            <StatItem label="Busco" value={stats.needed} />
-            <StatItem label="Extra" value={stats.extras} />
+            <StatItem label="Have" value={stats.owned} />
+            <StatItem label="Missing" value={TOTAL_STICKERS - stats.owned} />
+            <StatItem label="Need" value={stats.needed} />
+            <StatItem label="Extras" value={stats.extras} />
           </View>
         </View>
 
@@ -39,7 +40,7 @@ export default function StatsScreen() {
         <View style={s.progressCard}>
           <View style={s.progressRow}>
             <Text style={s.progressLabel}>{stats.owned} / {TOTAL_STICKERS}</Text>
-            <Text style={s.progressLabel}>{TOTAL_STICKERS - stats.owned} restantes</Text>
+            <Text style={s.progressLabel}>{TOTAL_STICKERS - stats.owned} remaining</Text>
           </View>
           <View style={s.barBg}>
             <View style={[s.barFill, { width: `${pct}%` }]} />
@@ -47,8 +48,8 @@ export default function StatsScreen() {
         </View>
 
         {/* Group breakdown */}
-        {completed.length > 0 && <Section title={`Completadas (${completed.length})`} groups={completed} />}
-        {inProgress.length > 0 && <Section title={`En progreso (${inProgress.length})`} groups={inProgress} />}
+        {completed.length > 0 && <Section title={`Complete (${completed.length})`} groups={completed} />}
+        {inProgress.length > 0 && <Section title={`In progress (${inProgress.length})`} groups={inProgress} />}
       </ScrollView>
     </SafeAreaView>
   )
@@ -57,8 +58,8 @@ export default function StatsScreen() {
 function StatItem({ label, value }: { label: string; value: number }) {
   return (
     <View style={{ alignItems: 'center' }}>
-      <Text style={{ fontSize: 22, fontWeight: '900', color: '#fff' }}>{value}</Text>
-      <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{label}</Text>
+      <Text style={{ fontSize: 24, fontWeight: FONT.weight.black, color: COLORS.paper }}>{value}</Text>
+      <Text style={{ fontSize: FONT.size.bodyS, color: 'rgba(255,255,255,0.7)', marginTop: 2, fontWeight: FONT.weight.medium, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Text>
     </View>
   )
 }
@@ -86,23 +87,23 @@ function Section({ title, groups }: { title: string; groups: { id: string; emoji
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FEFCE8' },
-  scroll: { padding: 16, paddingBottom: 32 },
-  title: { fontSize: 26, fontWeight: '800', color: '#1C1917', marginBottom: 16 },
-  heroCard: { backgroundColor: '#006341', borderRadius: 24, padding: 24, alignItems: 'center', marginBottom: 12 },
-  heroPct: { fontSize: 64, fontWeight: '900', color: '#fff' },
-  heroSub: { fontSize: 15, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
-  heroStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.2)' },
-  progressCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#F3F4F6', marginBottom: 16 },
-  progressRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  progressLabel: { fontSize: 13, color: '#6B7280' },
-  barBg: { height: 8, backgroundColor: '#E5E7EB', borderRadius: 99, overflow: 'hidden' },
-  barFill: { height: '100%', backgroundColor: '#006341', borderRadius: 99 },
-  section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 11, fontWeight: '700', color: '#9CA3AF', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
-  sectionCard: { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#F3F4F6', overflow: 'hidden' },
-  groupRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
-  groupRowBorder: { borderTopWidth: 1, borderTopColor: '#F9FAFB' },
-  groupName: { fontSize: 13, fontWeight: '600', color: '#1C1917', marginBottom: 4 },
-  groupCount: { fontSize: 12, fontWeight: '700', color: '#9CA3AF', minWidth: 36, textAlign: 'right' },
+  safe: { flex: 1, backgroundColor: COLORS.cream },
+  scroll: { padding: SPACING.lg, paddingBottom: SPACING.xxxl },
+  title: { fontSize: FONT.size.displayXL, fontWeight: FONT.weight.black, color: COLORS.ink, marginBottom: SPACING.lg },
+  heroCard: { backgroundColor: COLORS.ink, borderRadius: RADIUS.xxl, padding: SPACING.xl, alignItems: 'center', marginBottom: SPACING.md, ...SHADOW.md },
+  heroPct: { fontSize: 72, fontWeight: FONT.weight.black, color: COLORS.gold },
+  heroSub: { fontSize: FONT.size.bodyL, color: 'rgba(255,255,255,0.7)', marginTop: 2, fontWeight: FONT.weight.medium },
+  heroStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: SPACING.xl, paddingTop: SPACING.lg, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.2)' },
+  progressCard: { backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, padding: SPACING.lg, borderWidth: 1, borderColor: COLORS.border, marginBottom: SPACING.lg, ...SHADOW.sm },
+  progressRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.sm },
+  progressLabel: { fontSize: FONT.size.bodyM, color: COLORS.textMuted, fontWeight: FONT.weight.medium },
+  barBg: { height: 10, backgroundColor: COLORS.surface2, borderRadius: RADIUS.full, overflow: 'hidden' },
+  barFill: { height: '100%', backgroundColor: COLORS.green, borderRadius: RADIUS.full },
+  section: { marginBottom: SPACING.lg },
+  sectionTitle: { fontSize: FONT.size.label, fontWeight: FONT.weight.bold, color: COLORS.textMuted, letterSpacing: 1.4, textTransform: 'uppercase', marginBottom: SPACING.sm },
+  sectionCard: { backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, borderWidth: 1, borderColor: COLORS.border, overflow: 'hidden', ...SHADOW.sm },
+  groupRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
+  groupRowBorder: { borderTopWidth: 1, borderTopColor: COLORS.borderSoft },
+  groupName: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.ink, marginBottom: SPACING.xs },
+  groupCount: { fontSize: FONT.size.bodyS, fontWeight: FONT.weight.bold, color: COLORS.textMuted, minWidth: 40, textAlign: 'right' },
 })

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { AuthUser } from './api'
 import { api, clearTokens, setAT, setRT } from './api'
+import { useAlbumStore } from './album-store'
 
 interface AuthStore {
   user: AuthUser | null
@@ -24,6 +25,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     await setAT(r.accessToken)
     await setRT(r.refreshToken)
     set({ user: r.user })
+    useAlbumStore.getState().syncFromServer()
   },
 
   signUp: async (body) => {
@@ -32,6 +34,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       await setAT(r.accessToken)
       await setRT(r.refreshToken)
       set({ user: r.user })
+      useAlbumStore.getState().syncFromServer()
     }
   },
 
@@ -45,6 +48,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     try {
       const me = await api.auth.me()
       set({ user: { id: me.id, email: me.email, username: me.username, role: me.role }, hydrated: true })
+      useAlbumStore.getState().syncFromServer()
     } catch {
       set({ user: null, hydrated: true })
     }

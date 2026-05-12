@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
 import { fmt } from '@/lib/data'
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 const SHIPPING = 120
 
@@ -90,27 +91,27 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FEFCE8' },
-  list: { padding: 16, paddingBottom: 32 },
-  title: { fontSize: 26, fontWeight: '800', color: '#1C1917', marginBottom: 16 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  emptyTitle: { fontSize: 20, fontWeight: '700', color: '#1C1917', marginBottom: 8 },
-  emptySub: { fontSize: 14, color: '#9CA3AF', marginBottom: 24 },
-  goBtn: { backgroundColor: '#006341', paddingHorizontal: 32, paddingVertical: 12, borderRadius: 16 },
-  goBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 16, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: '#F3F4F6', gap: 12 },
-  cardImg: { width: 64, height: 64, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  safe: { flex: 1, backgroundColor: COLORS.cream },
+  list: { padding: SPACING.lg, paddingBottom: SPACING.xxxl },
+  title: { fontSize: FONT.size.displayXL, fontWeight: FONT.weight.black, color: COLORS.ink, marginBottom: SPACING.lg },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.xxl },
+  emptyTitle: { fontSize: FONT.size.displayL, fontWeight: FONT.weight.bold, color: COLORS.ink, marginBottom: SPACING.sm },
+  emptySub: { fontSize: FONT.size.bodyL, color: COLORS.textMuted, marginBottom: SPACING.xxl },
+  goBtn: { backgroundColor: COLORS.ink, paddingHorizontal: SPACING.xxl, paddingVertical: SPACING.md, borderRadius: RADIUS.lg },
+  goBtnText: { color: COLORS.paper, fontWeight: FONT.weight.bold, fontSize: FONT.size.bodyL },
+  card: { flexDirection: 'row', backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, padding: SPACING.md, marginBottom: SPACING.sm, borderWidth: 1, borderColor: COLORS.border, gap: SPACING.md, ...SHADOW.sm },
+  cardImg: { width: 64, height: 64, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
   cardBody: { flex: 1 },
-  itemName: { fontSize: 13, fontWeight: '700', color: '#1C1917', lineHeight: 17 },
-  itemPrice: { fontSize: 13, fontWeight: '700', color: '#006341', marginTop: 2 },
-  qtyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 },
-  qtyBtn: { width: 24, height: 24, borderRadius: 99, backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center' },
-  qtyBtnText: { fontSize: 14, fontWeight: '700', color: '#374151' },
-  qty: { fontSize: 14, fontWeight: '700', color: '#1C1917', minWidth: 16, textAlign: 'center' },
+  itemName: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.ink, lineHeight: 17 },
+  itemPrice: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.green, marginTop: 2 },
+  qtyRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.sm },
+  qtyBtn: { width: 28, height: 28, borderRadius: RADIUS.full, backgroundColor: COLORS.surface2, alignItems: 'center', justifyContent: 'center' },
+  qtyBtnText: { fontSize: FONT.size.bodyL, fontWeight: FONT.weight.bold, color: COLORS.ink },
+  qty: { fontSize: FONT.size.bodyL, fontWeight: FONT.weight.bold, color: COLORS.ink, minWidth: 20, textAlign: 'center' },
   cardRight: { alignItems: 'flex-end', justifyContent: 'center' },
-  lineTotal: { fontSize: 14, fontWeight: '800', color: '#1C1917' },
-  summary: { backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#F3F4F6' },
-  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  checkoutBtn: { backgroundColor: '#CE1126', borderRadius: 16, paddingVertical: 16, alignItems: 'center', marginTop: 12 },
-  checkoutBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
+  lineTotal: { fontSize: FONT.size.bodyL, fontWeight: FONT.weight.black, color: COLORS.ink },
+  summary: { backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, padding: SPACING.lg, borderWidth: 1, borderColor: COLORS.border, ...SHADOW.sm },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.xs },
+  checkoutBtn: { backgroundColor: COLORS.ink, borderRadius: RADIUS.lg, paddingVertical: SPACING.lg, alignItems: 'center', marginTop: SPACING.md },
+  checkoutBtnText: { color: COLORS.paper, fontWeight: FONT.weight.bold, fontSize: FONT.size.displayM },
 })
