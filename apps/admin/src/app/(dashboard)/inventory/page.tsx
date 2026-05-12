@@ -1,12 +1,15 @@
 'use client'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, type StockEntry, type Movement } from '@/lib/api'
 import { DataTable } from '@/components/shared/data-table'
 import { Pagination } from '@/components/shared/pagination'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { Warehouse, TrendingUp, AlertTriangle, Clock, Package } from 'lucide-react'
+import { Sheet } from '@/components/ui/sheet'
+import { Warehouse, TrendingUp, AlertTriangle, Clock, Package, Plus } from 'lucide-react'
 
 const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 const fmtNum = (n: number) => new Intl.NumberFormat('en-US').format(n)
@@ -16,9 +19,23 @@ const LOCATION_COLORS: Record<string, string> = {
 }
 
 export default function InventoryPage() {
+  const qc = useQueryClient()
   const [tab, setTab] = useState<'stock' | 'wip' | 'idle' | 'movements'>('stock')
   const [movePage, setMovePage] = useState(1)
   const [idleDays, setIdleDays] = useState('30')
+  const [adjustOpen, setAdjustOpen] = useState(false)
+
+  const adjustMut = useMutation({
+    mutationFn: api.stock.adjust,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['stock'] })
+      qc.invalidateQueries({ queryKey: ['stock-wip'] })
+      qc.invalidateQueries({ queryKey: ['stock-summary'] })
+      qc.invalidateQueries({ queryKey: ['movements'] })
+      qc.invalidateQueries({ queryKey: ['products'] })
+      setAdjustOpen(false)
+    },
+  })
 
   const { data: summary } = useQuery({ queryKey: ['stock-summary'], queryFn: () => api.stock.summary(), refetchOnWindowFocus: true })
   const { data: stock, isLoading: stockLoading } = useQuery({ queryKey: ['stock'], queryFn: () => api.stock.list(), enabled: tab === 'stock', refetchOnWindowFocus: true })
@@ -61,8 +78,11 @@ export default function InventoryPage() {
   ]
 
   return (
-    <div className="p-6 space-y-5">
-      <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Inventory — Stock</h1>
+    <div className="p-4 md:p-6 space-y-5">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Inventory — Stock</h1>
+        <Button onClick={() => setAdjustOpen(true)}><Plus className="h-4 w-4 mr-1" />Adjust stock</Button>
+      </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -128,6 +148,82 @@ export default function InventoryPage() {
           <Pagination page={movements?.page ?? 1} pages={movements?.pages ?? 1} total={movements?.total ?? 0} onPage={setMovePage} />
         </>
       )}
+
+      <Sheet open={adjustOpen} onClose={() => setAdjustOpen(false)} title="Adjust stock">
+        <AdjustForm
+          onSave={(b) => adjustMut.mutate(b)}
+          saving={adjustMut.isPending}
+          error={adjustMut.isError ? (adjustMut.error as Error).message : ''}
+        />
+      </Sheet>
+    </div>
+  )
+}
+
+function AdjustForm({ onSave, saving, error }: {
+  onSave: (b: { sku_id: string; location_id: string; qty: number; direction: 'in' | 'out'; reason?: string }) => void
+  saving: boolean
+  error: string
+}) {
+  const [skuId, setSkuId] = useState('')
+  const [locationId, setLocationId] = useState('loc_warehouse')
+  const [qty, setQty] = useState('1')
+  const [direction, setDirection] = useState<'in' | 'out'>('in')
+  const [reason, setReason] = useState('')
+
+  const { data: products } = useQuery({ queryKey: ['products-all'], queryFn: () => api.products.list({ limit: '200' }) })
+  const { data: locations } = useQuery({ queryKey: ['locations'], queryFn: () => api.locations.list() })
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        Use for initial stock, found/lost inventory, or corrections outside the purchases flow.
+        Adjustments do NOT affect accounts — for paid stock use Purchases instead.
+      </p>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Product *</label>
+        <Select value={skuId} onChange={(e) => setSkuId(e.target.value)}>
+          <option value="">Select product...</option>
+          {products?.items.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </Select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Direction *</label>
+          <Select value={direction} onChange={(e) => setDirection(e.target.value as 'in' | 'out')}>
+            <option value="in">Add stock (in)</option>
+            <option value="out">Remove stock (out)</option>
+          </Select>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Quantity *</label>
+          <Input type="number" min="1" value={qty} onChange={(e) => setQty(e.target.value)} />
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Location *</label>
+        <Select value={locationId} onChange={(e) => setLocationId(e.target.value)}>
+          {locations?.filter((l) => !l.type.startsWith('wip')).map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+        </Select>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Reason</label>
+        <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Initial stock, breakage, recount" />
+      </div>
+
+      {error && <p className="text-sm text-red-500">{error}</p>}
+
+      <Button
+        className="w-full"
+        disabled={saving || !skuId || !qty || !locationId || Number(qty) <= 0}
+        onClick={() => onSave({ sku_id: skuId, location_id: locationId, qty: Number(qty), direction, ...(reason ? { reason } : {}) })}
+      >
+        {saving ? 'Saving...' : `${direction === 'in' ? 'Add' : 'Remove'} ${qty} units`}
+      </Button>
     </div>
   )
 }

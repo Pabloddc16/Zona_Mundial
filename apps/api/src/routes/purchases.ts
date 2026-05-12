@@ -45,11 +45,43 @@ const purchasesRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.patch('/:id/pay', { preHandler: fastify.authenticate }, async (req, reply) => {
     const { id } = req.params as { id: string }
-    const { data: purchase } = await getClient().from('purchases').select('status').eq('id', id).single()
+    const body = req.body as { payment_method?: string } | undefined
+    const paymentMethod = body?.payment_method ?? 'efectivo'
+
+    const sb = getClient()
+    const { data: purchase } = await sb
+      .from('purchases')
+      .select('status, supplier, purchase_lines(qty, unit_cost)')
+      .eq('id', id)
+      .single()
     if (!purchase) return reply.notFound()
-    if ((purchase as { status: string }).status !== 'draft') return reply.badRequest('Solo se puede marcar como pagada una compra en borrador')
-    const { data, error } = await getClient().from('purchases').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', id).select().single()
+    const pur = purchase as { status: string; supplier: string; purchase_lines: { qty: number; unit_cost: number }[] }
+    if (pur.status !== 'draft') return reply.badRequest('Solo se puede marcar como pagada una compra en borrador')
+
+    const total = (pur.purchase_lines ?? []).reduce((sum, l) => sum + Number(l.qty) * Number(l.unit_cost), 0)
+
+    const { data, error } = await sb
+      .from('purchases')
+      .update({ status: 'paid', paid_at: new Date().toISOString(), total })
+      .eq('id', id)
+      .select()
+      .single()
     if (error) throw new Error(error.message)
+
+    // Auto-create an expense row so purchases reflect in accounts/cashflow.
+    if (total > 0) {
+      await sb.from('expenses').insert({
+        id: `exp_${randomUUID().slice(0, 8)}`,
+        date: new Date().toISOString().slice(0, 10),
+        concept: `Compra a ${pur.supplier}`,
+        category: 'inventory',
+        amount: total,
+        payment_method: paymentMethod,
+        notes: `Auto-creado al pagar compra ${id}`,
+        created_by: req.user?.username ?? null,
+      })
+    }
+
     return data
   })
 
@@ -82,10 +114,19 @@ const purchasesRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.patch('/:id/cancel', { preHandler: fastify.authenticate }, async (req, reply) => {
     const { id } = req.params as { id: string }
-    const { data: purchase } = await getClient().from('purchases').select('status').eq('id', id).single()
+    const sb = getClient()
+    const { data: purchase } = await sb.from('purchases').select('status').eq('id', id).single()
     if (!purchase) return reply.notFound()
-    if ((purchase as { status: string }).status === 'received') return reply.badRequest('No se puede cancelar una compra ya recibida')
-    const { data } = await getClient().from('purchases').update({ status: 'cancelled' }).eq('id', id).select().single()
+    const prevStatus = (purchase as { status: string }).status
+    if (prevStatus === 'received') return reply.badRequest('No se puede cancelar una compra ya recibida')
+
+    const { data } = await sb.from('purchases').update({ status: 'cancelled' }).eq('id', id).select().single()
+
+    // If the purchase was already paid, remove the auto-created expense row so accounts stay accurate.
+    if (prevStatus === 'paid') {
+      await sb.from('expenses').delete().like('notes', `%compra ${id}%`)
+    }
+
     return data
   })
 }

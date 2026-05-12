@@ -1,5 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { getClient } from '@pablo/db'
+import { recordMovements } from '../services/inventory.js'
+import { randomUUID } from 'crypto'
 
 const stockRoutes: FastifyPluginAsync = async (fastify) => {
   // GET /api/stock — stock by sku/location
@@ -80,6 +82,38 @@ const stockRoutes: FastifyPluginAsync = async (fastify) => {
       }
     }
     return result.sort((a, b) => b.days_idle - a.days_idle)
+  })
+
+  // POST /api/stock/adjust — manual stock adjustment (in or out)
+  // Use for initial stock, found/lost inventory, corrections outside the purchases flow.
+  fastify.post('/adjust', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const body = req.body as { sku_id?: string; location_id?: string; qty?: number; direction?: 'in' | 'out'; reason?: string }
+    if (!body.sku_id || !body.location_id || !body.qty || !body.direction) {
+      return reply.badRequest('sku_id, location_id, qty y direction requeridos')
+    }
+    if (body.qty <= 0) return reply.badRequest('qty debe ser > 0')
+
+    const adjustmentId = `adj_${randomUUID().slice(0, 8)}`
+    const movement = body.direction === 'in'
+      ? { location_from: null, location_to: body.location_id }
+      : { location_from: body.location_id, location_to: null }
+
+    try {
+      await recordMovements([{
+        sku_id: body.sku_id,
+        qty: body.qty,
+        ...movement,
+        type: 'adjustment' as const,
+        ref_table: 'stock_adjustments',
+        ref_id: adjustmentId,
+        note: body.reason ?? null,
+        created_by: req.user?.username ?? null,
+      }])
+    } catch (err) {
+      return reply.badRequest((err as Error).message)
+    }
+
+    return { ok: true, id: adjustmentId }
   })
 }
 

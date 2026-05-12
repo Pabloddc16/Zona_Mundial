@@ -32,7 +32,10 @@ export default function PurchasesPage() {
     queryFn: () => api.purchases.list({ page: String(page), ...(status ? { status } : {}) }),
   })
 
-  const payMut = useMutation({ mutationFn: (id: string) => api.purchases.pay(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['purchases'] }) })
+  const payMut = useMutation({
+    mutationFn: ({ id, payment_method }: { id: string; payment_method: string }) => api.purchases.pay(id, { payment_method }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['purchases'] }); qc.invalidateQueries({ queryKey: ['expenses'] }) },
+  })
   const receiveMut = useMutation({ mutationFn: (id: string) => api.purchases.receive(id), onSuccess: () => { qc.invalidateQueries({ queryKey: ['purchases'] }); qc.invalidateQueries({ queryKey: ['stock'] }) } })
   const cancelMut = useMutation({ mutationFn: (id: string) => api.purchases.cancel(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['purchases'] }) })
   const createMut = useMutation({ mutationFn: (body: unknown) => api.purchases.create(body), onSuccess: () => { qc.invalidateQueries({ queryKey: ['purchases'] }); setCreating(false) } })
@@ -46,7 +49,16 @@ export default function PurchasesPage() {
     { key: 'actions', header: '', cell: (r: Purchase) => (
       <div className="flex gap-1 justify-end">
         {r.status === 'draft' && (
-          <Button size="sm" variant="ghost" onClick={() => payMut.mutate(r.id)} className="gap-1">
+          <Button size="sm" variant="ghost" onClick={() => {
+            const method = prompt('Payment method? (efectivo / tarjeta / transferencia)', 'efectivo')
+            if (!method) return
+            const m = method.trim().toLowerCase()
+            if (!['efectivo', 'tarjeta', 'transferencia'].includes(m)) {
+              alert('Method must be: efectivo, tarjeta, or transferencia')
+              return
+            }
+            payMut.mutate({ id: r.id, payment_method: m })
+          }} className="gap-1">
             <CheckCircle2 className="h-3.5 w-3.5" /> Mark paid
           </Button>
         )}

@@ -243,7 +243,7 @@ export const api = {
     list: (params?: Record<string, string>) => get<Paginated<Purchase>>(`/api/purchases?${new URLSearchParams(params).toString()}`),
     get: (id: string) => get<Purchase>(`/api/purchases/${id}`),
     create: (body: unknown) => post<Purchase>('/api/purchases', body),
-    pay: (id: string) => patch<Purchase>(`/api/purchases/${id}/pay`, {}),
+    pay: (id: string, body?: { payment_method?: string }) => patch<Purchase>(`/api/purchases/${id}/pay`, body ?? {}),
     receive: (id: string, body?: unknown) => patch<Purchase>(`/api/purchases/${id}/receive`, body ?? {}),
     cancel: (id: string) => patch<Purchase>(`/api/purchases/${id}/cancel`, {}),
   },
@@ -274,6 +274,8 @@ export const api = {
     idle: (days?: number) => get<IdleStock[]>(`/api/stock/idle${days ? `?days=${days}` : ''}`),
     movements: (params?: Record<string, string>) => get<Paginated<Movement>>(`/api/movements?${new URLSearchParams(params).toString()}`),
     summary: () => get<StockSummary>('/api/stock/summary'),
+    adjust: (body: { sku_id: string; location_id: string; qty: number; direction: 'in' | 'out'; reason?: string }) =>
+      post<{ ok: boolean; id: string }>('/api/stock/adjust', body),
   },
 }
 
