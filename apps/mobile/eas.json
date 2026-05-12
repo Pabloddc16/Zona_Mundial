@@ -6,9 +6,16 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com"
+      },
+      "android": {
+        "buildType": "apk"
+      },
       "ios": {
-        "simulator": true
-      }
+        "simulator": false
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
@@ -20,7 +27,8 @@
       },
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
       "ios": {
@@ -28,7 +36,8 @@
       },
       "android": {
         "autoIncrement": true
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {

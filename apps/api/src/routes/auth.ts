@@ -40,6 +40,55 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     }
   })
 
+  // POST /api/auth/register — public customer signup (mobile app)
+  fastify.post('/register', async (req, reply) => {
+    const body = req.body as { email?: string; password?: string; username?: string; phone?: string }
+    const email = String(body?.email ?? '').trim().toLowerCase()
+    const password = String(body?.password ?? '')
+    const username = String(body?.username ?? '').trim() || email.split('@')[0]
+
+    if (!email || !password) return reply.badRequest('email y password requeridos')
+    if (password.length < 8) return reply.badRequest('Password debe tener al menos 8 caracteres')
+
+    const supabase = getClient()
+
+    // Create Supabase auth user (email_confirm: true so they can immediately log in)
+    const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    })
+    if (authErr || !authData.user) {
+      return reply.badRequest(authErr?.message ?? 'No se pudo crear la cuenta')
+    }
+
+    // Insert public.users row with customer role
+    const { error: rowErr } = await supabase.from('users').insert({
+      id: authData.user.id,
+      username,
+      email,
+      role: 'customer',
+      active: true,
+    })
+    if (rowErr) {
+      // Roll back the auth user on failure
+      await supabase.auth.admin.deleteUser(authData.user.id)
+      return reply.badRequest(rowErr.message)
+    }
+
+    // Auto sign-in after register
+    const { data: sessionData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInErr || !sessionData.session) {
+      return reply.code(201).send({ ok: true, message: 'Cuenta creada, inicia sesión.' })
+    }
+
+    return reply.code(201).send({
+      user: { id: authData.user.id, email, username, role: 'customer' },
+      accessToken: sessionData.session.access_token,
+      refreshToken: sessionData.session.refresh_token,
+    })
+  })
+
   // POST /api/auth/refresh
   fastify.post('/refresh', async (req, reply) => {
     const body = req.body as { refreshToken?: string }
