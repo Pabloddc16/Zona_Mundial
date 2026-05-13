@@ -86,6 +86,11 @@ export default function RegisterScreen() {
               <Text style={s.footerText}>Already have an account? </Text>
               <Link href="/login" style={s.link}>Sign in</Link>
             </View>
+
+            <Text style={s.disclaimer}>
+              Not affiliated with FIFA or Panini. By creating an account you agree to our
+              Terms and Privacy Policy.
+            </Text>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -109,4 +114,5 @@ const s = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.xl },
   footerText: { color: COLORS.textMuted, fontSize: FONT.size.bodyM },
   link: { color: COLORS.green, fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold },
+  disclaimer: { fontSize: FONT.size.bodyS, color: COLORS.textFaint, textAlign: 'center', marginTop: SPACING.xl, lineHeight: 16 },
 })

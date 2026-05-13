@@ -72,6 +72,11 @@ export default function LoginScreen() {
               <Text style={s.footerText}>New here? </Text>
               <Link href="/register" style={s.link}>Create account</Link>
             </View>
+
+            <Text style={s.disclaimer}>
+              Not affiliated with FIFA or Panini. By continuing you agree to our Terms and
+              Privacy Policy.
+            </Text>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -95,4 +100,5 @@ const s = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.xl },
   footerText: { color: COLORS.textMuted, fontSize: FONT.size.bodyM },
   link: { color: COLORS.green, fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold },
+  disclaimer: { fontSize: FONT.size.bodyS, color: COLORS.textFaint, textAlign: 'center', marginTop: SPACING.xl, lineHeight: 16 },
 })

@@ -117,6 +117,7 @@ export interface Order {
 }
 
 const put = <T>(path: string, body: unknown) => request<T>(path, { method: 'PUT', body: JSON.stringify(body) })
+const del = <T>(path: string) => request<T>(path, { method: 'DELETE' })
 
 export interface StickerState { owned: number; needed: number }
 export interface TradeMatch {
@@ -135,6 +136,7 @@ export const api = {
       post<LoginResp>('/api/auth/register', body),
     me: () => get<AuthUser & { profile: unknown }>('/api/auth/me'),
     logout: () => post<{ ok: boolean }>('/api/auth/logout', {}),
+    deleteAccount: () => del<{ ok: boolean }>('/api/auth/account'),
   },
   products: {
     list: (params?: Record<string, string>) =>

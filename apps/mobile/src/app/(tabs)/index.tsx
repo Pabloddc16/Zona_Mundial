@@ -27,7 +27,12 @@ export default function AlbumScreen() {
       <ScrollView contentContainerStyle={s.scroll}>
         {/* Header */}
         <View style={s.header}>
-          <Text style={s.title}>My Album</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={s.title}>My Album</Text>
+            <TouchableOpacity onPress={() => router.push('/settings')} style={{ padding: SPACING.sm }}>
+              <Text style={{ fontSize: 22 }}>⚙️</Text>
+            </TouchableOpacity>
+          </View>
           <Text style={s.subtitle}>{stats.owned} / {TOTAL_STICKERS} stickers</Text>
           <View style={s.barBg}>
             <View style={[s.barFill, { width: `${pct}%` }]} />

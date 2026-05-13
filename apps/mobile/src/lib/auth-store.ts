@@ -11,6 +11,7 @@ interface AuthStore {
   signIn: (email: string, password: string) => Promise<void>
   signUp: (body: { email: string; password: string; username?: string }) => Promise<void>
   signOut: () => Promise<void>
+  deleteAccount: () => Promise<void>
   loadFromToken: () => Promise<void>
 }
 
@@ -41,6 +42,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
   signOut: async () => {
     await api.auth.logout().catch(() => {})
     await clearTokens()
+    set({ user: null })
+  },
+
+  deleteAccount: async () => {
+    await api.auth.deleteAccount()
+    await clearTokens()
+    // Also wipe local album cache so re-signup starts fresh
+    useAlbumStore.getState().resetAll()
     set({ user: null })
   },
 

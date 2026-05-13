@@ -118,6 +118,25 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     return { ok: true }
   })
 
+  // DELETE /api/auth/account — Apple Guideline 5.1.1(v): users must be able
+  // to delete their account from within the app. Wipes auth.users (which
+  // cascades to album_stickers via FK ON DELETE CASCADE) and public.users.
+  fastify.delete('/account', { preHandler: fastify.authenticate }, async (req, reply) => {
+    const userId = req.user!.id
+    const supabase = getClient()
+
+    // 1. Remove the public.users row (so admin lists no longer show them)
+    const { error: pubErr } = await supabase.from('users').delete().eq('id', userId)
+    if (pubErr) req.log.warn({ err: pubErr.message, userId }, 'public.users delete failed')
+
+    // 2. Remove Supabase auth user — invalidates all sessions automatically
+    const { error: authErr } = await supabase.auth.admin.deleteUser(userId)
+    if (authErr) return reply.internalServerError(`Auth delete failed: ${authErr.message}`)
+
+    reply.clearCookie('sb-token', { path: '/' })
+    return { ok: true }
+  })
+
   // GET /api/auth/me
   fastify.get('/me', { preHandler: fastify.authenticate }, async (req, _reply) => {
     const supabase = getClient()
