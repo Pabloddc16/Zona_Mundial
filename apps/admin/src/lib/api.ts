@@ -95,10 +95,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         ...init,
         headers: authHeaders(init?.headers),
       })
-      if (!retry.ok) {
-        const body = await retry.json().catch(() => ({}))
-        throw new Error((body as { error?: string }).error ?? `HTTP ${retry.status}`)
-      }
+      if (!retry.ok) throw await parseError(retry, path)
       return retry.json() as Promise<T>
     }
     // Only redirect to login if tokens are gone (real auth failure, not network blip)
@@ -108,11 +105,19 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error('Session expired')
   }
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
-  }
+  if (!res.ok) throw await parseError(res, path)
   return res.json() as Promise<T>
+}
+
+async function parseError(res: Response, path: string): Promise<Error> {
+  const body = await res.json().catch(() => ({})) as Record<string, unknown>
+  // Fastify shape: { statusCode, error: 'Bad Request', message: 'actual reason' }
+  const message =
+    (typeof body['message'] === 'string' && body['message']) ||
+    (typeof body['error'] === 'string' && body['error']) ||
+    `HTTP ${res.status}`
+  console.warn(`[api] ${res.status} ${path}`, body)
+  return new Error(String(message))
 }
 
 const get = <T>(path: string) => request<T>(path)

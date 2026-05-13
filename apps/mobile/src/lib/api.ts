@@ -66,20 +66,27 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         ...init,
         headers: await authHeaders(init?.headers as Record<string, string> | undefined),
       })
-      if (!retry.ok) {
-        const body = await retry.json().catch(() => ({}))
-        throw new Error((body as { error?: string }).error ?? `HTTP ${retry.status}`)
-      }
+      if (!retry.ok) throw await parseError(retry, path)
       return retry.json() as Promise<T>
     }
     throw new Error('Session expired')
   }
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
-  }
+  if (!res.ok) throw await parseError(res, path)
   return res.json() as Promise<T>
+}
+
+async function parseError(res: Response, path: string): Promise<Error> {
+  const body = await res.json().catch(() => ({})) as Record<string, unknown>
+  // Fastify shape: { statusCode, error: 'Bad Request', message: 'actual reason' }
+  // Custom shape:  { error: 'message' }
+  const message =
+    (typeof body['message'] === 'string' && body['message']) ||
+    (typeof body['error'] === 'string' && body['error']) ||
+    `HTTP ${res.status}`
+  // Always log full server response so debugging is possible from device logs
+  if (__DEV__ || true) console.warn(`[api] ${res.status} ${path}`, body)
+  return new Error(String(message))
 }
 
 const get = <T>(path: string) => request<T>(path)

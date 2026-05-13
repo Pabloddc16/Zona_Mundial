@@ -59,6 +59,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
       email_confirm: true,
     })
     if (authErr || !authData.user) {
+      req.log.warn({ email, authErr: authErr?.message, step: 'createUser' }, 'register failed')
       return reply.badRequest(authErr?.message ?? 'No se pudo crear la cuenta')
     }
 
@@ -71,6 +72,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
       active: true,
     })
     if (rowErr) {
+      req.log.warn({ email, rowErr: rowErr.message, step: 'usersInsert' }, 'register failed')
       // Roll back the auth user on failure
       await supabase.auth.admin.deleteUser(authData.user.id)
       return reply.badRequest(rowErr.message)
