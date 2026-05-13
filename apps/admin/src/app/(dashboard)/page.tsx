@@ -49,13 +49,16 @@ export default function DashboardPage() {
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="Cash on hand" value={fmt(s?.cashOnHand ?? 0)} accent="green" />
         <StatCard label="Total revenue" value={fmt(s?.ingresoTotal ?? 0)} accent="blue" />
         <StatCard label="Collected" value={fmt(s?.cobrado ?? 0)} accent="green" />
         <StatCard label="Pending collection" value={fmt(s?.porCobrar ?? 0)} accent="yellow" />
         <StatCard label="Net profit" value={fmt(s?.utilidadNeta ?? 0)} accent={s?.utilidadNeta ?? 0 >= 0 ? 'green' : 'red'} />
         <StatCard label="Expenses" value={fmt(s?.totalEgresos ?? 0)} accent="red" />
         <StatCard label="Gross profit" value={fmt(s?.utilidadBruta ?? 0)} accent="green" />
-        <StatCard label="Inventory (value)" value={fmt(s?.valorInventario ?? 0)} />
+        <StatCard label="Inventory (cost)" value={fmt(s?.valorInventario ?? 0)} />
+        <StatCard label="Stock retail value" value={fmt(s?.inventarioPotencialVenta ?? 0)} accent="blue" />
+        <StatCard label="Potential profit" value={fmt(s?.gananciaPotencial ?? 0)} accent="green" />
         <StatCard label="Inventory (units)" value={s?.unidadesInventario?.toLocaleString() ?? '0'} />
       </div>
 

@@ -125,12 +125,19 @@ export default function InventoryPage() {
       </div>
 
       {tab === 'idle' && (
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-amber-400" />
-          <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>No movement in more than</span>
-          <Select value={idleDays} onChange={(e) => setIdleDays(e.target.value)} className="w-28">
-            {['7', '14', '30', '60', '90'].map((d) => <option key={d} value={d}>{d} days</option>)}
-          </Select>
+        <div className="space-y-2">
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            <strong>Idle</strong> = stock that has not been sold, transferred, or moved in the
+            selected window. Useful to find slow-moving items you may want to discount or
+            return.
+          </p>
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-400" />
+            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>No movement in more than</span>
+            <Select value={idleDays} onChange={(e) => setIdleDays(e.target.value)} className="w-28">
+              {['7', '14', '30', '60', '90'].map((d) => <option key={d} value={d}>{d} days</option>)}
+            </Select>
+          </div>
         </div>
       )}
 

@@ -53,7 +53,7 @@ const dashboardRoutes: FastifyPluginAsync = async (fastify) => {
     const refundsTotal = returns.reduce((s, r) => s + Number(r.refund_amount ?? 0), 0)
 
     // Revenue by method
-    const byMethod = { efectivo: 0, tarjeta: 0, transferencia: 0, credito: 0 }
+    const byMethod = { efectivo: 0, tarjeta: 0, tarjeta_bbva: 0, transferencia: 0, credito: 0 }
     function addByMethod(arr: Array<Record<string, unknown>>, defaultMethod: string) {
       for (const s of arr) {
         const m = (String(s['payment_method'] ?? defaultMethod)).toLowerCase()
@@ -65,6 +65,7 @@ const dashboardRoutes: FastifyPluginAsync = async (fastify) => {
           for (const p of pays) {
             const pm = (p.method ?? 'efectivo').toLowerCase()
             if (pm === 'tarjeta') byMethod.tarjeta += Number(p.amount ?? 0)
+            else if (pm === 'tarjeta_bbva') byMethod.tarjeta_bbva += Number(p.amount ?? 0)
             else if (pm === 'transferencia') byMethod.transferencia += Number(p.amount ?? 0)
             else byMethod.efectivo += Number(p.amount ?? 0)
           }
@@ -125,6 +126,17 @@ const dashboardRoutes: FastifyPluginAsync = async (fastify) => {
     }, 0)
     const inventoryUnits = (products ?? []).reduce((s, p) => s + (qtyBySku.get(p.id as string) ?? 0), 0)
 
+    // Potential revenue if every stocked unit sold at retail price + potential profit
+    const inventoryRetailValue = (products ?? []).reduce((s, p) => {
+      const qty = qtyBySku.get(p.id as string) ?? 0
+      return s + qty * Number(p.price ?? 0)
+    }, 0)
+    const potentialProfit = inventoryRetailValue - inventoryValue
+
+    // Cash on hand for this range = collected via cash/card/transfer - expenses
+    const cashCollected = (byMethod.efectivo ?? 0) + (byMethod.tarjeta ?? 0) + (byMethod.tarjeta_bbva ?? 0) + (byMethod.transferencia ?? 0)
+    const cashOnHand = cashCollected - totalEgresos
+
     // Accounts receivable (wholesale unpaid)
     const allWs = (await supabase.from('wholesale_sales').select('id, wholesaler_id, wholesaler_name, total, amount_paid, saldo, created_at, status').neq('status', 'pagado')).data ?? []
     const cxc = allWs.map((s) => ({
@@ -180,6 +192,9 @@ const dashboardRoutes: FastifyPluginAsync = async (fastify) => {
         totalEgresos: Math.round(totalEgresos * 100) / 100,
         utilidadNeta: Math.round(utilidadNeta * 100) / 100,
         valorInventario: Math.round(inventoryValue * 100) / 100,
+        inventarioPotencialVenta: Math.round(inventoryRetailValue * 100) / 100,
+        gananciaPotencial: Math.round(potentialProfit * 100) / 100,
+        cashOnHand: Math.round(cashOnHand * 100) / 100,
         unidadesInventario: inventoryUnits,
       },
       devoluciones: {

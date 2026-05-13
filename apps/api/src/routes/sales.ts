@@ -5,7 +5,7 @@ import { computeSaleTotals } from '../lib/calc.js'
 import { recordMovements } from '../services/inventory.js'
 import { randomUUID } from 'crypto'
 
-const VALID_PAYMENT_METHODS = ['efectivo', 'tarjeta', 'transferencia']
+const VALID_PAYMENT_METHODS = ['efectivo', 'tarjeta', 'tarjeta_bbva', 'transferencia']
 
 const salesRoutes: FastifyPluginAsync = async (fastify) => {
   // GET /api/sales

@@ -30,7 +30,10 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
     const createAttrs: { password: string; email_confirm: boolean; email?: string } = { password, email_confirm: true }
     if (email) createAttrs.email = email
     const { data: authData, error: authErr } = await supabase.auth.admin.createUser(createAttrs)
-    if (authErr || !authData.user) return reply.internalServerError(authErr?.message ?? 'Error al crear usuario')
+    if (authErr || !authData.user) {
+      req.log.warn({ email, username, authErr: authErr?.message, step: 'createUser' }, 'user create failed')
+      return reply.internalServerError(authErr?.message ?? 'Error al crear usuario')
+    }
 
     const { data: userRow, error: rowErr } = await supabase.from('users').insert({
       id: authData.user.id,
@@ -42,6 +45,7 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
     }).select('id, username, email, role, active, created_at').single()
 
     if (rowErr) {
+      req.log.warn({ email, username, rowErr: rowErr.message, step: 'usersInsert' }, 'user create failed')
       await supabase.auth.admin.deleteUser(authData.user.id)
       return reply.internalServerError(rowErr.message)
     }

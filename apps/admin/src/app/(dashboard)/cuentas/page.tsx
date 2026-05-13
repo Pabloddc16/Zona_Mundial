@@ -22,13 +22,23 @@ const ACCOUNTS = [
   },
   {
     id: 'tarjeta',
-    name: 'BBVA',
-    bank: 'Tarjeta / Credit card',
-    icon: '🏦',
+    name: 'Card (generic)',
+    bank: 'Any card payment',
+    icon: '💳',
     color: 'oklch(0.55 0.18 260)',
     bg: 'oklch(0.55 0.18 260 / 0.12)',
     border: 'oklch(0.55 0.18 260 / 0.25)',
     method: 'tarjeta' as const,
+  },
+  {
+    id: 'tarjeta_bbva',
+    name: 'BBVA',
+    bank: 'BBVA card',
+    icon: '🏦',
+    color: 'oklch(0.50 0.20 240)',
+    bg: 'oklch(0.50 0.20 240 / 0.12)',
+    border: 'oklch(0.50 0.20 240 / 0.25)',
+    method: 'tarjeta_bbva' as const,
   },
   {
     id: 'transferencia',
@@ -52,7 +62,8 @@ export default function CuentasPage() {
   })
 
   const byMethod = data?.byMethod
-  const totalIncoming = (byMethod?.efectivo ?? 0) + (byMethod?.tarjeta ?? 0) + (byMethod?.transferencia ?? 0)
+  const totalIncoming = (byMethod?.efectivo ?? 0) + (byMethod?.tarjeta ?? 0) + (byMethod?.tarjeta_bbva ?? 0) + (byMethod?.transferencia ?? 0)
+  const summary = data?.summary
 
   return (
     <div className="p-6 space-y-6">
@@ -75,8 +86,25 @@ export default function CuentasPage() {
         <p className="text-sm text-white/40 mt-1">{from} → {to}</p>
       </div>
 
+      {/* Financial statement */}
+      <Card>
+        <CardHeader><CardTitle>Financial statement</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatRow label="Cash on hand" value={fmt(summary?.cashOnHand ?? 0)} hint="Collected − expenses (range)" tone="primary" />
+            <StatRow label="Capital in stock" value={fmt(summary?.valorInventario ?? 0)} hint="Inventory at cost" />
+            <StatRow label="Stock retail value" value={fmt(summary?.inventarioPotencialVenta ?? 0)} hint="If all stock sold at retail" />
+            <StatRow label="Potential profit" value={fmt(summary?.gananciaPotencial ?? 0)} hint="Retail value − cost" tone="success" />
+            <StatRow label="Total collected" value={fmt(summary?.cobrado ?? 0)} hint="Range" />
+            <StatRow label="Total expenses" value={fmt(summary?.totalEgresos ?? 0)} hint="Range" tone="danger" />
+            <StatRow label="Gross profit" value={fmt(summary?.utilidadBruta ?? 0)} hint="Revenue − COGS" />
+            <StatRow label="Net profit" value={fmt(summary?.utilidadNeta ?? 0)} hint="Gross profit − expenses" tone="success" />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Account cards */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
         {ACCOUNTS.map((acc) => {
           const amount = byMethod?.[acc.method] ?? 0
           const pct = totalIncoming > 0 ? (amount / totalIncoming) * 100 : 0
@@ -131,10 +159,26 @@ export default function CuentasPage() {
         <CardHeader><CardTitle>Account mapping</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
           <Row icon="💵" label="Cash" desc="All cash sales from POS, orders, and wholesale" />
-          <Row icon="🏦" label="BBVA (Card)" desc="All credit/debit card payments" />
+          <Row icon="💳" label="Card (generic)" desc="Card payments not tied to a specific bank" />
+          <Row icon="🏦" label="BBVA" desc="BBVA card payments specifically" />
           <Row icon="💜" label="Nu Bank (Transfer)" desc="All bank transfers" />
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+function StatRow({ label, value, hint, tone }: { label: string; value: string; hint?: string; tone?: 'primary' | 'success' | 'danger' }) {
+  const color =
+    tone === 'success' ? 'text-emerald-400' :
+    tone === 'danger' ? 'text-rose-400' :
+    tone === 'primary' ? 'text-amber-300' :
+    'text-white/90'
+  return (
+    <div className="rounded-xl p-3" style={{ background: 'oklch(1 0 0 / 0.04)', border: '1px solid oklch(1 0 0 / 0.06)' }}>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">{label}</p>
+      <p className={`text-xl font-black tabular-nums mt-1 ${color}`}>{value}</p>
+      {hint ? <p className="text-[10px] text-white/30 mt-0.5">{hint}</p> : null}
     </div>
   )
 }

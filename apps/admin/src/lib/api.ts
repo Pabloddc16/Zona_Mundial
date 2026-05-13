@@ -323,9 +323,9 @@ export interface StockSummary { totalSkus: number; totalUnits: number; totalValu
 
 export interface DashboardData {
   range: { from: string; to: string; days: number }
-  summary: { ingresoTotal: number; cobrado: number; porCobrar: number; utilidadBruta: number; totalEgresos: number; utilidadNeta: number; valorInventario: number; unidadesInventario: number; devoluciones: number }
+  summary: { ingresoTotal: number; cobrado: number; porCobrar: number; utilidadBruta: number; totalEgresos: number; utilidadNeta: number; valorInventario: number; inventarioPotencialVenta: number; gananciaPotencial: number; cashOnHand: number; unidadesInventario: number; devoluciones: number }
   bySource: { pos: { count: number; revenue: number }; wholesale: { count: number; revenue: number }; app: { count: number; revenue: number } }
-  byMethod: { efectivo: number; tarjeta: number; transferencia: number; credito: number }
+  byMethod: { efectivo: number; tarjeta: number; tarjeta_bbva: number; transferencia: number; credito: number }
   dailyCashFlow: { date: string; revenue: number }[]
   expensesByCat: Record<string, number>
   cuentasPorCobrar: { total: number; count: number; items: unknown[] }

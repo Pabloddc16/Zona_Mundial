@@ -21,8 +21,17 @@ const STATUS_LABEL: Record<string, string> = {
   draft: 'Draft', paid: 'Paid', received: 'Received', cancelled: 'Cancelled',
 }
 
+const PAYMENT_METHODS = [
+  { value: 'efectivo', label: '💵 Cash' },
+  { value: 'tarjeta', label: '💳 Card (generic)' },
+  { value: 'tarjeta_bbva', label: '🏦 BBVA card' },
+  { value: 'transferencia', label: '💜 Bank transfer' },
+]
+
 export default function PurchasesPage() {
   const qc = useQueryClient()
+  const [payDlg, setPayDlg] = useState<Purchase | null>(null)
+  const [payMethod, setPayMethod] = useState('efectivo')
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('')
   const [creating, setCreating] = useState(false)
@@ -49,16 +58,7 @@ export default function PurchasesPage() {
     { key: 'actions', header: '', cell: (r: Purchase) => (
       <div className="flex gap-1 justify-end">
         {r.status === 'draft' && (
-          <Button size="sm" variant="ghost" onClick={() => {
-            const method = prompt('Payment method? (efectivo / tarjeta / transferencia)', 'efectivo')
-            if (!method) return
-            const m = method.trim().toLowerCase()
-            if (!['efectivo', 'tarjeta', 'transferencia'].includes(m)) {
-              alert('Method must be: efectivo, tarjeta, or transferencia')
-              return
-            }
-            payMut.mutate({ id: r.id, payment_method: m })
-          }} className="gap-1">
+          <Button size="sm" variant="ghost" onClick={() => { setPayMethod('efectivo'); setPayDlg(r) }} className="gap-1">
             <CheckCircle2 className="h-3.5 w-3.5" /> Mark paid
           </Button>
         )}
@@ -100,6 +100,33 @@ export default function PurchasesPage() {
 
       <Sheet open={creating} onClose={() => setCreating(false)} title="New purchase">
         <PurchaseForm onSave={(b) => createMut.mutate(b)} saving={createMut.isPending} error={createMut.isError ? (createMut.error as Error).message : ''} />
+      </Sheet>
+
+      <Sheet open={!!payDlg} onClose={() => setPayDlg(null)} title="Mark as paid">
+        {payDlg && (
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Purchase</p>
+              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{payDlg.id} — {payDlg.supplier}</p>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Payment method *</label>
+              <Select value={payMethod} onChange={(e) => setPayMethod(e.target.value)}>
+                {PAYMENT_METHODS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+              </Select>
+            </div>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              This creates an expense row (category: inventory) so it shows up in Accounts and the dashboard cash flow.
+            </p>
+            <Button
+              className="w-full"
+              disabled={payMut.isPending}
+              onClick={() => { payMut.mutate({ id: payDlg.id, payment_method: payMethod }); setPayDlg(null) }}
+            >
+              {payMut.isPending ? 'Saving…' : 'Confirm payment'}
+            </Button>
+          </div>
+        )}
       </Sheet>
     </div>
   )
