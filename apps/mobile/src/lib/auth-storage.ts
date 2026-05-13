@@ -2,6 +2,18 @@ import * as SecureStore from 'expo-secure-store'
 
 const AT_KEY = 'pablo-at'
 const RT_KEY = 'pablo-rt'
+const USER_KEY = 'pablo-user'
+
+export async function getCachedUser<T>(): Promise<T | null> {
+  try {
+    const raw = await SecureStore.getItemAsync(USER_KEY)
+    return raw ? (JSON.parse(raw) as T) : null
+  } catch { return null }
+}
+export async function setCachedUser<T>(u: T | null): Promise<void> {
+  if (u) await SecureStore.setItemAsync(USER_KEY, JSON.stringify(u))
+  else await SecureStore.deleteItemAsync(USER_KEY).catch(() => {})
+}
 
 export async function getAT(): Promise<string | null> {
   try { return await SecureStore.getItemAsync(AT_KEY) } catch { return null }
