@@ -13,65 +13,65 @@ export interface Product {
 }
 
 export const PRODUCTS: Product[] = [
-  { id: 'CAJA-100', name: 'Caja 100 sobres', price: 2500, category: 'sobres', description: 'Caja sellada Panini oficial. 100 sobres × 7 estampas.', emoji: '📦', image: '/images/productos/caja-100-sobres.webp', gradient: ['#CE1126', '#8B0B1C'], badge: 'MEJOR VOLUMEN' },
-  { id: 'SOBRE-1', name: 'Sobre individual', price: 25, category: 'sobres', description: 'Un sobre oficial con 7 estampas aleatorias.', emoji: '✉️', image: '/images/productos/sobre.webp', gradient: ['#006341', '#004a30'], badge: 'MÁS VENDIDO' },
-  { id: 'ALBUM-HARD', name: 'Álbum pasta dura', price: 349, category: 'albumes', description: 'Edición coleccionista México 2026, tapa dura premium.', emoji: '📗', image: '/images/productos/album-hardcover.webp', gradient: ['#006341', '#FFD100'], badge: 'COLECCIONISTA' },
-  { id: 'ALBUM-SOFT', name: 'Álbum pasta blanda', price: 99, category: 'albumes', description: 'Edición estándar softcover, mismas páginas.', emoji: '📘', image: '/images/productos/album-softcover.webp', gradient: ['#006341', '#00815a'] },
-  { id: 'SET-COCA', name: 'Set Coca-Cola', price: 490, category: 'coca', description: 'Cartas exclusivas que no vienen en sobres regulares.', emoji: '🥤', gradient: ['#CE1126', '#FFD100'], badge: 'EDICIÓN ESPECIAL' },
-  { id: 'SOBRE-COCA', name: 'Sobre Coca-Cola', price: 40, category: 'coca', description: 'Sobre exclusivo con estampas edición limitada.', emoji: '🎟️', gradient: ['#CE1126', '#006341'], badge: 'LIMITED' },
-  { id: 'CARTA-COCA', name: 'Carta Coca-Cola', price: 40, category: 'coca', description: 'Carta holográfica Coca-Cola individual.', emoji: '✨', gradient: ['#FFD100', '#CE1126'], badge: 'HOLOGRÁFICA' },
-  { id: 'CARTA-SUELTA', name: 'Carta suelta Panini', price: 5, category: 'cartas', description: 'Carta individual para completar tu álbum.', emoji: '🃏', gradient: ['#006341', '#FFD100'], badge: 'COMPLETA ÁLBUM' },
-  { id: 'COLECCION', name: 'Colección completa', price: 3500, category: 'packs', description: 'Álbum pasta dura + 140 sobres. Envío express.', emoji: '🏆', image: '/images/productos/combo.webp', gradient: ['#FFD100', '#006341'], badge: 'RECOMENDADO' },
-  { id: 'JERSEY-MX-LOCAL', name: 'Jersey México Local 26', price: 2199, category: 'jerseys', description: 'Jersey oficial selección mexicana local Mundial 2026.', emoji: '🇲🇽', gradient: ['#006341', '#CE1126'], badge: 'OFICIAL' },
-  { id: 'JERSEY-MX-VISITA', name: 'Jersey México Visita 26', price: 2199, category: 'jerseys', description: 'Jersey oficial selección mexicana visita Mundial 2026.', emoji: '⚽', gradient: ['#FAF6EE', '#006341'], badge: 'OFICIAL' },
-  { id: 'JERSEY-ARG', name: 'Jersey Argentina 26', price: 2299, category: 'jerseys', description: 'Jersey oficial Argentina Mundial 2026.', emoji: '🇦🇷', gradient: ['#6FA8DC', '#FFFFFF'] },
-  { id: 'JERSEY-BRA', name: 'Jersey Brasil 26', price: 2299, category: 'jerseys', description: 'Jersey amarillo Brasil Mundial 2026.', emoji: '🇧🇷', gradient: ['#FFD100', '#006341'] },
-  { id: 'BALON-OFICIAL', name: 'Balón oficial Mundial 26', price: 3499, category: 'balones', description: 'Adidas tamaño 5 FIFA Quality Pro.', emoji: '⚽', gradient: ['#CE1126', '#FFD100'], badge: 'FIFA QUALITY' },
-  { id: 'BALON-REPLICA', name: 'Balón réplica Mundial 26', price: 899, category: 'balones', description: 'Réplica oficial.', emoji: '🥎', gradient: ['#006341', '#FFD100'] },
-  { id: 'COPA-REPLICA-MINI', name: 'Copa FIFA réplica mini', price: 499, category: 'trofeos', description: 'Altura 15 cm.', emoji: '🏆', gradient: ['#FFD100', '#C19800'], badge: 'COLECCIONABLE' },
-  { id: 'COPA-REPLICA-FULL', name: 'Copa FIFA réplica 1:1', price: 3999, category: 'trofeos', description: '36.8 cm. Edición coleccionista.', emoji: '🏆', gradient: ['#FFD100', '#B27D00'], badge: 'EDICIÓN LIMITADA' },
-  { id: 'GORRA-MX', name: 'Gorra México Oficial', price: 599, category: 'accesorios', description: 'Gorra bordada oficial selección mexicana.', emoji: '🧢', gradient: ['#006341', '#CE1126'] },
-  { id: 'BUFANDA-MX', name: 'Bufanda México', price: 399, category: 'accesorios', description: 'Bufanda tejida tricolor edición Mundial 2026.', emoji: '🧣', gradient: ['#CE1126', '#006341'] },
-  { id: 'LLAVERO-PACK', name: 'Pack 5 llaveros selecciones', price: 249, category: 'accesorios', description: '5 llaveros selecciones varias.', emoji: '🗝️', gradient: ['#FFD100', '#006341'] },
-  { id: 'POSTER-MASCOTAS', name: 'Poster oficial mascotas 26', price: 149, category: 'accesorios', description: 'A2 de las mascotas Maple, Zayu y Clutch.', emoji: '🖼️', gradient: ['#FFD100', '#CE1126'] },
+  { id: 'CAJA-100', name: 'Box of 100 packs', price: 2500, category: 'sobres', description: 'Sealed box. 100 packs × 7 stickers each.', emoji: '📦', image: '/images/productos/caja-100-sobres.webp', gradient: ['#CE1126', '#8B0B1C'], badge: 'BEST VALUE' },
+  { id: 'SOBRE-1', name: 'Single pack', price: 25, category: 'sobres', description: 'One pack with 7 random stickers.', emoji: '✉️', image: '/images/productos/sobre.webp', gradient: ['#006341', '#004a30'], badge: 'BEST SELLER' },
+  { id: 'ALBUM-HARD', name: 'Hardcover album', price: 349, category: 'albumes', description: 'Collector edition, premium hardcover.', emoji: '📗', image: '/images/productos/album-hardcover.webp', gradient: ['#006341', '#FFD100'], badge: 'COLLECTOR' },
+  { id: 'ALBUM-SOFT', name: 'Softcover album', price: 99, category: 'albumes', description: 'Standard softcover edition, same pages.', emoji: '📘', image: '/images/productos/album-softcover.webp', gradient: ['#006341', '#00815a'] },
+  { id: 'SET-COCA', name: 'Coca-Cola set', price: 490, category: 'coca', description: 'Exclusive cards not found in regular packs.', emoji: '🥤', gradient: ['#CE1126', '#FFD100'], badge: 'SPECIAL EDITION' },
+  { id: 'SOBRE-COCA', name: 'Coca-Cola pack', price: 40, category: 'coca', description: 'Exclusive pack with limited edition stickers.', emoji: '🎟️', gradient: ['#CE1126', '#006341'], badge: 'LIMITED' },
+  { id: 'CARTA-COCA', name: 'Coca-Cola card', price: 40, category: 'coca', description: 'Single Coca-Cola holographic card.', emoji: '✨', gradient: ['#FFD100', '#CE1126'], badge: 'HOLOGRAPHIC' },
+  { id: 'CARTA-SUELTA', name: 'Single sticker', price: 5, category: 'cartas', description: 'Single sticker to complete your album.', emoji: '🃏', gradient: ['#006341', '#FFD100'], badge: 'COMPLETE THE ALBUM' },
+  { id: 'COLECCION', name: 'Complete collection', price: 3500, category: 'packs', description: 'Hardcover album + 140 packs. Express shipping.', emoji: '🏆', image: '/images/productos/combo.webp', gradient: ['#FFD100', '#006341'], badge: 'RECOMMENDED' },
+  { id: 'JERSEY-MX-LOCAL', name: 'Mexico home jersey 26', price: 2199, category: 'jerseys', description: 'Mexico national team home jersey.', emoji: '🇲🇽', gradient: ['#006341', '#CE1126'], badge: 'OFFICIAL' },
+  { id: 'JERSEY-MX-VISITA', name: 'Mexico away jersey 26', price: 2199, category: 'jerseys', description: 'Mexico national team away jersey.', emoji: '⚽', gradient: ['#FAF6EE', '#006341'], badge: 'OFFICIAL' },
+  { id: 'JERSEY-ARG', name: 'Argentina jersey 26', price: 2299, category: 'jerseys', description: 'Argentina national team jersey.', emoji: '🇦🇷', gradient: ['#6FA8DC', '#FFFFFF'] },
+  { id: 'JERSEY-BRA', name: 'Brazil jersey 26', price: 2299, category: 'jerseys', description: 'Brazil national team yellow jersey.', emoji: '🇧🇷', gradient: ['#FFD100', '#006341'] },
+  { id: 'BALON-OFICIAL', name: 'Official match ball 26', price: 3499, category: 'balones', description: 'Adidas size 5 Quality Pro.', emoji: '⚽', gradient: ['#CE1126', '#FFD100'], badge: 'QUALITY PRO' },
+  { id: 'BALON-REPLICA', name: 'Replica ball 26', price: 899, category: 'balones', description: 'Official replica.', emoji: '🥎', gradient: ['#006341', '#FFD100'] },
+  { id: 'COPA-REPLICA-MINI', name: 'Trophy mini replica', price: 499, category: 'trofeos', description: '15 cm height.', emoji: '🏆', gradient: ['#FFD100', '#C19800'], badge: 'COLLECTIBLE' },
+  { id: 'COPA-REPLICA-FULL', name: 'Trophy 1:1 replica', price: 3999, category: 'trofeos', description: '36.8 cm. Collector edition.', emoji: '🏆', gradient: ['#FFD100', '#B27D00'], badge: 'LIMITED EDITION' },
+  { id: 'GORRA-MX', name: 'Mexico cap (official)', price: 599, category: 'accesorios', description: 'Embroidered cap, Mexico national team.', emoji: '🧢', gradient: ['#006341', '#CE1126'] },
+  { id: 'BUFANDA-MX', name: 'Mexico scarf', price: 399, category: 'accesorios', description: 'Tricolor knit scarf, 2026 edition.', emoji: '🧣', gradient: ['#CE1126', '#006341'] },
+  { id: 'LLAVERO-PACK', name: 'Keychain pack (5 teams)', price: 249, category: 'accesorios', description: '5 keychains from various national teams.', emoji: '🗝️', gradient: ['#FFD100', '#006341'] },
+  { id: 'POSTER-MASCOTAS', name: 'Mascot poster 26', price: 149, category: 'accesorios', description: 'A2 poster of the official mascots.', emoji: '🖼️', gradient: ['#FFD100', '#CE1126'] },
 ]
 
 export const CATEGORIES = [
-  { id: 'all', label: 'Todos' },
+  { id: 'all', label: 'All' },
   { id: 'packs', label: 'Packs' },
-  { id: 'sobres', label: 'Sobres' },
-  { id: 'albumes', label: 'Álbumes' },
+  { id: 'sobres', label: 'Sticker packs' },
+  { id: 'albumes', label: 'Albums' },
   { id: 'coca', label: 'Coca-Cola' },
   { id: 'jerseys', label: 'Jerseys' },
-  { id: 'balones', label: 'Balones' },
-  { id: 'trofeos', label: 'Trofeos' },
-  { id: 'accesorios', label: 'Accesorios' },
+  { id: 'balones', label: 'Balls' },
+  { id: 'trofeos', label: 'Trophies' },
+  { id: 'accesorios', label: 'Accessories' },
 ]
 
 const TEAMS = [
-  { code: 'MEX', name: 'México', flag: '🇲🇽', group: 'Anfitriones' },
-  { code: 'USA', name: 'Estados Unidos', flag: '🇺🇸', group: 'Anfitriones' },
-  { code: 'CAN', name: 'Canadá', flag: '🇨🇦', group: 'Anfitriones' },
-  { code: 'ARG', name: 'Argentina', flag: '🇦🇷', group: 'Sudamérica' },
-  { code: 'BRA', name: 'Brasil', flag: '🇧🇷', group: 'Sudamérica' },
-  { code: 'URU', name: 'Uruguay', flag: '🇺🇾', group: 'Sudamérica' },
-  { code: 'COL', name: 'Colombia', flag: '🇨🇴', group: 'Sudamérica' },
-  { code: 'ECU', name: 'Ecuador', flag: '🇪🇨', group: 'Sudamérica' },
-  { code: 'CHI', name: 'Chile', flag: '🇨🇱', group: 'Sudamérica' },
-  { code: 'PAR', name: 'Paraguay', flag: '🇵🇾', group: 'Sudamérica' },
-  { code: 'ESP', name: 'España', flag: '🇪🇸', group: 'Europa' },
-  { code: 'FRA', name: 'Francia', flag: '🇫🇷', group: 'Europa' },
-  { code: 'ENG', name: 'Inglaterra', flag: '🇬🇧', group: 'Europa' },
-  { code: 'GER', name: 'Alemania', flag: '🇩🇪', group: 'Europa' },
-  { code: 'ITA', name: 'Italia', flag: '🇮🇹', group: 'Europa' },
-  { code: 'POR', name: 'Portugal', flag: '🇵🇹', group: 'Europa' },
-  { code: 'NED', name: 'Países Bajos', flag: '🇳🇱', group: 'Europa' },
-  { code: 'BEL', name: 'Bélgica', flag: '🇧🇪', group: 'Europa' },
-  { code: 'CRO', name: 'Croacia', flag: '🇭🇷', group: 'Europa' },
-  { code: 'JPN', name: 'Japón', flag: '🇯🇵', group: 'Asia' },
-  { code: 'KOR', name: 'Corea del Sur', flag: '🇰🇷', group: 'Asia' },
-  { code: 'MAR', name: 'Marruecos', flag: '🇲🇦', group: 'África' },
-  { code: 'SEN', name: 'Senegal', flag: '🇸🇳', group: 'África' },
+  { code: 'MEX', name: 'Mexico', flag: '🇲🇽', group: 'Hosts' },
+  { code: 'USA', name: 'United States', flag: '🇺🇸', group: 'Hosts' },
+  { code: 'CAN', name: 'Canada', flag: '🇨🇦', group: 'Hosts' },
+  { code: 'ARG', name: 'Argentina', flag: '🇦🇷', group: 'South America' },
+  { code: 'BRA', name: 'Brazil', flag: '🇧🇷', group: 'South America' },
+  { code: 'URU', name: 'Uruguay', flag: '🇺🇾', group: 'South America' },
+  { code: 'COL', name: 'Colombia', flag: '🇨🇴', group: 'South America' },
+  { code: 'ECU', name: 'Ecuador', flag: '🇪🇨', group: 'South America' },
+  { code: 'CHI', name: 'Chile', flag: '🇨🇱', group: 'South America' },
+  { code: 'PAR', name: 'Paraguay', flag: '🇵🇾', group: 'South America' },
+  { code: 'ESP', name: 'Spain', flag: '🇪🇸', group: 'Europe' },
+  { code: 'FRA', name: 'France', flag: '🇫🇷', group: 'Europe' },
+  { code: 'ENG', name: 'England', flag: '🇬🇧', group: 'Europe' },
+  { code: 'GER', name: 'Germany', flag: '🇩🇪', group: 'Europe' },
+  { code: 'ITA', name: 'Italy', flag: '🇮🇹', group: 'Europe' },
+  { code: 'POR', name: 'Portugal', flag: '🇵🇹', group: 'Europe' },
+  { code: 'NED', name: 'Netherlands', flag: '🇳🇱', group: 'Europe' },
+  { code: 'BEL', name: 'Belgium', flag: '🇧🇪', group: 'Europe' },
+  { code: 'CRO', name: 'Croatia', flag: '🇭🇷', group: 'Europe' },
+  { code: 'JPN', name: 'Japan', flag: '🇯🇵', group: 'Asia' },
+  { code: 'KOR', name: 'South Korea', flag: '🇰🇷', group: 'Asia' },
+  { code: 'MAR', name: 'Morocco', flag: '🇲🇦', group: 'Africa' },
+  { code: 'SEN', name: 'Senegal', flag: '🇸🇳', group: 'Africa' },
   { code: 'CRC', name: 'Costa Rica', flag: '🇨🇷', group: 'Concacaf' },
 ]
 
@@ -117,7 +117,7 @@ function stickersTeam(prefix: string): Sticker[] {
     const n = i + 1
     const type = stickerType(n)
     const tier = tierFor(type, 'team', prefix)
-    return { n, code: prefix + pad(n), label: n === 1 ? 'Escudo' : n === 2 ? 'Foto equipo' : `Jugador ${n - 2}`, type, tier, price: PRICE_BY_TIER[tier] }
+    return { n, code: prefix + pad(n), label: n === 1 ? 'Crest' : n === 2 ? 'Team photo' : `Player ${n - 2}`, type, tier, price: PRICE_BY_TIER[tier] }
   })
 }
 
@@ -126,12 +126,12 @@ export const ALBUM: AlbumGroup[] = [
     id: s.fullId,
     prefix: s.id,
     name: s.name,
-    subtitle: 'Sección especial',
+    subtitle: 'Special section',
     emoji: s.emoji,
     kind: 'special' as const,
     stickers: Array.from({ length: s.count }, (_, i) => {
       const tier = tierFor('special', 'special', s.id)
-      return { n: i + 1, code: s.id + pad(i + 1), label: `Estampa ${i + 1}`, type: 'special', tier, price: PRICE_BY_TIER[tier] }
+      return { n: i + 1, code: s.id + pad(i + 1), label: `Sticker ${i + 1}`, type: 'special', tier, price: PRICE_BY_TIER[tier] }
     }),
   })),
   ...TEAMS.map((t) => ({
@@ -151,4 +151,4 @@ export const PREFIX_MAP = ALBUM.reduce<Record<string, string>>((m, g) => { m[g.p
 export function productById(id: string) { return PRODUCTS.find((p) => p.id === id) }
 export function groupById(id: string) { return ALBUM.find((g) => g.id === id) }
 
-export const fmt = (n: number) => '$' + Number(n || 0).toLocaleString('es-MX', { maximumFractionDigits: 0 })
+export const fmt = (n: number) => '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })

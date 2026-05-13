@@ -9,7 +9,12 @@ import { api, type OrderPayload } from '@/lib/api'
 import { fmt } from '@/lib/data'
 
 const SHIPPING = 120
-const PAYMENT_METHODS = ['Efectivo', 'Transferencia', 'Tarjeta']
+const PAYMENT_METHODS = [
+  { value: 'efectivo', label: 'Cash' },
+  { value: 'transferencia', label: 'Transfer' },
+  { value: 'tarjeta', label: 'Card' },
+  { value: 'tarjeta_bbva', label: 'BBVA' },
+]
 
 export default function CheckoutScreen() {
   const cart = useCartStore((s) => s.cart)
@@ -21,7 +26,7 @@ export default function CheckoutScreen() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
-  const [payment, setPayment] = useState('Efectivo')
+  const [payment, setPayment] = useState('efectivo')
   const [notes, setNotes] = useState('')
   const [deliveryType, setDeliveryType] = useState<'envio' | 'local'>('envio')
   const [loading, setLoading] = useState(false)
@@ -31,8 +36,8 @@ export default function CheckoutScreen() {
   const total = subtotal + shipping
 
   async function submit() {
-    if (!name.trim() || !phone.trim()) { setError('Nombre y teléfono requeridos'); return }
-    if (deliveryType === 'envio' && !address.trim()) { setError('Dirección requerida para envío'); return }
+    if (!name.trim() || !phone.trim()) { setError('Name and phone are required'); return }
+    if (deliveryType === 'envio' && !address.trim()) { setError('Address is required for shipping'); return }
     setLoading(true)
     setError('')
     try {
@@ -52,7 +57,7 @@ export default function CheckoutScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
       router.replace(`/orden/${order.order_number}`)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error al procesar pedido')
+      setError(e instanceof Error ? e.message : 'Could not place order')
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {})
     } finally {
       setLoading(false)
@@ -68,46 +73,46 @@ export default function CheckoutScreen() {
             <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
               <Text style={s.backIcon}>‹</Text>
             </TouchableOpacity>
-            <Text style={s.title}>Tu pedido</Text>
+            <Text style={s.title}>Your order</Text>
           </View>
 
           {/* Delivery type */}
-          <Section label="Tipo de entrega">
+          <Section label="Delivery type">
             <View style={s.deliveryRow}>
               {(['envio', 'local'] as const).map((t) => (
                 <TouchableOpacity key={t} onPress={() => setDeliveryType(t)} style={[s.deliveryBtn, deliveryType === t && s.deliveryBtnActive]}>
                   <Text style={[s.deliveryBtnText, deliveryType === t && s.deliveryBtnTextActive]}>
-                    {t === 'envio' ? '📦 Envío' : '🏪 Recoger'}
+                    {t === 'envio' ? '📦 Shipping' : '🏪 Pickup'}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </Section>
 
-          <Section label="Nombre completo *">
-            <TextInput style={s.input} value={name} onChangeText={setName} placeholder="Juan García" returnKeyType="next" />
+          <Section label="Full name *">
+            <TextInput style={s.input} value={name} onChangeText={setName} placeholder="John Smith" returnKeyType="next" />
           </Section>
-          <Section label="Teléfono / WhatsApp *">
-            <TextInput style={s.input} value={phone} onChangeText={setPhone} placeholder="55 1234 5678" keyboardType="phone-pad" returnKeyType="next" />
+          <Section label="Phone / WhatsApp *">
+            <TextInput style={s.input} value={phone} onChangeText={setPhone} placeholder="555 123 4567" keyboardType="phone-pad" returnKeyType="next" />
           </Section>
           {deliveryType === 'envio' && (
-            <Section label="Dirección de entrega *">
-              <TextInput style={s.input} value={address} onChangeText={setAddress} placeholder="Calle, número, colonia, municipio" multiline />
+            <Section label="Delivery address *">
+              <TextInput style={s.input} value={address} onChangeText={setAddress} placeholder="Street, number, neighborhood, city" multiline />
             </Section>
           )}
 
-          <Section label="Método de pago">
+          <Section label="Payment method">
             <View style={s.payRow}>
               {PAYMENT_METHODS.map((m) => (
-                <TouchableOpacity key={m} onPress={() => setPayment(m)} style={[s.payBtn, payment === m && s.payBtnActive]}>
-                  <Text style={[s.payBtnText, payment === m && s.payBtnTextActive]}>{m}</Text>
+                <TouchableOpacity key={m.value} onPress={() => setPayment(m.value)} style={[s.payBtn, payment === m.value && s.payBtnActive]}>
+                  <Text style={[s.payBtnText, payment === m.value && s.payBtnTextActive]}>{m.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </Section>
 
-          <Section label="Notas (opcional)">
-            <TextInput style={[s.input, { minHeight: 64 }]} value={notes} onChangeText={setNotes} placeholder="Instrucciones especiales..." multiline textAlignVertical="top" />
+          <Section label="Notes (optional)">
+            <TextInput style={[s.input, { minHeight: 64 }]} value={notes} onChangeText={setNotes} placeholder="Special instructions..." multiline textAlignVertical="top" />
           </Section>
 
           {/* Summary */}
@@ -120,7 +125,7 @@ export default function CheckoutScreen() {
             ))}
             {shipping > 0 && (
               <View style={s.summaryRow}>
-                <Text style={s.summaryLabel}>Envío</Text>
+                <Text style={s.summaryLabel}>Shipping</Text>
                 <Text style={s.summaryValue}>{fmt(shipping)}</Text>
               </View>
             )}
@@ -133,7 +138,7 @@ export default function CheckoutScreen() {
           {error ? <Text style={s.error}>{error}</Text> : null}
 
           <TouchableOpacity style={[s.btn, loading && { opacity: 0.6 }]} onPress={submit} disabled={loading}>
-            <Text style={s.btnText}>{loading ? 'Procesando...' : `Confirmar — ${fmt(total)}`}</Text>
+            <Text style={s.btnText}>{loading ? 'Processing…' : `Place order — ${fmt(total)}`}</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

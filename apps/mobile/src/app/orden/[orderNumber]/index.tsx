@@ -76,30 +76,30 @@ export default function OrdenScreen() {
         {/* Success hero */}
         <View style={s.hero}>
           <Text style={{ fontSize: 64 }}>🎉</Text>
-          <Text style={s.heroTitle}>¡Pedido confirmado!</Text>
-          <Text style={s.heroSub}>Recibirás tu pedido pronto</Text>
+          <Text style={s.heroTitle}>Order confirmed!</Text>
+          <Text style={s.heroSub}>You'll receive your order soon</Text>
           <Text style={s.orderNum}>#{order.order_number}</Text>
         </View>
 
         {/* Status */}
         <View style={[s.statusCard, { backgroundColor: bg }]}>
-          <Text style={{ fontSize: 13, color: '#6B7280' }}>Estado</Text>
+          <Text style={{ fontSize: 13, color: '#6B7280' }}>Status</Text>
           <Text style={[s.statusText, { color: fg }]}>{STATUS_LABEL[order.status] ?? order.status}</Text>
         </View>
 
         {/* Details */}
         <View style={s.card}>
-          <Row label="Cliente" value={order.customer_name} />
-          <Row label="Teléfono" value={order.phone} />
-          {order.address ? <Row label="Dirección" value={order.address} /> : null}
-          <Row label="Entrega" value={order.delivery_type === 'envio' ? 'Envío a domicilio' : 'Recoger en tienda'} />
-          <Row label="Pago" value={order.payment_method} />
+          <Row label="Customer" value={order.customer_name} />
+          <Row label="Phone" value={order.phone} />
+          {order.address ? <Row label="Address" value={order.address} /> : null}
+          <Row label="Delivery" value={order.delivery_type === 'envio' ? 'Home delivery' : 'Store pickup'} />
+          <Row label="Payment" value={order.payment_method} />
         </View>
 
         {/* Items */}
         {order.order_items && order.order_items.length > 0 && (
           <View style={s.card}>
-            <Text style={s.sectionLabel}>Productos</Text>
+            <Text style={s.sectionLabel}>Items</Text>
             {order.order_items.map((item, i) => (
               <View key={i} style={s.itemRow}>
                 <Text style={{ fontSize: 13, color: '#6B7280', flex: 1 }}>{item.name} × {item.qty}</Text>
@@ -108,7 +108,7 @@ export default function OrdenScreen() {
             ))}
             {order.shipping > 0 && (
               <View style={s.itemRow}>
-                <Text style={{ fontSize: 13, color: '#9CA3AF' }}>Envío</Text>
+                <Text style={{ fontSize: 13, color: '#9CA3AF' }}>Shipping</Text>
                 <Text style={{ fontSize: 13, color: '#9CA3AF' }}>{fmt(order.shipping)}</Text>
               </View>
             )}
@@ -120,7 +120,7 @@ export default function OrdenScreen() {
         )}
 
         <TouchableOpacity style={s.btn} onPress={() => router.push('/')}>
-          <Text style={s.btnText}>Volver al álbum</Text>
+          <Text style={s.btnText}>Back to album</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/tienda')} style={{ alignItems: 'center', marginTop: 12 }}>
           <Text style={{ color: '#006341', fontWeight: '600', fontSize: 14 }}>Seguir comprando</Text>

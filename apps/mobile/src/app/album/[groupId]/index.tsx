@@ -14,7 +14,7 @@ export default function GroupScreen() {
   const markNeeded = useAlbumStore((s) => s.markNeeded)
   const addToCart = useCartStore((s) => s.add)
 
-  if (!group) return <SafeAreaView><Text>No encontrado</Text></SafeAreaView>
+  if (!group) return <SafeAreaView><Text>Not found</Text></SafeAreaView>
 
   const gs = album[groupId] ?? {}
 
@@ -49,14 +49,14 @@ export default function GroupScreen() {
             <Text style={{ fontSize: 24 }}>{group.emoji}</Text>
             <Text style={s.headerTitle} numberOfLines={1}>{group.name}</Text>
           </View>
-          <Text style={s.headerSub}>{group.subtitle} · {group.stickers.length} estampas</Text>
+          <Text style={s.headerSub}>{group.subtitle} · {group.stickers.length} stickers</Text>
         </View>
       </View>
 
       {missing.length > 0 && (
         <TouchableOpacity style={s.missingBanner} onPress={addMissingToCart}>
-          <Text style={s.missingText}>Te faltan {missing.length} estampas</Text>
-          <Text style={s.missingBtn}>Agregar al carrito</Text>
+          <Text style={s.missingText}>You're missing {missing.length} stickers</Text>
+          <Text style={s.missingBtn}>Add to cart</Text>
         </TouchableOpacity>
       )}
 
@@ -74,10 +74,10 @@ export default function GroupScreen() {
               {extra && <Text style={s.extraBadge}>+{state.owned - 1}</Text>}
               <View style={s.btnRow}>
                 <TouchableOpacity onPress={() => handleOwned(st.n)} style={[s.stickerBtn, owned ? s.stickerBtnOwned : s.stickerBtnGray]}>
-                  <Text style={[s.stickerBtnText, owned && { color: '#fff' }]}>{owned ? '✓' : 'Tengo'}</Text>
+                  <Text style={[s.stickerBtnText, owned && { color: '#fff' }]}>{owned ? '✓' : 'Have'}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleNeeded(st.n)} style={[s.stickerBtn, needed ? s.stickerBtnNeeded : s.stickerBtnGray]}>
-                  <Text style={[s.stickerBtnText, needed && { color: '#1C1917' }]}>{needed ? '★' : 'Busco'}</Text>
+                  <Text style={[s.stickerBtnText, needed && { color: '#1C1917' }]}>{needed ? '★' : 'Need'}</Text>
                 </TouchableOpacity>
               </View>
             </View>
