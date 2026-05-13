@@ -42,50 +42,81 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
 
   // POST /api/auth/register — public customer signup (mobile app)
   fastify.post('/register', async (req, reply) => {
-    const body = req.body as { email?: string; password?: string; username?: string; phone?: string }
+    const body = req.body as { email?: string; password?: string; username?: string }
     const email = String(body?.email ?? '').trim().toLowerCase()
     const password = String(body?.password ?? '')
     const username = String(body?.username ?? '').trim() || email.split('@')[0]
 
-    if (!email || !password) return reply.badRequest('email y password requeridos')
-    if (password.length < 8) return reply.badRequest('Password debe tener al menos 8 caracteres')
+    req.log.info({ email, username, hasPassword: !!password }, 'register attempt')
+
+    if (!email) return reply.badRequest('Email is required')
+    if (!password) return reply.badRequest('Password is required')
+    if (password.length < 8) return reply.badRequest('Password must be at least 8 characters')
+    if (!/.+@.+\..+/.test(email)) return reply.badRequest('Invalid email format')
 
     const supabase = getClient()
 
-    // Create Supabase auth user (email_confirm: true so they can immediately log in)
+    // 1) Create the Supabase auth user. If they already exist, recover gracefully.
+    let authUserId: string | null = null
     const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     })
-    if (authErr || !authData.user) {
-      req.log.warn({ email, authErr: authErr?.message, step: 'createUser' }, 'register failed')
-      return reply.badRequest(authErr?.message ?? 'No se pudo crear la cuenta')
+    if (authErr || !authData?.user) {
+      const msg = authErr?.message ?? ''
+      const alreadyExists = /already (registered|exists)|duplicate|already been registered/i.test(msg)
+      if (alreadyExists) {
+        // Look up the existing auth user so we can either repair their public.users row or
+        // tell them clearly to sign in.
+        const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 })
+        const found = list?.users.find((u) => (u.email ?? '').toLowerCase() === email)
+        if (!found) {
+          req.log.warn({ email, authErr: msg, step: 'createUser-notfound' }, 'register failed')
+          return reply.badRequest('Email already registered. Try signing in instead.')
+        }
+        authUserId = found.id
+        // Check whether public.users row exists; if yes, refuse — they have a real account.
+        const { data: pubRow } = await supabase.from('users').select('id').eq('id', authUserId).single()
+        if (pubRow) return reply.badRequest('Email already registered. Try signing in instead.')
+        // Otherwise fall through — auth exists but public.users missing, we'll repair it.
+        req.log.info({ email, authUserId }, 'register: repairing orphan auth user')
+      } else {
+        req.log.warn({ email, authErr: msg, step: 'createUser' }, 'register failed')
+        return reply.badRequest(msg || 'Could not create account')
+      }
+    } else {
+      authUserId = authData.user.id
     }
 
-    // Insert public.users row with customer role
-    const { error: rowErr } = await supabase.from('users').insert({
-      id: authData.user.id,
+    if (!authUserId) return reply.internalServerError('register: missing auth user id')
+
+    // 2) Insert (or upsert) the public.users row.
+    const { error: rowErr } = await supabase.from('users').upsert({
+      id: authUserId,
       username,
       email,
       role: 'customer',
       active: true,
-    })
+    }, { onConflict: 'id' })
     if (rowErr) {
-      req.log.warn({ email, rowErr: rowErr.message, step: 'usersInsert' }, 'register failed')
-      // Roll back the auth user on failure
-      await supabase.auth.admin.deleteUser(authData.user.id)
-      return reply.badRequest(rowErr.message)
+      req.log.warn({ email, rowErr: rowErr.message, step: 'usersUpsert' }, 'register failed')
+      // Don't roll back the auth user — they may be trying again. Surface a usable message.
+      const msg = /duplicate key.*username/i.test(rowErr.message)
+        ? 'That username is already taken. Try a different one.'
+        : rowErr.message
+      return reply.badRequest(msg)
     }
 
-    // Auto sign-in after register
+    // 3) Auto sign-in so the client receives tokens.
     const { data: sessionData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
     if (signInErr || !sessionData.session) {
-      return reply.code(201).send({ ok: true, message: 'Cuenta creada, inicia sesión.' })
+      req.log.warn({ email, signInErr: signInErr?.message, step: 'autoSignIn' }, 'register: auto sign-in skipped')
+      return reply.code(201).send({ ok: true, message: 'Account created. Please sign in.' })
     }
 
     return reply.code(201).send({
-      user: { id: authData.user.id, email, username, role: 'customer' },
+      user: { id: authUserId, email, username, role: 'customer' },
       accessToken: sessionData.session.access_token,
       refreshToken: sessionData.session.refresh_token,
     })
