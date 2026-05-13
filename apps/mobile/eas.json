@@ -48,8 +48,8 @@
     "production": {
       "ios": {
         "appleId": "stulanik@gmail.com",
-        "ascAppId": "FILL_IN_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "FILL_IN_TEAM_ID"
+        "ascAppId": "6769002053",
+        "appleTeamId": "7D7NLMWLYL"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
