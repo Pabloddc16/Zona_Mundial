@@ -29,7 +29,7 @@ export default function LoginScreen() {
     <SafeAreaView style={s.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={s.content}>
-          <Text style={s.brand}>Mundial 26</Text>
+          <Text style={s.brand}>Cromos 26</Text>
           <Text style={s.title}>Sign in</Text>
           <Text style={s.subtitle}>Continue your album</Text>
 

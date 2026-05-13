@@ -59,14 +59,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   loadFromToken: async () => {
-    // 1. Fast path: if we have a cached user and a token, render the app
-    //    immediately. Don't wait for the network — Render's free tier
-    //    cold-start can take 30-60s and the user would see an infinite spinner.
     const [token, cachedUser] = await Promise.all([getAT(), getCachedUser<AuthUser>()])
-    if (token && cachedUser) {
+
+    // 1. No token at all → skip the network entirely. Show login screen
+    //    immediately. Render's cold-start (~30-60s) shouldn't block here.
+    if (!token) {
+      set({ user: null, hydrated: true })
+      return
+    }
+
+    // 2. Token + cached user → render the app instantly, refresh in background.
+    if (cachedUser) {
       set({ user: cachedUser, hydrated: true })
-      // 2. Refresh in the background — if the token's been revoked or the
-      //    user was deleted server-side, drop them.
       api.auth.me()
         .then((me) => {
           const fresh = { id: me.id, email: me.email, username: me.username, role: me.role }
@@ -83,7 +87,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       return
     }
 
-    // 3. No cached state — try the network once, then mark hydrated either way
+    // 3. Token but no cached user — try /me; mark hydrated either way.
     try {
       const me = await api.auth.me()
       const fresh = { id: me.id, email: me.email, username: me.username, role: me.role }
