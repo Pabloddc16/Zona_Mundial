@@ -49,14 +49,21 @@ export default function PurchasesPage() {
   const cancelMut = useMutation({ mutationFn: (id: string) => api.purchases.cancel(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['purchases'] }) })
   const createMut = useMutation({ mutationFn: (body: unknown) => api.purchases.create(body), onSuccess: () => { qc.invalidateQueries({ queryKey: ['purchases'] }); setCreating(false) } })
 
+  const [detailId, setDetailId] = useState<string | null>(null)
+
   const columns = [
-    { key: 'id', header: 'ID', cell: (r: Purchase) => <span className="font-mono text-xs" style={{ color: 'var(--amber)' }}>{r.id}</span> },
-    { key: 'supplier', header: 'Supplier' },
+    { key: 'id', header: 'ID', cell: (r: Purchase) => (
+      <button onClick={() => setDetailId(r.id)} className="font-mono text-xs underline" style={{ color: 'var(--amber)' }}>{r.id}</button>
+    ) },
+    { key: 'supplier', header: 'Supplier', cell: (r: Purchase) => (
+      <button onClick={() => setDetailId(r.id)} className="underline" style={{ color: 'var(--text-primary)' }}>{r.supplier}</button>
+    ) },
     { key: 'status', header: 'Status', cell: (r: Purchase) => <Badge variant={STATUS_BADGE[r.status]}>{STATUS_LABEL[r.status] ?? r.status}</Badge> },
     { key: 'total', header: 'Total', cell: (r: Purchase) => fmt(r.total), className: 'text-right font-medium' },
     { key: 'created_at', header: 'Date', cell: (r: Purchase) => r.created_at.slice(0, 10) },
     { key: 'actions', header: '', cell: (r: Purchase) => (
       <div className="flex gap-1 justify-end">
+        <Button size="sm" variant="ghost" onClick={() => setDetailId(r.id)}>View</Button>
         {r.status === 'draft' && (
           <Button size="sm" variant="ghost" onClick={() => { setPayMethod('efectivo'); setPayDlg(r) }} className="gap-1">
             <CheckCircle2 className="h-3.5 w-3.5" /> Mark paid
@@ -128,6 +135,98 @@ export default function PurchasesPage() {
           </div>
         )}
       </Sheet>
+
+      <Sheet open={!!detailId} onClose={() => setDetailId(null)} title="Purchase detail" width="lg">
+        {detailId && <PurchaseDetail id={detailId} />}
+      </Sheet>
+    </div>
+  )
+}
+
+function PurchaseDetail({ id }: { id: string }) {
+  const { data, isLoading } = useQuery({ queryKey: ['purchase', id], queryFn: () => api.purchases.get(id) })
+  if (isLoading) return <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
+  if (!data) return <p style={{ color: 'var(--text-muted)' }}>Not found</p>
+  type DetailLine = { id: string; sku_id: string; qty: number; unit_cost: number; product?: { name?: string; sku?: string } }
+  const p = data as unknown as Purchase & { lines?: DetailLine[]; received_location?: { name?: string } }
+  const total = (p.lines ?? []).reduce((s, l) => s + Number(l.qty) * Number(l.unit_cost), 0)
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <p style={{ color: 'var(--text-muted)' }} className="text-xs uppercase tracking-wide">ID</p>
+          <p className="font-mono" style={{ color: 'var(--amber)' }}>{p.id}</p>
+        </div>
+        <div>
+          <p style={{ color: 'var(--text-muted)' }} className="text-xs uppercase tracking-wide">Status</p>
+          <Badge variant={STATUS_BADGE[p.status]}>{STATUS_LABEL[p.status] ?? p.status}</Badge>
+        </div>
+        <div>
+          <p style={{ color: 'var(--text-muted)' }} className="text-xs uppercase tracking-wide">Supplier</p>
+          <p style={{ color: 'var(--text-primary)' }}>{p.supplier}</p>
+        </div>
+        <div>
+          <p style={{ color: 'var(--text-muted)' }} className="text-xs uppercase tracking-wide">Created</p>
+          <p>{p.created_at.slice(0, 16).replace('T', ' ')}</p>
+        </div>
+        {p.paid_at && (
+          <div>
+            <p style={{ color: 'var(--text-muted)' }} className="text-xs uppercase tracking-wide">Paid</p>
+            <p>{p.paid_at.slice(0, 16).replace('T', ' ')}</p>
+          </div>
+        )}
+        {p.received_at && (
+          <div>
+            <p style={{ color: 'var(--text-muted)' }} className="text-xs uppercase tracking-wide">Received</p>
+            <p>{p.received_at.slice(0, 16).replace('T', ' ')}</p>
+          </div>
+        )}
+      </div>
+
+      <div>
+        <p className="mb-2 text-xs uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Line items</p>
+        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--glass-border)' }}>
+          <table className="w-full text-sm">
+            <thead style={{ background: 'oklch(1 0 0 / 0.03)' }}>
+              <tr>
+                <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Product</th>
+                <th className="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Qty</th>
+                <th className="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Unit cost</th>
+                <th className="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {((p.lines as DetailLine[] | undefined) ?? []).map((l: DetailLine) => (
+                <tr key={l.id} style={{ borderTop: '1px solid var(--glass-border)' }}>
+                  <td className="px-3 py-2">
+                    <p style={{ color: 'var(--text-primary)' }}>{l.product?.name ?? l.sku_id}</p>
+                    {l.product?.sku && <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{l.product.sku}</p>}
+                  </td>
+                  <td className="px-3 py-2 text-right tabular-nums">{l.qty}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{fmt(Number(l.unit_cost))}</td>
+                  <td className="px-3 py-2 text-right tabular-nums font-medium">{fmt(Number(l.qty) * Number(l.unit_cost))}</td>
+                </tr>
+              ))}
+              <tr style={{ borderTop: '1px solid var(--glass-border)', background: 'oklch(1 0 0 / 0.02)' }}>
+                <td className="px-3 py-2 font-semibold" colSpan={3} style={{ color: 'var(--text-primary)' }}>Total</td>
+                <td className="px-3 py-2 text-right tabular-nums font-bold">{fmt(total)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {p.notes && (
+        <div>
+          <p className="mb-1 text-xs uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Notes</p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{p.notes}</p>
+        </div>
+      )}
+
+      {p.received_location?.name && (
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Received to: {p.received_location.name}</p>
+      )}
     </div>
   )
 }

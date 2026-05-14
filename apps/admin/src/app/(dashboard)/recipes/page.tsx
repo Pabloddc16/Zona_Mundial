@@ -14,10 +14,24 @@ export default function RecipesPage() {
   const qc = useQueryClient()
   const [creating, setCreating] = useState(false)
 
+  const [mutError, setMutError] = useState('')
+
   const { data: recipes, isLoading } = useQuery({ queryKey: ['recipes'], queryFn: () => api.recipes.list() })
-  const deleteMut = useMutation({ mutationFn: (id: string) => api.recipes.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['recipes'] }) })
-  const toggleMut = useMutation({ mutationFn: ({ id, active }: { id: string; active: boolean }) => api.recipes.update(id, { active }), onSuccess: () => qc.invalidateQueries({ queryKey: ['recipes'] }) })
-  const createMut = useMutation({ mutationFn: (b: unknown) => api.recipes.create(b), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recipes'] }); setCreating(false) } })
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => api.recipes.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recipes'] }),
+    onError: (e: Error) => setMutError(`Delete failed: ${e.message}. If the recipe is used by any conversions, deactivate it instead.`),
+  })
+  const toggleMut = useMutation({
+    mutationFn: ({ id, active }: { id: string; active: boolean }) => api.recipes.update(id, { active }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recipes'] }),
+    onError: (e: Error) => setMutError(e.message),
+  })
+  const createMut = useMutation({
+    mutationFn: (b: unknown) => api.recipes.create(b),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['recipes'] }); setCreating(false); setMutError('') },
+    onError: (e: Error) => setMutError(e.message),
+  })
 
   const columns = [
     { key: 'name', header: 'Recipe', cell: (r: Recipe) => <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{r.name}</span> },
@@ -28,9 +42,13 @@ export default function RecipesPage() {
     )},
     { key: 'inputs', header: 'Inputs', cell: (r: Recipe) => (
       <div className="flex flex-wrap gap-1">
-        {r.lines?.map((l) => (
-          <Badge key={l.id} variant="default">{l.input_qty}× {(l as unknown as { input_product?: { name?: string } }).input_product?.name ?? l.input_sku_id}</Badge>
-        ))}
+        {(r.lines?.length ?? 0) === 0 ? (
+          <Badge variant="danger">⚠ No ingredients</Badge>
+        ) : (
+          r.lines?.map((l) => (
+            <Badge key={l.id} variant="default">{l.input_qty}× {(l as unknown as { input_product?: { name?: string } }).input_product?.name ?? l.input_sku_id}</Badge>
+          ))
+        )}
       </div>
     )},
     { key: 'active', header: 'Active', cell: (r: Recipe) => <Badge variant={r.active ? 'success' : 'default'}>{r.active ? 'Yes' : 'No'}</Badge>, className: 'text-center' },
@@ -55,6 +73,14 @@ export default function RecipesPage() {
         </div>
         <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-1" />New recipe</Button>
       </div>
+
+      {mutError && (
+        <div className="rounded-lg px-4 py-3 text-sm text-red-400 flex items-center justify-between" style={{ background: 'oklch(0.63 0.225 27 / 0.12)', border: '1px solid oklch(0.63 0.225 27 / 0.25)' }}>
+          <span>{mutError}</span>
+          <button onClick={() => setMutError('')} className="ml-3 opacity-60 hover:opacity-100">✕</button>
+        </div>
+      )}
+
       <DataTable columns={columns} data={recipes ?? []} keyFn={(r) => r.id} loading={isLoading} emptyMessage="No recipes" />
       <Sheet open={creating} onClose={() => setCreating(false)} title="New recipe">
         <RecipeForm onSave={(b) => createMut.mutate(b)} saving={createMut.isPending} error={createMut.isError ? (createMut.error as Error).message : ''} />
@@ -69,6 +95,10 @@ function RecipeForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
   const [outputQty, setOutputQty] = useState('1')
   const [lines, setLines] = useState([{ input_sku_id: '', input_qty: '1' }])
   const { data: products } = useQuery({ queryKey: ['products', 1, '', ''], queryFn: () => api.products.list({ limit: '100' }) })
+
+  const validLines = lines
+    .filter((l) => l.input_sku_id && Number(l.input_qty) > 0)
+    .map((l) => ({ input_sku_id: l.input_sku_id, input_qty: Number(l.input_qty) }))
 
   const addLine = () => setLines([...lines, { input_sku_id: '', input_qty: '1' }])
   const removeLine = (i: number) => setLines(lines.filter((_, idx) => idx !== i))
@@ -110,7 +140,12 @@ function RecipeForm({ onSave, saving, error }: { onSave: (b: unknown) => void; s
         ))}
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
-      <Button className="w-full" disabled={saving || !name || !outputSkuId} onClick={() => onSave({ name, output_sku_id: outputSkuId, output_qty: Number(outputQty), lines: lines.filter((l) => l.input_sku_id).map((l) => ({ input_sku_id: l.input_sku_id, input_qty: Number(l.input_qty) })) })}>
+      {validLines.length === 0 && (
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          ⚠ Add at least one input ingredient. A recipe without ingredients can't be used to start a conversion.
+        </p>
+      )}
+      <Button className="w-full" disabled={saving || !name || !outputSkuId || validLines.length === 0} onClick={() => onSave({ name, output_sku_id: outputSkuId, output_qty: Number(outputQty), lines: validLines })}>
         {saving ? 'Saving...' : 'Create recipe'}
       </Button>
     </div>

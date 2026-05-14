@@ -65,17 +65,16 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
     const supabase = getClient()
     const productIds = items.map((i) => i.product_id).filter(Boolean) as string[]
     const { data: products } = productIds.length
-      ? await supabase.from('products').select('id, cost, stock, name, emoji').in('id', productIds)
+      ? await supabase.from('products').select('id, cost, name, emoji').in('id', productIds)
       : { data: [] }
 
-    // Validate stock and build enriched items
+    // Build enriched items. Stock is validated inside recordMovements against the
+    // movements-backed stock view — the legacy products.stock column is always 0
+    // since we moved to the ledger model.
     const enrichedItems = []
     for (const raw of items) {
       const product = products?.find((p) => p.id === raw.product_id)
-      if (raw.product_id && !product) return reply.badRequest(`Producto no encontrado: ${raw.product_id}`)
-      if (product && typeof product.stock === 'number' && product.stock < raw.quantity) {
-        return reply.badRequest(`Stock insuficiente: ${raw.product_id}`)
-      }
+      if (raw.product_id && !product) return reply.badRequest(`Product not found: ${raw.product_id}`)
       const cost = Number(product?.cost ?? 0)
       enrichedItems.push({
         ...raw,
