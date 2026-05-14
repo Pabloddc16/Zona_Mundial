@@ -1,3 +1,10 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  # customer-web is a standalone Vite PWA (imported from external reference repo).
+  # Its sharp@^0.34 dep needs prebuilt binaries that don't exist for the EAS
+  # macOS arm64 build image — and customer-web isn't required for mobile/admin/api
+  # builds. Keep it out of the workspace install so frozen-lockfile installs stay
+  # green on EAS. Run `pnpm install` inside apps/customer-web directly if you
+  # need to work on it.
+  - '!apps/customer-web'
