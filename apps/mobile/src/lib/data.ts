@@ -40,6 +40,7 @@ export const CATEGORIES = [
   { id: 'all', label: 'All' },
   { id: 'packs', label: 'Packs' },
   { id: 'sobres', label: 'Sticker packs' },
+  { id: 'cartas', label: 'Cards' },
   { id: 'albumes', label: 'Albums' },
   { id: 'coca', label: 'Coca-Cola' },
   { id: 'jerseys', label: 'Jerseys' },

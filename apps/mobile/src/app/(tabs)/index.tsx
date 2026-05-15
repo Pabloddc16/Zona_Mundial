@@ -197,10 +197,12 @@ function Section({
 }) {
   return (
     <View style={s.section}>
-      <TouchableOpacity onPress={onToggle} style={s.sectionHeader} activeOpacity={0.7}>
+      <View style={s.sectionHeader}>
         <Text style={s.sectionTitle}>{group.name} {group.emoji}</Text>
-        <Text style={s.sectionToggle}>{collapsed ? '▼' : '▲'}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={onToggle} hitSlop={{ top: 12, right: 12, bottom: 12, left: 12 }} style={s.chevronBtn}>
+          <Text style={s.sectionToggle}>{collapsed ? '▼' : '▲'}</Text>
+        </TouchableOpacity>
+      </View>
       {!collapsed && (
         <View style={s.stickerGrid}>
           {group.stickers.map((st) => {
@@ -264,6 +266,7 @@ const s = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm },
   sectionTitle: { fontSize: FONT.size.displayM, fontWeight: FONT.weight.bold, color: COLORS.ink },
   sectionToggle: { fontSize: 14, color: COLORS.textMuted },
+  chevronBtn: { padding: 6 },
   stickerGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: SPACING.lg, gap: 12, marginTop: SPACING.sm },
 
   sticker: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', position: 'relative' },
