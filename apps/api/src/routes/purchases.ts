@@ -17,12 +17,31 @@ const purchasesRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.get('/:id', { preHandler: fastify.authenticate }, async (req, reply) => {
     const { id } = req.params as { id: string }
-    const { data, error } = await getClient()
-      .from('purchases')
-      .select('*, lines:purchase_lines(*, product:products!sku_id(name, sku, unit_type)), received_location:locations!received_to(name)')
-      .eq('id', id).single()
-    if (error) return reply.notFound('Compra no encontrada')
-    return data
+    const sb = getClient()
+    const { data: purchase, error } = await sb.from('purchases').select('*').eq('id', id).single()
+    if (error || !purchase) {
+      req.log.warn({ id, err: error?.message }, 'purchase detail not found')
+      return reply.notFound('Purchase not found')
+    }
+
+    const { data: lines } = await sb.from('purchase_lines').select('*').eq('purchase_id', id)
+    const rows = (lines ?? []) as Array<{ id: string; purchase_id: string; sku_id: string; qty: number; unit_cost: number; received_to: string | null }>
+
+    const skuIds = [...new Set(rows.map((l) => l.sku_id).filter(Boolean))]
+    const locIds = [...new Set(rows.map((l) => l.received_to).filter(Boolean) as string[])]
+    if (purchase['received_to']) locIds.push(purchase['received_to'])
+
+    const [{ data: products }, { data: locations }] = await Promise.all([
+      skuIds.length ? sb.from('products').select('id, name, sku, unit_type').in('id', skuIds) : Promise.resolve({ data: [] }),
+      locIds.length ? sb.from('locations').select('id, name').in('id', locIds) : Promise.resolve({ data: [] }),
+    ])
+    const productById = new Map((products ?? []).map((p) => [p.id, p]))
+    const locationById = new Map((locations ?? []).map((l) => [l.id, l]))
+
+    const enrichedLines = rows.map((l) => ({ ...l, product: productById.get(l.sku_id) ?? null }))
+    const receivedLocation = purchase['received_to'] ? locationById.get(purchase['received_to'] as string) ?? null : null
+
+    return { ...purchase, lines: enrichedLines, received_location: receivedLocation }
   })
 
   fastify.post('/', { preHandler: fastify.authenticate }, async (req, reply) => {

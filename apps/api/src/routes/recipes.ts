@@ -15,15 +15,36 @@ const recipesRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.post('/', { preHandler: fastify.authenticate }, async (req, reply) => {
     const body = req.body as { name?: string; output_sku_id?: string; output_qty?: number; lines?: { input_sku_id: string; input_qty: number }[] }
-    if (!body.name || !body.output_sku_id) return reply.badRequest('name y output_sku_id requeridos')
+    if (!body.name || !body.output_sku_id) return reply.badRequest('name and output_sku_id required')
+    if (!body.lines?.length) return reply.badRequest('At least one ingredient line is required')
+
     const sb = getClient()
     const recipeId = `recipe_${randomUUID().slice(0, 8)}`
-    const { data, error } = await sb.from('recipes').insert({ id: recipeId, name: body.name, output_sku_id: body.output_sku_id, output_qty: body.output_qty ?? 1 }).select().single()
-    if (error) throw new Error(error.message)
-    if (body.lines?.length) {
-      const lineRows = body.lines.map((l, i) => ({ id: `rl_${randomUUID().slice(0, 8)}_${i}`, recipe_id: recipeId, input_sku_id: l.input_sku_id, input_qty: l.input_qty }))
-      await sb.from('recipe_lines').insert(lineRows)
+
+    const { data, error } = await sb
+      .from('recipes')
+      .insert({ id: recipeId, name: body.name, output_sku_id: body.output_sku_id, output_qty: body.output_qty ?? 1 })
+      .select()
+      .single()
+    if (error) {
+      req.log.warn({ err: error.message, step: 'recipes.insert' }, 'recipe create failed')
+      return reply.badRequest(error.message)
     }
+
+    const lineRows = body.lines.map((l, i) => ({
+      id: `rl_${randomUUID().slice(0, 8)}_${i}`,
+      recipe_id: recipeId,
+      input_sku_id: l.input_sku_id,
+      input_qty: Number(l.input_qty),
+    }))
+    const { error: linesErr } = await sb.from('recipe_lines').insert(lineRows)
+    if (linesErr) {
+      // Roll back the recipe row so we don't leave a 0-line orphan
+      await sb.from('recipes').delete().eq('id', recipeId)
+      req.log.warn({ err: linesErr.message, lineRows, step: 'recipe_lines.insert' }, 'recipe lines insert failed')
+      return reply.badRequest(`Recipe ingredients couldn't be saved: ${linesErr.message}`)
+    }
+
     return reply.code(201).send(data)
   })
 
