@@ -29,8 +29,12 @@ export default function AlbumScreen() {
         <View style={s.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text style={s.title}>My Album</Text>
-            <TouchableOpacity onPress={() => router.push('/settings')} style={{ padding: SPACING.sm }}>
-              <Text style={{ fontSize: 22 }}>⚙️</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/tienda')}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: SPACING.sm, paddingHorizontal: SPACING.md, backgroundColor: COLORS.ink, borderRadius: 999 }}
+            >
+              <Text style={{ fontSize: 16 }}>🛒</Text>
+              <Text style={{ color: COLORS.paper, fontWeight: '700', fontSize: 13 }}>Store</Text>
             </TouchableOpacity>
           </View>
           <Text style={s.subtitle}>{stats.owned} / {TOTAL_STICKERS} stickers</Text>

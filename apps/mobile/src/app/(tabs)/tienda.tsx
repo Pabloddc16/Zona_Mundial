@@ -12,6 +12,8 @@ export default function TiendaScreen() {
   const [cat, setCat] = useState('all')
   const [added, setAdded] = useState<string | null>(null)
   const add = useCartStore((s) => s.add)
+  const cart = useCartStore((s) => s.cart)
+  const cartCount = Object.values(cart).reduce((a, b) => a + b, 0)
   const products = useProductsStore((s) => s.products)
 
   const visible = cat === 'all' ? products : products.filter((p) => p.category === cat)
@@ -25,7 +27,37 @@ export default function TiendaScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <View style={s.titleRow}><Text style={s.title}>Store</Text></View>
+      {/* Header with back + cart */}
+      <View style={s.headerBar}>
+        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
+          <Text style={s.backIcon}>‹</Text>
+        </TouchableOpacity>
+        <Text style={s.title}>Store</Text>
+        <TouchableOpacity onPress={() => router.push('/carrito')} style={s.cartBtn}>
+          <Text style={{ fontSize: 18 }}>🛒</Text>
+          {cartCount > 0 && (
+            <View style={s.cartBadge}>
+              <Text style={s.cartBadgeText}>{cartCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Uber-Eats style 3 mode buttons */}
+      <View style={s.modeRow}>
+        <TouchableOpacity style={[s.modeBtn, s.modeBtnActive]}>
+          <Text style={{ fontSize: 22 }}>📦</Text>
+          <Text style={s.modeBtnTextActive}>Delivery</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={s.modeBtn}>
+          <Text style={{ fontSize: 22 }}>🏪</Text>
+          <Text style={s.modeBtnText}>Pickup</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={s.modeBtn}>
+          <Text style={{ fontSize: 22 }}>🎁</Text>
+          <Text style={s.modeBtnText}>Gift</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Category pills */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.catScroll}>
@@ -71,8 +103,19 @@ export default function TiendaScreen() {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.cream },
+  headerBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.sm },
+  backBtn: { width: 36, height: 36, borderRadius: RADIUS.md, backgroundColor: COLORS.surface2, alignItems: 'center', justifyContent: 'center' },
+  backIcon: { fontSize: 22, color: COLORS.ink, lineHeight: 26 },
+  cartBtn: { width: 40, height: 40, borderRadius: RADIUS.full, backgroundColor: COLORS.ink, alignItems: 'center', justifyContent: 'center' },
+  cartBadge: { position: 'absolute', top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: COLORS.red, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
+  cartBadgeText: { color: COLORS.paper, fontWeight: '800', fontSize: 10 },
+  modeRow: { flexDirection: 'row', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
+  modeBtn: { flex: 1, padding: SPACING.md, borderRadius: RADIUS.lg, backgroundColor: COLORS.paper, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, gap: 6 },
+  modeBtnActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
+  modeBtnText: { fontSize: FONT.size.bodyM, fontWeight: '700', color: COLORS.ink },
+  modeBtnTextActive: { fontSize: FONT.size.bodyM, fontWeight: '700', color: COLORS.paper },
   titleRow: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.xs },
-  title: { fontSize: FONT.size.displayXL, fontWeight: FONT.weight.black, color: COLORS.ink },
+  title: { fontSize: FONT.size.displayL, fontWeight: FONT.weight.black, color: COLORS.ink },
   catScroll: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm, gap: SPACING.sm, flexDirection: 'row' },
   pill: { paddingHorizontal: SPACING.lg, paddingVertical: 6, borderRadius: RADIUS.full, borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.paper },
   pillActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },

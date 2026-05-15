@@ -1,21 +1,15 @@
 import { Tabs } from 'expo-router'
 import { Platform } from 'react-native'
-import { useCartStore, cartCount } from '@/lib/cart-store'
 import { Ionicons } from '@expo/vector-icons'
-
-const VERDE = '#006341'
-const GRAY = '#9CA3AF'
+import { COLORS } from '@/lib/theme'
 
 export default function TabsLayout() {
-  const cart = useCartStore((s) => s.cart)
-  const count = cartCount(cart)
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: VERDE,
-        tabBarInactiveTintColor: GRAY,
+        tabBarActiveTintColor: COLORS.green,
+        tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
           borderTopColor: '#F3F4F6',
           elevation: 0,
@@ -31,26 +25,21 @@ export default function TabsLayout() {
         options={{ title: 'Album', tabBarIcon: ({ color, size }) => <Ionicons name="book-outline" size={size} color={color} /> }}
       />
       <Tabs.Screen
-        name="tienda"
-        options={{ title: 'Store', tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} /> }}
-      />
-      <Tabs.Screen
         name="stats"
-        options={{ title: 'Stats', tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart-outline" size={size} color={color} /> }}
+        options={{ title: 'Stats', tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart-outline" size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="swap"
-        options={{ title: 'Swap', tabBarIcon: ({ color, size }) => <Ionicons name="qr-code-outline" size={size} color={color} /> }}
+        options={{ title: 'Trade', tabBarIcon: ({ color, size }) => <Ionicons name="sync-circle-outline" size={size} color={color} /> }}
       />
       <Tabs.Screen
-        name="carrito"
-        options={{
-          title: 'Cart',
-          tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" size={size} color={color} />,
-          tabBarBadgeStyle: { backgroundColor: '#CE1126', fontSize: 10 },
-          ...(count > 0 ? { tabBarBadge: count } : {}),
-        }}
+        name="settings"
+        options={{ title: 'Settings', tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} /> }}
       />
+
+      {/* Hidden — still routable, just not in tab bar */}
+      <Tabs.Screen name="tienda" options={{ href: null }} />
+      <Tabs.Screen name="carrito" options={{ href: null }} />
     </Tabs>
   )
 }
