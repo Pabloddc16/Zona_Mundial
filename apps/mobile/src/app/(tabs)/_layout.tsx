@@ -25,6 +25,10 @@ export default function TabsLayout() {
         options={{ title: 'Album', tabBarIcon: ({ color, size }) => <Ionicons name="book-outline" size={size} color={color} /> }}
       />
       <Tabs.Screen
+        name="tienda"
+        options={{ title: 'Store', tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} /> }}
+      />
+      <Tabs.Screen
         name="stats"
         options={{ title: 'Stats', tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart-outline" size={size} color={color} /> }}
       />
@@ -37,8 +41,7 @@ export default function TabsLayout() {
         options={{ title: 'Settings', tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} /> }}
       />
 
-      {/* Hidden — still routable, just not in tab bar */}
-      <Tabs.Screen name="tienda" options={{ href: null }} />
+      {/* Hidden — cart still routable from inside Store */}
       <Tabs.Screen name="carrito" options={{ href: null }} />
     </Tabs>
   )
