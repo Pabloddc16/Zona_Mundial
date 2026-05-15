@@ -40,20 +40,33 @@ const conversionsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.patch('/:id/start', { preHandler: fastify.authenticate }, async (req, reply) => {
     const { id } = req.params as { id: string }
     const sb = getClient()
-    const { data: conv } = await sb.from('conversions').select('status, qty, recipe:recipes(recipe_lines(*))').eq('id', id).single()
-    if (!conv) return reply.notFound()
-    const c = conv as unknown as { status: string; qty: number; recipe: { recipe_lines: { input_sku_id: string; input_qty: number }[] } | null }
-    if (c.status !== 'planned') return reply.badRequest('Solo conversiones planificadas pueden iniciarse')
-    if (!c.recipe?.recipe_lines?.length) return reply.badRequest('La receta no tiene ingredientes')
 
-    const movements = c.recipe.recipe_lines.map((l) => ({
-      sku_id: l.input_sku_id, qty: l.input_qty * c.qty,
-      location_from: 'loc_warehouse', location_to: 'loc_wip_conv',
-      type: 'conversion_out' as const, ref_table: 'conversions', ref_id: id,
+    const { data: conv } = await sb.from('conversions').select('status, qty, recipe_id').eq('id', id).single()
+    if (!conv) return reply.notFound()
+    const c = conv as { status: string; qty: number; recipe_id: string }
+    if (c.status !== 'planned') return reply.badRequest(`Conversion is already '${c.status}', only 'planned' can be started`)
+
+    // Fetch recipe lines manually — PostgREST nested embed can return [] inconsistently
+    const { data: linesData } = await sb.from('recipe_lines').select('input_sku_id, input_qty').eq('recipe_id', c.recipe_id)
+    const lines = (linesData ?? []) as Array<{ input_sku_id: string; input_qty: number }>
+    if (lines.length === 0) return reply.badRequest('Recipe has no ingredients — add ingredient lines before starting a conversion')
+
+    const movements = lines.map((l) => ({
+      sku_id: l.input_sku_id,
+      qty: l.input_qty * c.qty,
+      location_from: 'loc_warehouse',
+      location_to: 'loc_wip_conv',
+      type: 'conversion_out' as const,
+      ref_table: 'conversions',
+      ref_id: id,
       created_by: req.user?.username ?? null,
     }))
 
-    await recordMovements(movements)
+    try {
+      await recordMovements(movements)
+    } catch (err) {
+      return reply.badRequest((err as Error).message)
+    }
 
     const { data } = await sb.from('conversions').update({ status: 'in_progress', started_at: new Date().toISOString() }).eq('id', id).select().single()
     return data
@@ -62,28 +75,48 @@ const conversionsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.patch('/:id/finish', { preHandler: fastify.authenticate }, async (req, reply) => {
     const { id } = req.params as { id: string }
     const sb = getClient()
-    const { data: conv } = await sb.from('conversions').select('status, qty, location_id, recipe:recipes(output_sku_id, output_qty, recipe_lines(*))').eq('id', id).single()
+
+    const { data: conv } = await sb.from('conversions').select('status, qty, location_id, recipe_id').eq('id', id).single()
     if (!conv) return reply.notFound()
-    const c = conv as unknown as { status: string; qty: number; location_id: string; recipe: { output_sku_id: string; output_qty: number; recipe_lines: { input_sku_id: string; input_qty: number }[] } | null }
-    if (c.status !== 'in_progress') return reply.badRequest('Solo conversiones en progreso pueden finalizarse')
+    const c = conv as { status: string; qty: number; location_id: string; recipe_id: string }
+    if (c.status !== 'in_progress') return reply.badRequest(`Conversion is '${c.status}', only 'in_progress' can be finished`)
+
+    const { data: recipe } = await sb.from('recipes').select('output_sku_id, output_qty').eq('id', c.recipe_id).single()
+    if (!recipe) return reply.badRequest('Linked recipe not found')
+
+    const { data: linesData } = await sb.from('recipe_lines').select('input_sku_id, input_qty').eq('recipe_id', c.recipe_id)
+    const lines = (linesData ?? []) as Array<{ input_sku_id: string; input_qty: number }>
+    if (lines.length === 0) return reply.badRequest('Recipe has no ingredients to consume')
 
     const wip_location = 'loc_wip_conv'
-    const consumeMovements = c.recipe!.recipe_lines.map((l) => ({
-      sku_id: l.input_sku_id, qty: l.input_qty * c.qty,
-      location_from: wip_location, location_to: null,
-      type: 'conversion_out' as const, ref_table: 'conversions', ref_id: id,
+    const consumeMovements = lines.map((l) => ({
+      sku_id: l.input_sku_id,
+      qty: l.input_qty * c.qty,
+      location_from: wip_location,
+      location_to: null,
+      type: 'conversion_out' as const,
+      ref_table: 'conversions',
+      ref_id: id,
       created_by: req.user?.username ?? null,
     }))
 
-    const outputQty = c.recipe!.output_qty * c.qty
+    const outputQty = (recipe as { output_qty: number }).output_qty * c.qty
     const produceMovement = {
-      sku_id: c.recipe!.output_sku_id, qty: outputQty,
-      location_from: null, location_to: c.location_id,
-      type: 'conversion_in' as const, ref_table: 'conversions', ref_id: id,
+      sku_id: (recipe as { output_sku_id: string }).output_sku_id,
+      qty: outputQty,
+      location_from: null,
+      location_to: c.location_id,
+      type: 'conversion_in' as const,
+      ref_table: 'conversions',
+      ref_id: id,
       created_by: req.user?.username ?? null,
     }
 
-    await recordMovements([...consumeMovements, produceMovement])
+    try {
+      await recordMovements([...consumeMovements, produceMovement])
+    } catch (err) {
+      return reply.badRequest((err as Error).message)
+    }
 
     const { data } = await sb.from('conversions').update({ status: 'done', finished_at: new Date().toISOString() }).eq('id', id).select().single()
     return data
@@ -92,20 +125,33 @@ const conversionsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.patch('/:id/cancel', { preHandler: fastify.authenticate }, async (req, reply) => {
     const { id } = req.params as { id: string }
     const sb = getClient()
-    const { data: conv } = await sb.from('conversions').select('status, qty, recipe:recipes(recipe_lines(*))').eq('id', id).single()
+
+    const { data: conv } = await sb.from('conversions').select('status, qty, recipe_id').eq('id', id).single()
     if (!conv) return reply.notFound()
-    const c = conv as unknown as { status: string; qty: number; recipe: { recipe_lines: { input_sku_id: string; input_qty: number }[] } | null }
-    if (c.status === 'done' || c.status === 'cancelled') return reply.badRequest('No se puede cancelar esta conversión')
+    const c = conv as { status: string; qty: number; recipe_id: string }
+    if (c.status === 'done' || c.status === 'cancelled') return reply.badRequest(`Conversion is already '${c.status}'`)
 
     if (c.status === 'in_progress') {
-      const reverseMovements = c.recipe!.recipe_lines.map((l) => ({
-        sku_id: l.input_sku_id, qty: l.input_qty * c.qty,
-        location_from: 'loc_wip_conv', location_to: 'loc_warehouse',
-        type: 'transfer' as const, ref_table: 'conversions', ref_id: id,
-        note: 'Reversión por cancelación',
-        created_by: req.user?.username ?? null,
-      }))
-      await recordMovements(reverseMovements)
+      const { data: linesData } = await sb.from('recipe_lines').select('input_sku_id, input_qty').eq('recipe_id', c.recipe_id)
+      const lines = (linesData ?? []) as Array<{ input_sku_id: string; input_qty: number }>
+      if (lines.length > 0) {
+        const reverseMovements = lines.map((l) => ({
+          sku_id: l.input_sku_id,
+          qty: l.input_qty * c.qty,
+          location_from: 'loc_wip_conv',
+          location_to: 'loc_warehouse',
+          type: 'transfer' as const,
+          ref_table: 'conversions',
+          ref_id: id,
+          note: 'Cancellation reversal',
+          created_by: req.user?.username ?? null,
+        }))
+        try {
+          await recordMovements(reverseMovements)
+        } catch (err) {
+          return reply.badRequest((err as Error).message)
+        }
+      }
     }
 
     const { data } = await sb.from('conversions').update({ status: 'cancelled' }).eq('id', id).select().single()

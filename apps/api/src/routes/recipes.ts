@@ -5,12 +5,42 @@ import { randomUUID } from 'crypto'
 const recipesRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get('/', { preHandler: fastify.authenticate }, async () => {
     const sb = getClient()
-    const { data: recipes, error } = await sb
-      .from('recipes')
-      .select('*, output_product:products!output_sku_id(name, sku), recipe_lines(*, input_product:products!input_sku_id(name, sku))')
-      .order('name')
+    // Manual join because PostgREST nested embeds sometimes return empty arrays
+    // for recipe_lines even when rows exist (FK introspection inconsistency).
+    const { data: recipes, error } = await sb.from('recipes').select('*').order('name')
     if (error) throw new Error(error.message)
-    return recipes
+    const recipeRows = recipes ?? []
+    if (recipeRows.length === 0) return []
+
+    const recipeIds = recipeRows.map((r) => r.id as string)
+    const { data: lines } = await sb.from('recipe_lines').select('*').in('recipe_id', recipeIds)
+    const lineRows = (lines ?? []) as Array<{ id: string; recipe_id: string; input_sku_id: string; input_qty: number }>
+
+    const outputSkuIds = [...new Set(recipeRows.map((r) => r.output_sku_id as string))]
+    const inputSkuIds = [...new Set(lineRows.map((l) => l.input_sku_id))]
+    const allSkuIds = [...new Set([...outputSkuIds, ...inputSkuIds])]
+
+    const { data: products } = allSkuIds.length
+      ? await sb.from('products').select('id, name, sku').in('id', allSkuIds)
+      : { data: [] }
+    const productById = new Map((products ?? []).map((p) => [p.id, p]))
+
+    const linesByRecipe = new Map<string, typeof lineRows>()
+    for (const l of lineRows) {
+      const arr = linesByRecipe.get(l.recipe_id) ?? []
+      arr.push(l)
+      linesByRecipe.set(l.recipe_id, arr)
+    }
+
+    return recipeRows.map((r) => ({
+      ...r,
+      output_product: productById.get(r.output_sku_id as string) ?? null,
+      lines: (linesByRecipe.get(r.id as string) ?? []).map((l) => ({
+        ...l,
+        input_product: productById.get(l.input_sku_id) ?? null,
+      })),
+      recipe_lines: linesByRecipe.get(r.id as string) ?? [],
+    }))
   })
 
   fastify.post('/', { preHandler: fastify.authenticate }, async (req, reply) => {
