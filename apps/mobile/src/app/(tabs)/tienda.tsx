@@ -30,7 +30,7 @@ export default function TiendaScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      {/* Header — cart on the left per colleague's request */}
+      {/* Header — cart left, Cards quick-filter top-right */}
       <View style={s.headerBar}>
         <TouchableOpacity onPress={() => router.push('/carrito')} style={s.cartBtn}>
           <Text style={{ fontSize: 18 }}>🛒</Text>
@@ -41,9 +41,17 @@ export default function TiendaScreen() {
           )}
         </TouchableOpacity>
         <Text style={s.title}>Store</Text>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-          <Text style={s.backIcon}>✕</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity
+            onPress={() => setCat(cat === 'cartas' ? 'all' : 'cartas')}
+            style={[s.cardaBtn, cat === 'cartas' && s.cardaBtnActive]}
+          >
+            <Text style={[s.cardaBtnText, cat === 'cartas' && s.cardaBtnTextActive]}>🃏 Cards</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backIcon}>✕</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Uber-Eats style 3 mode buttons */}
@@ -128,6 +136,10 @@ const s = StyleSheet.create({
   modeBtnTextActive: { fontSize: FONT.size.bodyM, fontWeight: '700', color: COLORS.paper },
   modeHint: { paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm },
   modeHintText: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, fontStyle: 'italic' },
+  cardaBtn: { backgroundColor: COLORS.paper, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: COLORS.border },
+  cardaBtnActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
+  cardaBtnText: { fontSize: 12, fontWeight: '700', color: COLORS.ink },
+  cardaBtnTextActive: { color: COLORS.paper },
   titleRow: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.xs },
   title: { fontSize: FONT.size.displayL, fontWeight: FONT.weight.black, color: COLORS.ink },
   catScroll: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm, gap: SPACING.sm, flexDirection: 'row' },
