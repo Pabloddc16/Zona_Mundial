@@ -79,14 +79,29 @@ export default function TiendaScreen() {
         </Text>
       </View>
 
-      {/* Category pills */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.catScroll}>
-        {CATEGORIES.map((c) => (
-          <TouchableOpacity key={c.id} onPress={() => setCat(c.id)} style={[s.pill, cat === c.id && s.pillActive]}>
-            <Text style={[s.pillText, cat === c.id && s.pillTextActive]}>{c.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {/* Category pills — horizontal stable scroll */}
+      <View style={s.catWrap}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={s.catScroll}
+          keyboardShouldPersistTaps="handled"
+        >
+          {CATEGORIES.map((c) => {
+            const active = cat === c.id
+            return (
+              <TouchableOpacity
+                key={c.id}
+                onPress={() => setCat(c.id)}
+                style={[s.pill, active && s.pillActive]}
+                activeOpacity={0.7}
+              >
+                <Text style={[s.pillText, active && s.pillTextActive]} numberOfLines={1}>{c.label}</Text>
+              </TouchableOpacity>
+            )
+          })}
+        </ScrollView>
+      </View>
 
       <FlatList
         data={visible}
@@ -142,11 +157,32 @@ const s = StyleSheet.create({
   cardaBtnTextActive: { color: COLORS.paper },
   titleRow: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.xs },
   title: { fontSize: FONT.size.displayL, fontWeight: FONT.weight.black, color: COLORS.ink },
-  catScroll: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm, gap: SPACING.sm, flexDirection: 'row' },
-  pill: { paddingHorizontal: SPACING.lg, paddingVertical: 6, borderRadius: RADIUS.full, borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.paper },
-  pillActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
-  pillText: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.textMuted },
-  pillTextActive: { color: COLORS.paper },
+  catWrap: { height: 52, justifyContent: 'center' },
+  catScroll: { paddingHorizontal: SPACING.lg, alignItems: 'center', gap: SPACING.sm, paddingVertical: 0 },
+  pill: {
+    height: 36,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 60,
+  },
+  pillActive: {
+    backgroundColor: COLORS.ink,
+    borderColor: COLORS.ink,
+  },
+  pillText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    includeFontPadding: false,
+  },
+  pillTextActive: {
+    color: COLORS.paper,
+  },
   list: { paddingHorizontal: SPACING.md, paddingBottom: SPACING.xxxl },
   row: { gap: SPACING.md, marginBottom: SPACING.md },
   card: { flex: 1, backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border, ...SHADOW.sm },
