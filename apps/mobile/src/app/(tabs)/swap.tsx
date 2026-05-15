@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import QRCode from 'react-native-qrcode-svg'
 import { CameraView, useCameraPermissions } from 'expo-camera'
+import { Ionicons } from '@expo/vector-icons'
 import { useAlbumStore } from '@/lib/album-store'
 import { useAuthStore } from '@/lib/auth-store'
 import { ALBUM } from '@/lib/data'
@@ -87,7 +88,7 @@ export default function SwapScreen() {
 
             {extras.length === 0 && needed.length === 0 ? (
               <View style={s.emptyBox}>
-                <Text style={{ fontSize: 40, marginBottom: SPACING.sm }}>📚</Text>
+                <Ionicons name="book-outline" size={48} color={COLORS.textMuted} style={{ marginBottom: SPACING.sm }} />
                 <Text style={s.emptyText}>Mark stickers in your album to generate your swap code</Text>
               </View>
             ) : (
@@ -107,12 +108,17 @@ export default function SwapScreen() {
         {mode === 'scan' && (
           <View style={{ gap: SPACING.md }}>
             {!permission?.granted ? (
-              <View style={s.emptyBox}>
-                <Text style={{ fontSize: 40, marginBottom: SPACING.sm }}>📷</Text>
-                <Text style={s.emptyText}>Camera permission needed to scan QR codes</Text>
-                <TouchableOpacity style={[s.btn, { marginTop: SPACING.md }]} onPress={requestPermission}>
-                  <Text style={s.btnText}>Allow camera</Text>
+              <View style={s.permCard}>
+                <View style={s.permIconWrap}>
+                  <Ionicons name="camera-outline" size={40} color={COLORS.green} />
+                </View>
+                <Text style={s.permTitle}>Camera access needed</Text>
+                <Text style={s.permSub}>Scan QR codes from other collectors to find sticker swap matches.</Text>
+                <TouchableOpacity style={s.permBtn} onPress={requestPermission} activeOpacity={0.85}>
+                  <Ionicons name="camera" size={18} color={COLORS.paper} />
+                  <Text style={s.permBtnText}>Enable camera</Text>
                 </TouchableOpacity>
+                <Text style={s.permHint}>You can change this anytime in Settings.</Text>
               </View>
             ) : scanned ? (
               <>
@@ -177,6 +183,13 @@ const s = StyleSheet.create({
   statLabel: { fontSize: FONT.size.bodyS, fontWeight: FONT.weight.bold, textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 },
   emptyBox: { alignItems: 'center', paddingVertical: SPACING.xxl, paddingHorizontal: SPACING.lg },
   emptyText: { fontSize: FONT.size.bodyM, color: COLORS.textMuted, textAlign: 'center' },
+  permCard: { backgroundColor: COLORS.paper, borderRadius: RADIUS.xxl, padding: SPACING.xl, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, ...SHADOW.md, marginTop: SPACING.md },
+  permIconWrap: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(0,99,65,0.10)', alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.lg },
+  permTitle: { fontSize: FONT.size.displayM, fontWeight: FONT.weight.bold, color: COLORS.ink, marginBottom: SPACING.xs },
+  permSub: { fontSize: FONT.size.bodyM, color: COLORS.textMuted, textAlign: 'center', marginBottom: SPACING.lg, lineHeight: 18, paddingHorizontal: SPACING.lg },
+  permBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: COLORS.green, borderRadius: RADIUS.lg, paddingHorizontal: SPACING.xl, paddingVertical: SPACING.md },
+  permBtnText: { color: COLORS.paper, fontWeight: FONT.weight.bold, fontSize: FONT.size.bodyL },
+  permHint: { fontSize: FONT.size.bodyS, color: COLORS.textFaint, marginTop: SPACING.md },
   qrCard: { backgroundColor: COLORS.paper, borderRadius: RADIUS.xxl, padding: SPACING.xl, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, ...SHADOW.md },
   qrCaption: { fontSize: FONT.size.bodyM, color: COLORS.textMuted, marginTop: SPACING.md, fontWeight: FONT.weight.medium },
   btn: { backgroundColor: COLORS.ink, borderRadius: RADIUS.lg, paddingVertical: SPACING.lg, alignItems: 'center' },

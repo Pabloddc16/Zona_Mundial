@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics'
 import { CATEGORIES, fmt } from '@/lib/data'
 import { useCartStore } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
+import { Ionicons } from '@expo/vector-icons'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 type Mode = 'delivery' | 'pickup' | 'gift'
@@ -33,7 +34,7 @@ export default function TiendaScreen() {
       {/* Header — cart left, Cards quick-filter top-right */}
       <View style={s.headerBar}>
         <TouchableOpacity onPress={() => router.push('/carrito')} style={s.cartBtn}>
-          <Text style={{ fontSize: 18 }}>🛒</Text>
+          <Ionicons name="cart-outline" size={20} color={COLORS.paper} />
           {cartCount > 0 && (
             <View style={s.cartBadge}>
               <Text style={s.cartBadgeText}>{cartCount}</Text>
@@ -46,10 +47,15 @@ export default function TiendaScreen() {
             onPress={() => setCat(cat === 'cartas' ? 'all' : 'cartas')}
             style={[s.cardaBtn, cat === 'cartas' && s.cardaBtnActive]}
           >
-            <Text style={[s.cardaBtnText, cat === 'cartas' && s.cardaBtnTextActive]}>🃏 Cards</Text>
+            <Ionicons
+              name="albums-outline"
+              size={14}
+              color={cat === 'cartas' ? COLORS.paper : COLORS.ink}
+            />
+            <Text style={[s.cardaBtnText, cat === 'cartas' && s.cardaBtnTextActive]}>Cards</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-            <Text style={s.backIcon}>✕</Text>
+          <TouchableOpacity onPress={() => router.back()} style={s.backBtn} hitSlop={8}>
+            <Ionicons name="close" size={20} color={COLORS.ink} />
           </TouchableOpacity>
         </View>
       </View>
@@ -57,15 +63,15 @@ export default function TiendaScreen() {
       {/* Uber-Eats style 3 mode buttons */}
       <View style={s.modeRow}>
         <TouchableOpacity style={[s.modeBtn, mode === 'delivery' && s.modeBtnActive]} onPress={() => setMode('delivery')}>
-          <Text style={{ fontSize: 22 }}>📦</Text>
+          <Ionicons name="cube-outline" size={22} color={mode === 'delivery' ? COLORS.paper : COLORS.ink} />
           <Text style={mode === 'delivery' ? s.modeBtnTextActive : s.modeBtnText}>Delivery</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.modeBtn, mode === 'pickup' && s.modeBtnActive]} onPress={() => setMode('pickup')}>
-          <Text style={{ fontSize: 22 }}>🏪</Text>
+          <Ionicons name="storefront-outline" size={22} color={mode === 'pickup' ? COLORS.paper : COLORS.ink} />
           <Text style={mode === 'pickup' ? s.modeBtnTextActive : s.modeBtnText}>Pickup</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.modeBtn, mode === 'gift' && s.modeBtnActive]} onPress={() => setMode('gift')}>
-          <Text style={{ fontSize: 22 }}>🎁</Text>
+          <Ionicons name="gift-outline" size={22} color={mode === 'gift' ? COLORS.paper : COLORS.ink} />
           <Text style={mode === 'gift' ? s.modeBtnTextActive : s.modeBtnText}>Gift</Text>
         </TouchableOpacity>
       </View>
@@ -151,7 +157,7 @@ const s = StyleSheet.create({
   modeBtnTextActive: { fontSize: FONT.size.bodyM, fontWeight: '700', color: COLORS.paper },
   modeHint: { paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm },
   modeHintText: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, fontStyle: 'italic' },
-  cardaBtn: { backgroundColor: COLORS.paper, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: COLORS.border },
+  cardaBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: COLORS.paper, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: COLORS.border },
   cardaBtnActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
   cardaBtnText: { fontSize: 12, fontWeight: '700', color: COLORS.ink },
   cardaBtnTextActive: { color: COLORS.paper },

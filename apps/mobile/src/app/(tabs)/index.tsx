@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, Modal,
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
+import { Ionicons } from '@expo/vector-icons'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
 import { ALBUM, TOTAL_STICKERS, type AlbumGroup } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
@@ -82,14 +83,15 @@ export default function AlbumScreen() {
           <Text style={s.dropdownIcon}>▼</Text>
         </TouchableOpacity>
         <View style={s.iconRow}>
-          <TouchableOpacity onPress={() => setLocked((v) => !v)} style={s.iconBtn}>
-            <Text style={{ fontSize: 18 }}>{locked ? '🔒' : '🔓'}</Text>
+          <TouchableOpacity onPress={() => setLocked((v) => !v)} style={s.iconBtn} hitSlop={8}>
+            <Ionicons name={locked ? 'lock-closed' : 'lock-open-outline'} size={20} color={COLORS.ink} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleShare} style={s.iconBtn}>
-            <Text style={{ fontSize: 18 }}>↑</Text>
+          <TouchableOpacity onPress={handleShare} style={s.iconBtn} hitSlop={8}>
+            <Ionicons name="share-outline" size={20} color={COLORS.ink} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/tienda')} style={s.storeBtn}>
-            <Text style={s.storeBtnText}>🛒 Store</Text>
+            <Ionicons name="storefront" size={14} color={COLORS.paper} />
+            <Text style={s.storeBtnText}>Store</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -107,7 +109,7 @@ export default function AlbumScreen() {
       {/* Search */}
       <View style={s.searchRow}>
         <View style={s.search}>
-          <Text style={{ fontSize: 14, color: COLORS.textMuted }}>🔍</Text>
+          <Ionicons name="search" size={16} color={COLORS.textMuted} />
           <TextInput
             style={s.searchInput}
             value={query}
@@ -130,7 +132,7 @@ export default function AlbumScreen() {
       <ScrollView contentContainerStyle={s.scroll}>
         {visibleGroups.length === 0 && (
           <View style={s.empty}>
-            <Text style={{ fontSize: 40, marginBottom: 8 }}>📭</Text>
+            <Ionicons name="search-outline" size={40} color={COLORS.textMuted} style={{ marginBottom: 8 }} />
             <Text style={s.emptyText}>No stickers match this filter</Text>
           </View>
         )}
@@ -158,7 +160,7 @@ export default function AlbumScreen() {
                 style={[s.pickerItem, !selectedGroupId && s.pickerItemActive]}
                 onPress={() => { setSelectedGroupId(null); setPickerOpen(false) }}
               >
-                <Text style={{ fontSize: 22, marginRight: SPACING.md }}>📚</Text>
+                <Ionicons name="grid-outline" size={20} color={COLORS.ink} style={{ marginRight: SPACING.md }} />
                 <Text style={s.pickerLabel}>All sections</Text>
               </TouchableOpacity>
               {ALBUM.map((g) => (
@@ -240,7 +242,7 @@ const s = StyleSheet.create({
   dropdownIcon: { fontSize: 11, color: COLORS.ink },
   iconRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  storeBtn: { backgroundColor: COLORS.ink, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
+  storeBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.ink, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
   storeBtnText: { color: COLORS.paper, fontWeight: '700', fontSize: 12 },
 
   tabRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: COLORS.borderSoft, paddingHorizontal: SPACING.lg },

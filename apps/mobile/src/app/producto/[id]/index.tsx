@@ -46,7 +46,7 @@ export default function ProductoScreen() {
 
           {/* Qty */}
           <View style={s.qtySection}>
-            <Text style={s.qtyLabel}>Cantidad</Text>
+            <Text style={s.qtyLabel}>Quantity</Text>
             <View style={s.qtyRow}>
               <TouchableOpacity onPress={() => setQty((q) => Math.max(1, q - 1))} style={s.qtyBtn} disabled={qty <= 1}>
                 <Text style={[s.qtyBtnText, qty <= 1 && { opacity: 0.3 }]}>−</Text>
@@ -60,12 +60,12 @@ export default function ProductoScreen() {
 
           <TouchableOpacity style={[s.addBtn, added && s.addBtnDone]} onPress={handleAdd} activeOpacity={0.85}>
             <Text style={s.addBtnText}>
-              {added ? '✓ Agregado al carrito' : `Agregar${qty > 1 ? ` (${qty})` : ''} — ${fmt(product.price * qty)}`}
+              {added ? '✓ Added to cart' : `Add${qty > 1 ? ` (${qty})` : ''} — ${fmt(product.price * qty)}`}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => router.push('/carrito')} style={{ alignItems: 'center', marginTop: 12 }}>
-            <Text style={{ color: '#006341', fontWeight: '600', fontSize: 14 }}>Ver carrito</Text>
+            <Text style={{ color: '#006341', fontWeight: '600', fontSize: 14 }}>View cart</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
