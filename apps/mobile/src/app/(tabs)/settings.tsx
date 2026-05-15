@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Linking } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { router, Stack } from 'expo-router'
+import { router, Stack, Link } from 'expo-router'
 import { useAuthStore } from '@/lib/auth-store'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
@@ -65,6 +65,7 @@ export default function SettingsScreen() {
           <View style={s.card}>
             <Row label="Username" value={user?.username ?? '—'} />
             <Row label="Email" value={user?.email ?? '—'} />
+            <ActionRow label="Referral & profile" onPress={() => router.push('/referral')} />
           </View>
         </View>
 

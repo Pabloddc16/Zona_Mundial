@@ -8,8 +8,11 @@ import { useCartStore } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
+type Mode = 'delivery' | 'pickup' | 'gift'
+
 export default function TiendaScreen() {
   const [cat, setCat] = useState('all')
+  const [mode, setMode] = useState<Mode>('delivery')
   const [added, setAdded] = useState<string | null>(null)
   const add = useCartStore((s) => s.add)
   const cart = useCartStore((s) => s.cart)
@@ -27,12 +30,8 @@ export default function TiendaScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      {/* Header with back + cart */}
+      {/* Header — cart on the left per colleague's request */}
       <View style={s.headerBar}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-          <Text style={s.backIcon}>‹</Text>
-        </TouchableOpacity>
-        <Text style={s.title}>Store</Text>
         <TouchableOpacity onPress={() => router.push('/carrito')} style={s.cartBtn}>
           <Text style={{ fontSize: 18 }}>🛒</Text>
           {cartCount > 0 && (
@@ -41,22 +40,35 @@ export default function TiendaScreen() {
             </View>
           )}
         </TouchableOpacity>
+        <Text style={s.title}>Store</Text>
+        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
+          <Text style={s.backIcon}>✕</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Uber-Eats style 3 mode buttons */}
       <View style={s.modeRow}>
-        <TouchableOpacity style={[s.modeBtn, s.modeBtnActive]}>
+        <TouchableOpacity style={[s.modeBtn, mode === 'delivery' && s.modeBtnActive]} onPress={() => setMode('delivery')}>
           <Text style={{ fontSize: 22 }}>📦</Text>
-          <Text style={s.modeBtnTextActive}>Delivery</Text>
+          <Text style={mode === 'delivery' ? s.modeBtnTextActive : s.modeBtnText}>Delivery</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={s.modeBtn}>
+        <TouchableOpacity style={[s.modeBtn, mode === 'pickup' && s.modeBtnActive]} onPress={() => setMode('pickup')}>
           <Text style={{ fontSize: 22 }}>🏪</Text>
-          <Text style={s.modeBtnText}>Pickup</Text>
+          <Text style={mode === 'pickup' ? s.modeBtnTextActive : s.modeBtnText}>Pickup</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={s.modeBtn}>
+        <TouchableOpacity style={[s.modeBtn, mode === 'gift' && s.modeBtnActive]} onPress={() => setMode('gift')}>
           <Text style={{ fontSize: 22 }}>🎁</Text>
-          <Text style={s.modeBtnText}>Gift</Text>
+          <Text style={mode === 'gift' ? s.modeBtnTextActive : s.modeBtnText}>Gift</Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Mode hint banner */}
+      <View style={s.modeHint}>
+        <Text style={s.modeHintText}>
+          {mode === 'delivery' && '📍 Ships to your address in 2-5 days'}
+          {mode === 'pickup' && '🏬 Reserve and pick up at the store, no shipping fee'}
+          {mode === 'gift' && '💝 Send to a friend with a personal message'}
+        </Text>
       </View>
 
       {/* Category pills */}
@@ -114,6 +126,8 @@ const s = StyleSheet.create({
   modeBtnActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
   modeBtnText: { fontSize: FONT.size.bodyM, fontWeight: '700', color: COLORS.ink },
   modeBtnTextActive: { fontSize: FONT.size.bodyM, fontWeight: '700', color: COLORS.paper },
+  modeHint: { paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm },
+  modeHintText: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, fontStyle: 'italic' },
   titleRow: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.xs },
   title: { fontSize: FONT.size.displayL, fontWeight: FONT.weight.black, color: COLORS.ink },
   catScroll: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm, gap: SPACING.sm, flexDirection: 'row' },
