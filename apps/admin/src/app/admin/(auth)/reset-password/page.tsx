@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
     try {
       await api.auth.resetPassword(token, password)
       setDone(true)
-      setTimeout(() => router.replace('/login'), 3000)
+      setTimeout(() => router.replace('/admin/login'), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset password')
     } finally {
@@ -124,7 +124,7 @@ export default function ResetPasswordPage() {
 
         {!done && (
           <div className="mt-5 text-center">
-            <Link href="/login" className="text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>
+            <Link href="/admin/login" className="text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>
               Back to sign in
             </Link>
           </div>

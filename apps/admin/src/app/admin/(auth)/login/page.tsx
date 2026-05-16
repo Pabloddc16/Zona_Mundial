@@ -26,7 +26,7 @@ export default function LoginPage() {
       storeAT(accessToken)
       storeRT(refreshToken)
       setUser(user)
-      router.replace('/')
+      router.replace('/admin')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid credentials')
     } finally {

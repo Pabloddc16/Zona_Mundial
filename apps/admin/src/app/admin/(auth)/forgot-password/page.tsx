@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
               <p className="mb-6 text-sm" style={{ color: 'var(--text-muted)' }}>
                 If <strong style={{ color: 'var(--text-secondary)' }}>{email}</strong> exists in the system, you&apos;ll receive a recovery link within a few minutes.
               </p>
-              <Link href="/login">
+              <Link href="/admin/login">
                 <Button variant="outline" className="w-full">Back to sign in</Button>
               </Link>
             </div>
@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="mt-5 text-center">
-          <Link href="/login" className="inline-flex items-center gap-1.5 text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>
+          <Link href="/admin/login" className="inline-flex items-center gap-1.5 text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to sign in
           </Link>

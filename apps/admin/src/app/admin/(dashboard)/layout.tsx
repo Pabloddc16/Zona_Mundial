@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (!_hydrated) return
     if (!user) {
-      api.auth.me().then(setUser).catch(() => router.replace('/login'))
+      api.auth.me().then(setUser).catch(() => router.replace('/admin/login'))
     }
   }, [user, setUser, router, _hydrated])
 

@@ -100,7 +100,7 @@ export default function ConversionsPage() {
           {Object.entries(STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </Select>
         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-          WIP (in-progress) stock visible in <a href="/inventory" className="underline" style={{ color: 'var(--brand-400)' }}>Inventory → WIP tab</a>
+          WIP (in-progress) stock visible in <a href="/admin/inventory" className="underline" style={{ color: 'var(--brand-400)' }}>Inventory → WIP tab</a>
         </p>
       </div>
 
