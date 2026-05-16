@@ -14,35 +14,35 @@ const NAV_SECTIONS = [
   {
     label: 'Sales',
     items: [
-      { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-      { label: 'Orders', href: '/orders', icon: ShoppingBag },
-      { label: 'POS', href: '/pos', icon: ShoppingCart },
-      { label: 'Products', href: '/products', icon: Package },
-      { label: 'Customers', href: '/customers', icon: Users },
-      { label: 'Deliverers', href: '/deliverers', icon: Truck },
-      { label: 'Wholesalers', href: '/wholesalers', icon: Building2 },
-      { label: 'Expenses', href: '/expenses', icon: Receipt },
-      { label: 'Returns', href: '/returns', icon: RotateCcw },
-      { label: 'Accounts', href: '/cuentas', icon: Landmark },
+      { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+      { label: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+      { label: 'POS', href: '/admin/pos', icon: ShoppingCart },
+      { label: 'Products', href: '/admin/products', icon: Package },
+      { label: 'Customers', href: '/admin/customers', icon: Users },
+      { label: 'Deliverers', href: '/admin/deliverers', icon: Truck },
+      { label: 'Wholesalers', href: '/admin/wholesalers', icon: Building2 },
+      { label: 'Expenses', href: '/admin/expenses', icon: Receipt },
+      { label: 'Returns', href: '/admin/returns', icon: RotateCcw },
+      { label: 'Accounts', href: '/admin/cuentas', icon: Landmark },
     ],
   },
   {
     label: 'Inventory',
     items: [
-      { label: 'Stock', href: '/inventory', icon: TrendingUp },
-      { label: 'Purchases', href: '/purchases', icon: Package },
-      { label: 'Transfers', href: '/transfers', icon: ArrowLeftRight },
-      { label: 'Conversions', href: '/conversions', icon: GitMerge },
-      { label: 'Recipes', href: '/recipes', icon: FlaskConical },
-      { label: 'Locations', href: '/locations', icon: MapPin },
+      { label: 'Stock', href: '/admin/inventory', icon: TrendingUp },
+      { label: 'Purchases', href: '/admin/purchases', icon: Package },
+      { label: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight },
+      { label: 'Conversions', href: '/admin/conversions', icon: GitMerge },
+      { label: 'Recipes', href: '/admin/recipes', icon: FlaskConical },
+      { label: 'Locations', href: '/admin/locations', icon: MapPin },
     ],
   },
   {
     label: 'Admin',
     adminOnly: true,
     items: [
-      { label: 'Users', href: '/users', icon: UserCog, adminOnly: true },
-      { label: 'Guide', href: '/ayuda', icon: BookOpen, adminOnly: true },
+      { label: 'Users', href: '/admin/users', icon: UserCog, adminOnly: true },
+      { label: 'Guide', href: '/admin/ayuda', icon: BookOpen, adminOnly: true },
     ],
   },
 ]
@@ -63,7 +63,7 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
     setUser(null)
   }
 
-  const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
+  const isActive = (href: string) => href === '/admin' ? pathname === '/admin' : pathname.startsWith(href)
 
   const sidebarContent = (
     <>
