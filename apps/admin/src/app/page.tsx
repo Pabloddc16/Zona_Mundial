@@ -260,7 +260,8 @@ export default function LandingPage() {
           <a href="/privacy" style={footerLink}>Privacy</a>·
           <a href="/terms" style={footerLink}>Terms</a>·
           <a href="/delete-account" style={footerLink}>Delete Account</a>·
-          <a href="mailto:Pabloddc16@gmail.com" style={footerLink}>Contact</a>
+          <a href="mailto:Pabloddc16@gmail.com" style={footerLink}>Contact</a>·
+          <a href="/admin" style={footerLink}>Staff Login</a>
         </div>
         <p style={{ marginTop: 16, fontSize: 12 }}>© 2026 Cromos 26 · All rights reserved.</p>
         <p style={disclaimer}>
