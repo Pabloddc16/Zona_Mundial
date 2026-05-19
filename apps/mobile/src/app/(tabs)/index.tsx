@@ -76,17 +76,11 @@ export default function AlbumScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      {/* Editorial eyebrow */}
-      <View style={s.eyebrowRow}>
-        <View style={s.eyebrowDot} />
-        <Text style={s.eyebrowText}>ALBUM · 2026 WORLD CUP</Text>
-      </View>
-
       {/* Top bar — title dropdown + icons */}
       <View style={s.topBar}>
         <TouchableOpacity style={s.dropdown} onPress={() => setPickerOpen(true)} activeOpacity={0.7}>
           <Text style={s.dropdownText} numberOfLines={1}>{headerLabel}</Text>
-          <Ionicons name="chevron-down" size={16} color={COLORS.ink} style={{ marginTop: 2 }} />
+          <Text style={s.dropdownIcon}>▼</Text>
         </TouchableOpacity>
         <View style={s.iconRow}>
           <TouchableOpacity onPress={() => setLocked((v) => !v)} style={s.iconBtn} hitSlop={8}>
@@ -100,21 +94,6 @@ export default function AlbumScreen() {
             <Text style={s.storeBtnText}>Store</Text>
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Big progress hero */}
-      <View style={s.progressHero}>
-        <View style={{ flex: 1 }}>
-          <Text style={s.progressEyebrow}>YOUR COMPLETION</Text>
-          <Text style={s.progressCount}>
-            {stats.owned}
-            <Text style={s.progressCountTotal}> / {TOTAL_STICKERS}</Text>
-          </Text>
-        </View>
-        <Text style={s.progressPct}>{pct}%</Text>
-      </View>
-      <View style={s.progressBar}>
-        <View style={[s.progressFill, { width: `${pct}%` }]} />
       </View>
 
       {/* Sub-tabs */}
@@ -143,23 +122,11 @@ export default function AlbumScreen() {
         </View>
       </View>
 
-      {/* Stat strip */}
-      <View style={s.statStrip}>
-        <View style={s.statItem}>
-          <Text style={s.statValue}>{stats.needed}</Text>
-          <Text style={s.statLabel}>NEEDED</Text>
-        </View>
-        <View style={s.statDivider} />
-        <View style={s.statItem}>
-          <Text style={s.statValue}>{stats.extras}</Text>
-          <Text style={s.statLabel}>EXTRAS</Text>
-        </View>
-        <View style={s.statDivider} />
-        <View style={s.statItem}>
-          <Text style={s.statValue}>{ALBUM.length}</Text>
-          <Text style={s.statLabel}>SECTIONS</Text>
-        </View>
+      {/* Progress mini bar */}
+      <View style={s.progressBar}>
+        <View style={[s.progressFill, { width: `${pct}%` }]} />
       </View>
+      <Text style={s.progressLabel}>{pct}% · {stats.owned}/{TOTAL_STICKERS} · {stats.needed} needed · {stats.extras} extras</Text>
 
       {/* Sections */}
       <ScrollView contentContainerStyle={s.scroll}>
@@ -268,57 +235,38 @@ function Section({
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.cream },
-
-  /* eyebrow */
-  eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: 4 },
-  eyebrowDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.red },
-  eyebrowText: { fontSize: 10, fontWeight: FONT.weight.bold, letterSpacing: 2, color: COLORS.green, fontFamily: FONT.family.mono },
-
-  topBar: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingTop: 2, paddingBottom: SPACING.md, gap: SPACING.md },
+  safe: { flex: 1, backgroundColor: COLORS.paper },
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md, gap: SPACING.md },
   dropdown: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
-  dropdownText: { fontSize: FONT.size.displayXL, fontWeight: FONT.weight.black, color: COLORS.ink, flexShrink: 1, fontFamily: FONT.family.display, letterSpacing: -0.5 },
+  dropdownText: { fontSize: FONT.size.displayM, fontWeight: FONT.weight.bold, color: COLORS.ink, flexShrink: 1 },
+  dropdownIcon: { fontSize: 11, color: COLORS.ink },
   iconRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   storeBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.ink, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
   storeBtnText: { color: COLORS.paper, fontWeight: '700', fontSize: 12 },
 
-  /* progress hero */
-  progressHero: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.xs, marginHorizontal: SPACING.lg, marginBottom: SPACING.sm, backgroundColor: COLORS.paper, borderRadius: RADIUS.lg, padding: SPACING.lg, borderWidth: 2, borderColor: COLORS.ink },
-  progressEyebrow: { fontSize: 9, fontWeight: FONT.weight.bold, letterSpacing: 2.5, color: COLORS.textMuted, fontFamily: FONT.family.mono, marginBottom: 4 },
-  progressCount: { fontSize: 36, fontWeight: FONT.weight.black, color: COLORS.ink, fontFamily: FONT.family.display, letterSpacing: -1 },
-  progressCountTotal: { fontSize: 18, fontWeight: FONT.weight.medium, color: COLORS.textFaint },
-  progressPct: { fontSize: 44, fontWeight: FONT.weight.black, color: COLORS.green, fontFamily: FONT.family.display, letterSpacing: -1, lineHeight: 50 },
-
-  progressBar: { height: 6, backgroundColor: COLORS.surface3, marginHorizontal: SPACING.lg, borderRadius: 99, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: COLORS.green, borderRadius: 99 },
-
-  /* stat strip */
-  statStrip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md, gap: SPACING.md },
-  statItem: { flex: 1, alignItems: 'center' },
-  statValue: { fontSize: 20, fontWeight: FONT.weight.black, color: COLORS.ink, fontFamily: FONT.family.display },
-  statLabel: { fontSize: 9, fontWeight: FONT.weight.bold, letterSpacing: 1.5, color: COLORS.textMuted, fontFamily: FONT.family.mono, marginTop: 2 },
-  statDivider: { width: 1, height: 28, backgroundColor: COLORS.border },
-
-  /* tabs */
-  tabRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: COLORS.border, paddingHorizontal: SPACING.lg, backgroundColor: COLORS.cream },
+  tabRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: COLORS.borderSoft, paddingHorizontal: SPACING.lg },
   tabBtn: { flex: 1, paddingVertical: SPACING.md, alignItems: 'center', position: 'relative' },
-  tabLabel: { fontSize: FONT.size.bodyL, fontWeight: FONT.weight.medium, color: COLORS.textMuted, fontFamily: FONT.family.display },
-  tabLabelActive: { color: COLORS.ink, fontWeight: FONT.weight.black },
-  tabUnderline: { position: 'absolute', bottom: -1, left: '15%', right: '15%', height: 3, backgroundColor: COLORS.green, borderRadius: 1 },
+  tabLabel: { fontSize: FONT.size.bodyL, fontWeight: FONT.weight.medium, color: COLORS.textMuted },
+  tabLabelActive: { color: COLORS.ink, fontWeight: FONT.weight.bold },
+  tabUnderline: { position: 'absolute', bottom: 0, left: '15%', right: '15%', height: 2, backgroundColor: '#3B82F6', borderRadius: 1 },
 
   searchRow: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.md },
-  search: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: COLORS.paper, borderRadius: RADIUS.md, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: COLORS.border },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
   searchInput: { flex: 1, fontSize: FONT.size.bodyL, color: COLORS.ink, padding: 0 },
 
-  scroll: { paddingTop: SPACING.md, paddingBottom: SPACING.xxl },
+  progressBar: { height: 4, backgroundColor: '#E5E7EB', marginHorizontal: SPACING.lg, marginTop: SPACING.md, borderRadius: 99, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: COLORS.green, borderRadius: 99 },
+  progressLabel: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, paddingHorizontal: SPACING.lg, paddingTop: 4 },
+
+  scroll: { paddingTop: SPACING.lg },
 
   empty: { alignItems: 'center', paddingVertical: SPACING.xxxl },
   emptyText: { fontSize: FONT.size.bodyM, color: COLORS.textMuted },
 
   section: { marginBottom: SPACING.xl },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm },
-  sectionTitle: { fontSize: 22, fontWeight: FONT.weight.black, color: COLORS.ink, fontFamily: FONT.family.display, letterSpacing: -0.5 },
+  sectionTitle: { fontSize: FONT.size.displayM, fontWeight: FONT.weight.bold, color: COLORS.ink },
   sectionToggle: { fontSize: 14, color: COLORS.textMuted },
   chevronBtn: { padding: 6 },
   stickerGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: SPACING.lg, gap: 12, marginTop: SPACING.sm },
