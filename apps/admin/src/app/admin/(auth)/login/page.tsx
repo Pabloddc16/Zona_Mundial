@@ -2,11 +2,29 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Fraunces, Manrope, JetBrains_Mono } from 'next/font/google'
 import { api, storeRT, storeAT } from '@/lib/api'
 import { useAuthStore } from '@/lib/auth-store'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Trophy, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react'
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap',
+  axes: ['SOFT', 'opsz'],
+})
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const mono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -28,86 +46,127 @@ export default function LoginPage() {
       setUser(user)
       router.replace('/admin')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid credentials')
+      if (err instanceof TypeError && /fetch/i.test(err.message)) {
+        setError('Cannot reach the API. Is the backend running on http://localhost:4000?')
+      } else {
+        setError(err instanceof Error ? err.message : 'Invalid credentials')
+      }
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4" style={{ background: 'var(--surface-deep)' }}>
-      {/* Ambient glow orbs */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full" style={{ background: 'radial-gradient(circle, oklch(0.77 0.163 70 / 0.12) 0%, transparent 70%)' }} />
-        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full" style={{ background: 'radial-gradient(circle, oklch(0.62 0.20 260 / 0.10) 0%, transparent 70%)' }} />
-        <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'radial-gradient(circle, oklch(0.77 0.163 70 / 0.04) 0%, transparent 60%)' }} />
-      </div>
+    <div
+      className={`${fraunces.variable} ${manrope.variable} ${mono.variable} relative flex min-h-screen items-center justify-center overflow-hidden bg-[#FAF6EE] px-4 py-12 text-[#0B1F15]`}
+      style={{ fontFamily: 'var(--font-body), system-ui, sans-serif' }}
+    >
+      {/* halftone */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage: 'radial-gradient(circle, #0B1F15 1px, transparent 1.5px)',
+          backgroundSize: '14px 14px',
+        }}
+      />
+      {/* gradient blob */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-40 -top-40 h-[520px] w-[520px] rounded-full opacity-30"
+        style={{ background: 'radial-gradient(circle, rgba(0,99,65,0.6) 0%, transparent 65%)' }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 -right-40 h-[520px] w-[520px] rounded-full opacity-25"
+        style={{ background: 'radial-gradient(circle, rgba(255,209,0,0.55) 0%, transparent 65%)' }}
+      />
 
-      {/* Dot grid */}
-      <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: 'radial-gradient(oklch(1 0 0 / 0.08) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-
-      <div className="relative w-full max-w-[400px]">
+      <div className="relative w-full max-w-[420px]">
         {/* Brand header */}
-        <div className="mb-8 text-center">
-          <div className="relative mx-auto mb-5 flex h-[68px] w-[68px] items-center justify-center">
-            <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, oklch(0.77 0.163 70), oklch(0.65 0.18 50))', boxShadow: '0 0 40px oklch(0.77 0.163 70 / 0.35), 0 8px 24px oklch(0 0 0 / 0.4)' }} />
-            <Trophy className="relative h-8 w-8 text-white" />
+        <div className="mb-8">
+          <Link href="/" className="mb-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-[#0B1F15]/55 transition-colors hover:text-[#006341]" style={{ fontFamily: 'var(--font-mono)' }}>
+            <ArrowRight className="h-3.5 w-3.5 rotate-180" />
+            Back to site
+          </Link>
+
+          <div className="mb-4 inline-flex items-center gap-3">
+            <span
+              className="grid h-12 w-12 place-items-center rounded-full bg-[#006341] text-2xl font-bold text-[#FFD100]"
+              style={{ fontFamily: 'var(--font-fraunces)' }}
+            >
+              C
+            </span>
+            <span
+              className="text-2xl font-bold tracking-tight"
+              style={{ fontFamily: 'var(--font-fraunces)', fontVariationSettings: '"SOFT" 30, "opsz" 30' }}
+            >
+              Cromos 26
+            </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            Pablo Admin
+
+          <h1
+            className="text-[clamp(2.5rem,6vw,3.5rem)] font-black leading-[0.95] tracking-tight"
+            style={{ fontFamily: 'var(--font-fraunces)', fontVariationSettings: '"SOFT" 70, "opsz" 100' }}
+          >
+            <span className="block">Staff</span>
+            <span className="block italic text-[#006341]">sign in.</span>
           </h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
-            World Cup 2026 — Control Panel
+          <p className="mt-3 text-sm text-[#0B1F15]/60">
+            Authorized operators only. Customers, please use the mobile app.
           </p>
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl p-7" style={{ background: 'var(--surface-elevated)', border: '1px solid var(--glass-border)', boxShadow: '0 24px 64px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.06)' }}>
+        <div className="rounded-2xl border-4 border-[#0B1F15] bg-white p-7 shadow-[8px_8px_0_0_#006341]">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+              <label
+                className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-[#0B1F15]/60"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
                 Email
               </label>
-              <Input
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
+                placeholder="staff@cromos26.com"
                 required
                 autoFocus
-                className="h-10"
+                className="w-full rounded-lg border-2 border-[#0B1F15]/15 bg-[#FAF6EE] px-4 py-3 text-base outline-none transition-all placeholder:text-[#0B1F15]/30 focus:border-[#006341] focus:bg-white"
               />
             </div>
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
-                <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                <label
+                  className="text-xs font-bold uppercase tracking-[0.18em] text-[#0B1F15]/60"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
                   Password
                 </label>
                 <Link
-                  href="/forgot-password"
-                  className="text-xs font-medium transition-colors"
-                  style={{ color: 'var(--amber)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--amber-hover)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--amber)')}
+                  href="/admin/forgot-password"
+                  className="text-xs font-semibold text-[#006341] underline-offset-4 transition-colors hover:text-[#0B1F15] hover:underline"
                 >
-                  Forgot password?
+                  Forgot?
                 </Link>
               </div>
               <div className="relative">
-                <Input
+                <input
                   type={showPass ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-10 pr-10"
+                  className="w-full rounded-lg border-2 border-[#0B1F15]/15 bg-[#FAF6EE] px-4 py-3 pr-12 text-base outline-none transition-all focus:border-[#006341] focus:bg-white"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: 'var(--text-muted)' }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[#0B1F15]/45 transition-colors hover:bg-[#0B1F15]/5 hover:text-[#0B1F15]"
                   tabIndex={-1}
+                  aria-label={showPass ? 'Hide password' : 'Show password'}
                 >
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -115,30 +174,40 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="flex items-start gap-2.5 rounded-lg px-3.5 py-3 text-sm" style={{ background: 'oklch(0.63 0.225 27 / 0.10)', border: '1px solid oklch(0.63 0.225 27 / 0.25)', color: 'oklch(0.75 0.18 27)' }}>
+              <div
+                className="flex items-start gap-3 rounded-lg border-2 border-[#CE1126]/30 bg-[#CE1126]/8 px-4 py-3 text-sm text-[#CE1126]"
+                style={{ background: 'rgba(206,17,38,0.08)' }}
+              >
                 <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                {error}
+                <span className="leading-relaxed">{error}</span>
               </div>
             )}
 
-            <Button
-              className="h-10 w-full font-semibold"
-              size="default"
+            <button
               type="submit"
               disabled={loading || !email || !password}
+              className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-[#0B1F15] px-7 py-4 text-base font-bold text-[#FAF6EE] shadow-[6px_6px_0_0_#006341] transition-all hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[3px_3px_0_0_#006341] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0_0_#006341]"
             >
               {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Signing in...
-                </span>
-              ) : 'Sign in'}
-            </Button>
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#FAF6EE]/30 border-t-[#FAF6EE]" />
+                  Signing in
+                </>
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </>
+              )}
+            </button>
           </form>
         </div>
 
-        <p className="mt-6 text-center text-xs" style={{ color: 'oklch(1 0 0 / 0.20)' }}>
-          © 2026 Pablo Admin · Zona Mundial
+        <p
+          className="mt-6 text-center text-[10px] uppercase tracking-[0.25em] text-[#0B1F15]/30"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          © 2026 Cromos 26 · Zona Mundial
         </p>
       </div>
     </div>

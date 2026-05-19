@@ -1,12 +1,26 @@
 'use client'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Fraunces, JetBrains_Mono } from 'next/font/google'
 import { api } from '@/lib/api'
 import { StatCard } from '@/components/shared/stat-card'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { format, subDays } from 'date-fns'
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap',
+  axes: ['SOFT', 'opsz'],
+})
+
+const mono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n)
@@ -32,13 +46,26 @@ export default function DashboardPage() {
   const s = kpis?.summary
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white/90">Dashboard</h1>
+    <div className={`${fraunces.variable} ${mono.variable} p-6 space-y-6`}>
+      <div className="flex items-end justify-between gap-4 border-b border-white/8 pb-5">
+        <div>
+          <p
+            className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.28em] text-[oklch(0.77_0.163_70)]"
+            style={{ fontFamily: 'var(--font-mono)' }}
+          >
+            · Dashboard · Last {range} days
+          </p>
+          <h1
+            className="text-[clamp(2rem,4vw,3.25rem)] font-black leading-[0.95] tracking-tight text-white"
+            style={{ fontFamily: 'var(--font-fraunces)', fontVariationSettings: '"SOFT" 60, "opsz" 100' }}
+          >
+            Today, <em className="italic text-[oklch(0.84_0.150_80)]">at a glance.</em>
+          </h1>
+        </div>
         <select
           value={range}
           onChange={(e) => setRange(Number(e.target.value))}
-          className="rounded-md px-3 py-1.5 text-sm font-medium"
+          className="rounded-full px-4 py-2 text-sm font-medium transition-colors"
           style={{ background: 'oklch(0.24 0.012 260)', border: '1px solid oklch(1 0 0 / 0.12)', color: 'var(--text-secondary)' }}
         >
           <option value={7}>Last 7 days</option>
