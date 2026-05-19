@@ -15,6 +15,7 @@
     "test:cov": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "seed:admin": "tsx --env-file=.env.local scripts/seed-admin.ts",
     "backup": "tsx scripts/backup.ts",
     "restore": "tsx scripts/restore.ts"
   },

@@ -6,11 +6,19 @@ export const metadata: Metadata = {
   title: 'Cromos 26 — Track. Trade. Triumph.',
   description:
     'The 2026 FIFA World Cup sticker album, reimagined. Track your collection, swap doubles via QR with friends, and order packs in-app.',
+  icons: { icon: '/logo.jpg', apple: '/logo.jpg' },
   openGraph: {
     title: 'Cromos 26 — Track. Trade. Triumph.',
     description:
       'The 2026 World Cup sticker album, reimagined. Track. Trade. Triumph.',
     type: 'website',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Cromos 26' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cromos 26 — Track. Trade. Triumph.',
+    description: 'The 2026 World Cup sticker album, reimagined.',
+    images: ['/og.png'],
   },
 }
 
@@ -38,21 +46,21 @@ const STEPS = [
     n: '01',
     title: 'Mark your stickers',
     body: 'Tap each sticker as you stick it in your physical album. The grid fills up, the missing ones surface to the top.',
-    img: 'https://placehold.co/640x1280/006341/FFD100/png?text=Album',
+    img: '/step-album.png',
     rotate: '-3deg',
   },
   {
     n: '02',
     title: 'Generate a QR',
     body: 'Your extras and your needs encoded into one QR. Hold it up. A friend scans. Matches appear instantly.',
-    img: 'https://placehold.co/640x1280/0B1F15/FAF6EE/png?text=QR+Swap',
+    img: '/step-qr-swap.png',
     rotate: '2deg',
   },
   {
     n: '03',
     title: 'Order a pack',
     body: 'Out of stickers at midnight? Delivery, pickup, or gift to a friend. Mercado Pago handles the card. We never see it.',
-    img: 'https://placehold.co/640x1280/FFD100/0B1F15/png?text=Store',
+    img: '/step-pack-order.png',
     rotate: '-2deg',
   },
 ]
@@ -63,7 +71,7 @@ const FEATURES = [
     title: 'Every sticker, every team, in your pocket.',
     body:
       'Owned, missing, duplicates — three states. One tap. Filter by team, region, or special set. See the gaps. Close the gaps.',
-    img: 'https://placehold.co/720x1440/006341/FAF6EE/png?text=Album+Tab',
+    img: '/feature-album.jpeg',
     align: 'right' as const,
   },
   {
@@ -71,7 +79,7 @@ const FEATURES = [
     title: 'Find the trade in three seconds.',
     body:
       'Hold up your QR. A camera scans. The app shows exactly which of your doubles plug exactly which of their gaps. Both win. No spreadsheets, no chats, no waiting.',
-    img: 'https://placehold.co/720x1440/FFD100/0B1F15/png?text=Swap+QR',
+    img: '/feature-swap.jpeg',
     align: 'left' as const,
   },
   {
@@ -79,7 +87,7 @@ const FEATURES = [
     title: 'Packs at midnight, packs as gifts.',
     body:
       'Delivery to your door. Pickup at the store. Or send a pack to a friend with a personal note. Three modes, one tap each.',
-    img: 'https://placehold.co/720x1440/CE1126/FAF6EE/png?text=Store',
+    img: '/feature-store.jpeg',
     align: 'right' as const,
   },
   {
@@ -87,7 +95,7 @@ const FEATURES = [
     title: 'Numbers that motivate, not nag.',
     body:
       'Completion percentage. Missing-sticker count. Which teams you are closest to finishing. Weekly progress. Match-day reminders for when rare stickers tend to surface.',
-    img: 'https://placehold.co/720x1440/0B1F15/FFD100/png?text=Stats',
+    img: '/feature-stats.jpeg',
     align: 'left' as const,
   },
 ]
@@ -182,13 +190,13 @@ export default function LandingPage() {
       {/* ── Nav ─────────────────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 border-b border-[#0B1F15]/10 bg-[#FAF6EE]/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-10">
-          <a href="/" className="flex items-center gap-2">
-            <span
-              className="grid h-9 w-9 place-items-center rounded-full bg-[#006341] font-bold text-[#FFD100]"
-              style={{ fontFamily: 'var(--font-fraunces)' }}
-            >
-              C
-            </span>
+          <a href="/" className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.jpg"
+              alt="Cromos 26"
+              className="h-10 w-10 rounded-full object-cover ring-2 ring-[#0B1F15]/10"
+            />
             <span
               className="text-lg font-bold tracking-tight"
               style={{ fontFamily: 'var(--font-fraunces)', fontVariationSettings: '"SOFT" 30, "opsz" 30' }}
@@ -300,14 +308,16 @@ export default function LandingPage() {
               className="relative rotate-[3deg] transition-transform duration-500 hover:rotate-0"
               style={{ filter: 'drop-shadow(20px 30px 40px rgba(11,31,21,0.25))' }}
             >
-              <div className="rounded-[3.5rem] border-[10px] border-[#0B1F15] bg-[#0B1F15] p-1">
+              <div className="overflow-hidden rounded-[3.5rem] border-[10px] border-[#0B1F15] bg-[#0B1F15]">
                 <Image
-                  src="https://placehold.co/520x1080/006341/FFD100/png?text=Cromos+26"
+                  src="/hero-phone.png"
                   alt="Cromos 26 app preview"
                   width={520}
                   height={1080}
                   unoptimized
-                  className="rounded-[2.6rem]"
+                  className="block h-auto w-full object-cover"
+                  style={{ transform: 'scale(1.08) translateX(12px)' }}
+                  priority
                 />
               </div>
               {/* Sticker accents */}
@@ -660,12 +670,12 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 md:grid-cols-4 md:px-10">
           <div className="md:col-span-2">
             <div className="mb-4 flex items-center gap-3">
-              <span
-                className="grid h-10 w-10 place-items-center rounded-full bg-[#006341] font-bold text-[#FFD100]"
-                style={{ fontFamily: 'var(--font-fraunces)' }}
-              >
-                C
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.jpg"
+                alt="Cromos 26"
+                className="h-12 w-12 rounded-full object-cover ring-2 ring-[#FFD100]/30"
+              />
               <span
                 className="text-2xl font-bold tracking-tight"
                 style={{ fontFamily: 'var(--font-fraunces)' }}
