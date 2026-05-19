@@ -6,19 +6,19 @@ export const metadata: Metadata = {
   title: 'Cromos 26 — Track. Trade. Triumph.',
   description:
     'The 2026 FIFA World Cup sticker album, reimagined. Track your collection, swap doubles via QR with friends, and order packs in-app.',
-  icons: { icon: '/logo.jpg', apple: '/logo.jpg' },
+  icons: { icon: '/logo.webp', apple: '/logo.webp' },
   openGraph: {
     title: 'Cromos 26 — Track. Trade. Triumph.',
     description:
       'The 2026 World Cup sticker album, reimagined. Track. Trade. Triumph.',
     type: 'website',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Cromos 26' }],
+    images: [{ url: '/og.webp', width: 1200, height: 630, alt: 'Cromos 26' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Cromos 26 — Track. Trade. Triumph.',
     description: 'The 2026 World Cup sticker album, reimagined.',
-    images: ['/og.png'],
+    images: ['/og.webp'],
   },
 }
 
@@ -46,21 +46,21 @@ const STEPS = [
     n: '01',
     title: 'Mark your stickers',
     body: 'Tap each sticker as you stick it in your physical album. The grid fills up, the missing ones surface to the top.',
-    img: '/step-album.png',
+    img: '/step-album.webp',
     rotate: '-3deg',
   },
   {
     n: '02',
     title: 'Generate a QR',
     body: 'Your extras and your needs encoded into one QR. Hold it up. A friend scans. Matches appear instantly.',
-    img: '/step-qr-swap.png',
+    img: '/step-qr-swap.webp',
     rotate: '2deg',
   },
   {
     n: '03',
     title: 'Order a pack',
     body: 'Out of stickers at midnight? Delivery, pickup, or gift to a friend. Mercado Pago handles the card. We never see it.',
-    img: '/step-pack-order.png',
+    img: '/step-pack-order.webp',
     rotate: '-2deg',
   },
 ]
@@ -71,7 +71,7 @@ const FEATURES = [
     title: 'Every sticker, every team, in your pocket.',
     body:
       'Owned, missing, duplicates — three states. One tap. Filter by team, region, or special set. See the gaps. Close the gaps.',
-    img: '/feature-album.jpeg',
+    img: '/feature-album.webp',
     align: 'right' as const,
   },
   {
@@ -79,7 +79,7 @@ const FEATURES = [
     title: 'Find the trade in three seconds.',
     body:
       'Hold up your QR. A camera scans. The app shows exactly which of your doubles plug exactly which of their gaps. Both win. No spreadsheets, no chats, no waiting.',
-    img: '/feature-swap.jpeg',
+    img: '/feature-swap.webp',
     align: 'left' as const,
   },
   {
@@ -87,7 +87,7 @@ const FEATURES = [
     title: 'Packs at midnight, packs as gifts.',
     body:
       'Delivery to your door. Pickup at the store. Or send a pack to a friend with a personal note. Three modes, one tap each.',
-    img: '/feature-store.jpeg',
+    img: '/feature-store.webp',
     align: 'right' as const,
   },
   {
@@ -95,7 +95,7 @@ const FEATURES = [
     title: 'Numbers that motivate, not nag.',
     body:
       'Completion percentage. Missing-sticker count. Which teams you are closest to finishing. Weekly progress. Match-day reminders for when rare stickers tend to surface.',
-    img: '/feature-stats.jpeg',
+    img: '/feature-stats.webp',
     align: 'left' as const,
   },
 ]
@@ -193,7 +193,7 @@ export default function LandingPage() {
           <a href="/" className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.jpg"
+              src="/logo.webp"
               alt="Cromos 26"
               className="h-10 w-10 rounded-full object-cover ring-2 ring-[#0B1F15]/10"
             />
@@ -310,7 +310,7 @@ export default function LandingPage() {
             >
               <div className="overflow-hidden rounded-[3.5rem] border-[10px] border-[#0B1F15] bg-[#0B1F15]">
                 <Image
-                  src="/hero-phone.png"
+                  src="/hero-phone.webp"
                   alt="Cromos 26 app preview"
                   width={520}
                   height={1080}
@@ -672,7 +672,7 @@ export default function LandingPage() {
             <div className="mb-4 flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/logo.jpg"
+                src="/logo.webp"
                 alt="Cromos 26"
                 className="h-12 w-12 rounded-full object-cover ring-2 ring-[#FFD100]/30"
               />
