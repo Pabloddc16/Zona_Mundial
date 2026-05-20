@@ -94,20 +94,50 @@ When I have these I paste them into Render's environment, redeploy, and the app 
 
 ---
 
-## 3) EAS (Expo) build credits — $19 USD one month
+## 3) EAS (Expo) build credits — $19 USD one month, BUT under your account
 
-We hit the free tier limit. Resets June 1 if we wait, but **we can't ship until we build** the final production AAB / IPA.
+We hit the free tier limit on my personal Expo account. Resets June 1 if we wait, but **we can't ship until we build** the final production AAB / IPA. Better long-term path: you own the Expo billing instead of me carrying it on a personal account.
 
-### What to do
+### Steps for you (Pablo)
 
-1. Open https://expo.dev/accounts/brankostula/settings/billing
-2. Log in with `stulanik@gmail.com` (my Expo account)
-3. Upgrade to **Production plan** — $19 USD / month
-4. Tell me when done
+#### A. Create your own Expo account + organization
 
-I'll trigger the build (~25 min on EAS servers), download the AAB + IPA, upload to the stores, and after both submissions are accepted you can **cancel the plan** next month. Total spend: $19.
+1. https://expo.dev/signup → use your email (your business Gmail is fine)
+2. Verify email
+3. Top-right menu → **Create organization** → name it `Cromos26` (or your company name)
+4. The organization is free. Plans + billing live at the org level.
 
-If you want me to handle billing too, send me the card via secure channel and I'll set it up.
+#### B. Upgrade the organization to Production plan
+
+1. Org settings → **Billing**
+2. Pick **Production** ($19 USD / month)
+3. Add your card — charges go to your account, not mine
+
+#### C. Invite me as a developer
+
+1. Org → **Members** → **Invite member**
+2. Email: `stulanik@gmail.com`
+3. Role: **Developer** (or Admin if you want me to manage members later)
+4. I accept the invite from my CLI
+
+#### D. Transfer the existing project to your org
+
+The Cromos 26 EAS project currently lives under my `brankostula` account. Cleanest way to move it:
+
+**Option 1 — Expo support ticket (recommended, ~24-48h)**
+
+- Email Expo support: https://expo.dev/contact
+- Subject: "Transfer project to organization"
+- Body: "Please transfer EAS project `732ed138-a83a-41dc-8886-4f8217289d4f` from owner `brankostula` to organization `Cromos26` (owner email: <Pablo's email>). I have the consent of the current owner."
+- They migrate the project, build history, OTA channels, and credentials in one go.
+
+**Option 2 — Skip for now**
+
+If we want to ship fast, you can pay on your account but I trigger builds from mine for the very first release. We do the transfer after launch (no rush). The $19 still goes to your account because the **billing follows the user who triggered the build**, not the project owner. Confirmed with Expo.
+
+#### E. Tell me when steps A–C are done
+
+I trigger the first production build immediately (~25 min). After both stores accept the submission, you can **cancel the plan** next month → total spend $19.
 
 ---
 
@@ -130,13 +160,22 @@ When I have it, I add it to `apps/mobile/google-service-account.json` and `eas s
 
 ---
 
-## 5) Apple App Store — already mostly done, but check this
+## 5) Apple App Store — already mostly done, but verify ownership
 
 - ✅ Apple Developer Program paid ($99/yr) — Team ID `7D7NLMWLYL`
 - ✅ App in App Store Connect — App ID `6769002053`
 - ✅ Build #7 submitted to TestFlight earlier
 
-**Pending:**
+### ⚠ Confirm whose Apple Developer account this is
+
+Important: the Apple Developer account that paid the $99/yr — is it under **your name + your business**, or under mine? Same logic as the Expo billing — long-term you want this in your name.
+
+- If **already yours:** nothing to do. We continue using Team `7D7NLMWLYL`.
+- If currently **mine:** you'll need to enroll your own Apple Developer Program ($99 USD/yr) and we re-submit the app under your team. Adds 1 week to launch (Apple reviews enrollments). Decision: do this **after** initial TestFlight testing, before public launch.
+
+Reply quickly: whose name is on the $99 invoice from Apple?
+
+### Pending
 
 - ☐ **Check TestFlight status** at https://appstoreconnect.apple.com/
   - App should say **Ready to Test** for Build #7. If still **Processing**, wait it out.
@@ -261,8 +300,11 @@ Tick each one before forwarding:
 - ☐ TEST credentials copied
 - ☐ PROD credentials copied (secure channel ready)
 - ☐ Webhook URL added + signing secret copied
-- ☐ EAS Production plan ($19) paid
+- ☐ **Expo account created + Cromos26 organization made**
+- ☐ **Production plan $19 paid on the Expo org**
+- ☐ **stulanik@gmail.com invited to the org as Developer**
 - ☐ Play Console service account JSON downloaded
+- ☐ Apple Developer account ownership confirmed (yours or mine?)
 - ☐ Questions Q1-Q6 answered (or "use defaults" — that works too)
 - ☐ TestFlight build #7 status checked
 
