@@ -1,20 +1,34 @@
 import { useState } from 'react'
-import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native'
+import {
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
+import { Ionicons } from '@expo/vector-icons'
 import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
 import { api, type OrderPayload } from '@/lib/api'
 import { fmt } from '@/lib/data'
-
-const SHIPPING = 120
-const PAYMENT_METHODS = [
-  { value: 'efectivo', label: 'Cash' },
-  { value: 'transferencia', label: 'Transfer' },
-  { value: 'tarjeta', label: 'Card' },
-  { value: 'tarjeta_bbva', label: 'BBVA' },
-]
+import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
+import {
+  DELIVERY_LABEL,
+  DELIVERY_SUB,
+  deliveryAmountToFreeShipping,
+  deliveryFee,
+  paymentMethodsFor,
+  WELCOME_CREDIT_MXN,
+  maxReferralApplied,
+  type DeliveryZone,
+  type PaymentMethod,
+} from '@/lib/delivery'
 
 export default function CheckoutScreen() {
   const cart = useCartStore((s) => s.cart)
@@ -26,18 +40,33 @@ export default function CheckoutScreen() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
-  const [payment, setPayment] = useState('efectivo')
   const [notes, setNotes] = useState('')
-  const [deliveryType, setDeliveryType] = useState<'envio' | 'local'>('envio')
+  const [zone, setZone] = useState<DeliveryZone>('gdl')
+  const [payment, setPayment] = useState<PaymentMethod>('card')
+  // Stub credits — wire to backend in Phase 5/8
+  const [welcomeApplied] = useState(WELCOME_CREDIT_MXN)
+  const [referralBalance] = useState(0)
+  const [useReferralCredit, setUseReferralCredit] = useState(false)
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const shipping = deliveryType === 'envio' ? SHIPPING : 0
-  const total = subtotal + shipping
+  const allowedMethods = paymentMethodsFor(zone)
+  // Auto-correct payment if zone change removed the option
+  if (!allowedMethods.includes(payment) && allowedMethods[0]) {
+    setPayment(allowedMethods[0])
+  }
+
+  const shipping = deliveryFee(zone, subtotal)
+  const remainingForFree = deliveryAmountToFreeShipping(zone, subtotal)
+  const refApplied = useReferralCredit ? maxReferralApplied(subtotal, welcomeApplied, referralBalance) : 0
+  const totalDiscount = welcomeApplied + refApplied
+  const total = Math.max(0, subtotal - totalDiscount) + shipping
 
   async function submit() {
     if (!name.trim() || !phone.trim()) { setError('Name and phone are required'); return }
-    if (deliveryType === 'envio' && !address.trim()) { setError('Address is required for shipping'); return }
+    if (zone !== 'pickup' && !address.trim()) { setError('Address is required for delivery'); return }
+    if (items.length === 0) { setError('Your cart is empty'); return }
     setLoading(true)
     setError('')
     try {
@@ -46,8 +75,8 @@ export default function CheckoutScreen() {
         customer_name: name.trim(),
         phone: phone.trim(),
         address: address.trim(),
-        delivery_type: deliveryType,
-        payment_method: payment,
+        delivery_type: zone === 'pickup' ? 'local' : 'envio',
+        payment_method: payment === 'card' ? 'tarjeta' : 'efectivo',
         shipping,
         items: items.map((i) => ({ product_id: i!.id, name: i!.name, qty: i!.qty, price: i!.price })),
         ...(notesVal ? { notes: notesVal } : {}),
@@ -55,6 +84,7 @@ export default function CheckoutScreen() {
       const order = await api.orders.create(payload)
       clear()
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
+      // TODO Phase 7: if payment=card, redirect to Mercado Pago init_point here
       router.replace(`/orden/${order.order_number}`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not place order')
@@ -71,74 +101,182 @@ export default function CheckoutScreen() {
           {/* Header */}
           <View style={s.headerRow}>
             <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-              <Text style={s.backIcon}>‹</Text>
+              <Ionicons name="chevron-back" size={22} color={COLORS.ink} />
             </TouchableOpacity>
-            <Text style={s.title}>Your order</Text>
+            <Text style={s.title}>Checkout</Text>
           </View>
 
-          {/* Delivery type */}
-          <Section label="Delivery type">
-            <View style={s.deliveryRow}>
-              {(['envio', 'local'] as const).map((t) => (
-                <TouchableOpacity key={t} onPress={() => setDeliveryType(t)} style={[s.deliveryBtn, deliveryType === t && s.deliveryBtnActive]}>
-                  <Text style={[s.deliveryBtnText, deliveryType === t && s.deliveryBtnTextActive]}>
-                    {t === 'envio' ? '📦 Shipping' : '🏪 Pickup'}
+          {/* CONTACT */}
+          <Group label="Contact">
+            <Card>
+              <Field label="Name">
+                <TextInput style={s.input} value={name} onChangeText={setName} placeholder="Your full name" autoComplete="name" returnKeyType="next" />
+              </Field>
+              <Field label="Phone / WhatsApp">
+                <TextInput style={s.input} value={phone} onChangeText={setPhone} placeholder="33 1234 5678" autoComplete="tel" keyboardType="phone-pad" returnKeyType="next" />
+              </Field>
+            </Card>
+          </Group>
+
+          {/* DELIVERY */}
+          <Group label="Delivery">
+            <View style={s.zoneRow}>
+              {(['gdl', 'nacional', 'pickup'] as DeliveryZone[]).map((z) => (
+                <TouchableOpacity key={z} onPress={() => setZone(z)} style={[s.zoneBtn, zone === z && s.zoneBtnActive]}>
+                  <Ionicons
+                    name={z === 'gdl' ? 'bicycle-outline' : z === 'nacional' ? 'cube-outline' : 'storefront-outline'}
+                    size={20}
+                    color={zone === z ? COLORS.paper : COLORS.ink}
+                  />
+                  <Text style={[s.zoneBtnText, zone === z && s.zoneBtnTextActive]}>
+                    {z === 'gdl' ? 'Local' : z === 'nacional' ? 'Mexico' : 'Pickup'}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-          </Section>
+            <Card>
+              <View style={s.line}>
+                <Text style={s.lineLabel}>{DELIVERY_LABEL[zone]}</Text>
+                <Text style={[s.lineValue, shipping === 0 && { color: COLORS.green }]}>
+                  {shipping === 0 ? 'Free' : fmt(shipping)}
+                </Text>
+              </View>
+              <Text style={s.lineSub}>{DELIVERY_SUB[zone]}</Text>
+              {remainingForFree > 0 && (
+                <Text style={s.freeShipHint}>Add {fmt(remainingForFree)} more for free shipping</Text>
+              )}
+              {zone !== 'pickup' && (
+                <Field label="Address" topGap>
+                  <TextInput
+                    style={[s.input, { minHeight: 60 }]}
+                    value={address}
+                    onChangeText={setAddress}
+                    placeholder="Street, number, neighborhood, city"
+                    multiline
+                    textAlignVertical="top"
+                  />
+                </Field>
+              )}
+            </Card>
+          </Group>
 
-          <Section label="Full name *">
-            <TextInput style={s.input} value={name} onChangeText={setName} placeholder="John Smith" returnKeyType="next" />
-          </Section>
-          <Section label="Phone / WhatsApp *">
-            <TextInput style={s.input} value={phone} onChangeText={setPhone} placeholder="555 123 4567" keyboardType="phone-pad" returnKeyType="next" />
-          </Section>
-          {deliveryType === 'envio' && (
-            <Section label="Delivery address *">
-              <TextInput style={s.input} value={address} onChangeText={setAddress} placeholder="Street, number, neighborhood, city" multiline />
-            </Section>
+          {/* PAYMENT */}
+          <Group label="Payment method">
+            <View style={s.payRow}>
+              {(['card', 'cash'] as PaymentMethod[]).map((m) => {
+                const allowed = allowedMethods.includes(m)
+                const active = payment === m && allowed
+                return (
+                  <TouchableOpacity
+                    key={m}
+                    onPress={() => allowed && setPayment(m)}
+                    disabled={!allowed}
+                    style={[s.payBtn, active && s.payBtnActive, !allowed && s.payBtnDisabled]}
+                  >
+                    <Ionicons
+                      name={m === 'card' ? 'card-outline' : 'cash-outline'}
+                      size={22}
+                      color={active ? COLORS.paper : !allowed ? COLORS.textFaint : COLORS.ink}
+                    />
+                    <Text style={[s.payBtnText, active && s.payBtnTextActive, !allowed && s.payBtnTextDisabled]}>
+                      {m === 'card' ? 'Card' : 'Cash'}
+                    </Text>
+                    {m === 'card' && <Text style={s.payBadge}>Mercado Pago</Text>}
+                    {m === 'cash' && !allowed && <Text style={s.payBadge}>Pickup only</Text>}
+                  </TouchableOpacity>
+                )
+              })}
+            </View>
+          </Group>
+
+          {/* CREDITS */}
+          {(welcomeApplied > 0 || referralBalance > 0) && (
+            <Group label="Discounts">
+              <Card>
+                {welcomeApplied > 0 && (
+                  <View style={s.line}>
+                    <Text style={s.lineLabel}>🎁 Welcome credit</Text>
+                    <Text style={[s.lineValue, { color: COLORS.green }]}>−{fmt(welcomeApplied)}</Text>
+                  </View>
+                )}
+                {referralBalance > 0 && (
+                  <>
+                    <View style={s.line}>
+                      <Text style={s.lineLabel}>💸 Referral balance</Text>
+                      <Text style={s.lineValue}>{fmt(referralBalance)}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => setUseReferralCredit((v) => !v)} style={s.toggleRow}>
+                      <View style={[s.checkbox, useReferralCredit && s.checkboxOn]}>
+                        {useReferralCredit && <Ionicons name="checkmark" size={14} color={COLORS.paper} />}
+                      </View>
+                      <Text style={s.toggleLabel}>Apply {fmt(refApplied)} to this order</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </Card>
+            </Group>
           )}
 
-          <Section label="Payment method">
-            <View style={s.payRow}>
-              {PAYMENT_METHODS.map((m) => (
-                <TouchableOpacity key={m.value} onPress={() => setPayment(m.value)} style={[s.payBtn, payment === m.value && s.payBtnActive]}>
-                  <Text style={[s.payBtnText, payment === m.value && s.payBtnTextActive]}>{m.label}</Text>
-                </TouchableOpacity>
+          {/* NOTES */}
+          <Group label="Notes (optional)">
+            <Card>
+              <TextInput
+                style={[s.input, { minHeight: 60, borderWidth: 0, paddingHorizontal: 0 }]}
+                value={notes}
+                onChangeText={setNotes}
+                placeholder="Special instructions for the delivery person..."
+                multiline
+                textAlignVertical="top"
+              />
+            </Card>
+          </Group>
+
+          {/* SUMMARY */}
+          <Group label="Order summary">
+            <Card>
+              {items.map((i) => (
+                <View key={i!.id} style={s.line}>
+                  <Text style={s.lineLabel} numberOfLines={1}>{i!.qty}× {i!.name}</Text>
+                  <Text style={s.lineValue}>{fmt(i!.price * i!.qty)}</Text>
+                </View>
               ))}
-            </View>
-          </Section>
-
-          <Section label="Notes (optional)">
-            <TextInput style={[s.input, { minHeight: 64 }]} value={notes} onChangeText={setNotes} placeholder="Special instructions..." multiline textAlignVertical="top" />
-          </Section>
-
-          {/* Summary */}
-          <View style={s.summary}>
-            {items.map((i) => (
-              <View key={i!.id} style={s.summaryRow}>
-                <Text style={s.summaryLabel} numberOfLines={1}>{i!.name} × {i!.qty}</Text>
-                <Text style={s.summaryValue}>{fmt(i!.price * i!.qty)}</Text>
+              <View style={s.divider} />
+              <View style={s.line}>
+                <Text style={s.lineLabel}>Subtotal</Text>
+                <Text style={s.lineValue}>{fmt(subtotal)}</Text>
               </View>
-            ))}
-            {shipping > 0 && (
-              <View style={s.summaryRow}>
-                <Text style={s.summaryLabel}>Shipping</Text>
-                <Text style={s.summaryValue}>{fmt(shipping)}</Text>
+              <View style={s.line}>
+                <Text style={s.lineLabel}>Shipping</Text>
+                <Text style={[s.lineValue, shipping === 0 && { color: COLORS.green }]}>
+                  {shipping === 0 ? 'Free' : fmt(shipping)}
+                </Text>
               </View>
-            )}
-            <View style={[s.summaryRow, { borderTopWidth: 1, borderTopColor: '#F3F4F6', marginTop: 8, paddingTop: 8 }]}>
-              <Text style={{ fontWeight: '800', color: '#1C1917' }}>Total</Text>
-              <Text style={{ fontWeight: '800', color: '#1C1917' }}>{fmt(total)}</Text>
-            </View>
-          </View>
+              {welcomeApplied > 0 && (
+                <View style={s.line}>
+                  <Text style={[s.lineLabel, { color: COLORS.green }]}>Welcome credit</Text>
+                  <Text style={[s.lineValue, { color: COLORS.green }]}>−{fmt(welcomeApplied)}</Text>
+                </View>
+              )}
+              {refApplied > 0 && (
+                <View style={s.line}>
+                  <Text style={[s.lineLabel, { color: COLORS.green }]}>Referral credit</Text>
+                  <Text style={[s.lineValue, { color: COLORS.green }]}>−{fmt(refApplied)}</Text>
+                </View>
+              )}
+              <View style={s.dividerThick} />
+              <View style={s.line}>
+                <Text style={s.totalLabel}>Total</Text>
+                <Text style={s.totalValue}>{fmt(total)}</Text>
+              </View>
+            </Card>
+          </Group>
 
           {error ? <Text style={s.error}>{error}</Text> : null}
 
-          <TouchableOpacity style={[s.btn, loading && { opacity: 0.6 }]} onPress={submit} disabled={loading}>
-            <Text style={s.btnText}>{loading ? 'Processing…' : `Place order — ${fmt(total)}`}</Text>
+          <TouchableOpacity style={[s.payBtnMain, loading && { opacity: 0.6 }]} onPress={submit} disabled={loading}>
+            <Text style={s.payBtnMainText}>
+              {loading ? 'Processing…' : `Pay ${fmt(total)} ${payment === 'card' ? '→' : '· at pickup'}`}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -146,39 +284,76 @@ export default function CheckoutScreen() {
   )
 }
 
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
+function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <View style={{ marginBottom: 14 }}>
-      <Text style={s.label}>{label}</Text>
+    <View style={{ marginBottom: SPACING.lg }}>
+      <Text style={s.groupTitle}>{label.toUpperCase()}</Text>
+      {children}
+    </View>
+  )
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+  return <View style={s.card}>{children}</View>
+}
+
+function Field({ label, children, topGap }: { label: string; children: React.ReactNode; topGap?: boolean }) {
+  return (
+    <View style={[topGap && { marginTop: SPACING.md }]}>
+      <Text style={s.fieldLabel}>{label}</Text>
       {children}
     </View>
   )
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FEFCE8' },
-  scroll: { padding: 16, paddingBottom: 48 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
-  backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center' },
-  backIcon: { fontSize: 22, color: '#374151', lineHeight: 28 },
-  title: { fontSize: 24, fontWeight: '800', color: '#1C1917' },
-  label: { fontSize: 13, fontWeight: '600', color: '#6B7280', marginBottom: 6 },
-  input: { backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: '#1C1917' },
-  deliveryRow: { flexDirection: 'row', gap: 10 },
-  deliveryBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 2, borderColor: '#E5E7EB', alignItems: 'center', backgroundColor: '#fff' },
-  deliveryBtnActive: { borderColor: '#006341', backgroundColor: 'rgba(0,99,65,0.05)' },
-  deliveryBtnText: { fontSize: 13, fontWeight: '600', color: '#6B7280' },
-  deliveryBtnTextActive: { color: '#006341' },
-  payRow: { flexDirection: 'row', gap: 8 },
-  payBtn: { flex: 1, paddingVertical: 10, borderRadius: 12, borderWidth: 2, borderColor: '#E5E7EB', alignItems: 'center', backgroundColor: '#fff' },
-  payBtnActive: { borderColor: '#006341', backgroundColor: 'rgba(0,99,65,0.05)' },
-  payBtnText: { fontSize: 13, fontWeight: '600', color: '#6B7280' },
-  payBtnTextActive: { color: '#006341' },
-  summary: { backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#F3F4F6', marginBottom: 14 },
-  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  summaryLabel: { fontSize: 13, color: '#6B7280', flex: 1 },
-  summaryValue: { fontSize: 13, fontWeight: '600', color: '#1C1917' },
-  error: { color: '#CE1126', fontSize: 13, backgroundColor: 'rgba(206,17,38,0.06)', padding: 12, borderRadius: 10, marginBottom: 12 },
-  btn: { backgroundColor: '#CE1126', borderRadius: 16, paddingVertical: 16, alignItems: 'center' },
-  btnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
+  safe: { flex: 1, backgroundColor: COLORS.cream },
+  scroll: { padding: SPACING.lg, paddingBottom: SPACING.xxxl },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginBottom: SPACING.lg },
+  backBtn: { width: 40, height: 40, borderRadius: RADIUS.md, backgroundColor: COLORS.paper, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: COLORS.border },
+  title: { fontSize: 26, fontWeight: FONT.weight.black, color: COLORS.ink },
+
+  groupTitle: { fontSize: 11, fontWeight: FONT.weight.bold, letterSpacing: 1.5, color: COLORS.textMuted, marginBottom: SPACING.sm, paddingHorizontal: 2 },
+  card: { backgroundColor: COLORS.paper, borderRadius: RADIUS.lg, padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border },
+  fieldLabel: { fontSize: 12, fontWeight: FONT.weight.medium, color: COLORS.textMuted, marginBottom: 6 },
+  input: { backgroundColor: '#fff', borderRadius: RADIUS.sm, borderWidth: 1, borderColor: COLORS.border, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: COLORS.ink },
+
+  /* Zone selector */
+  zoneRow: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.sm },
+  zoneBtn: { flex: 1, paddingVertical: SPACING.md, borderRadius: RADIUS.md, borderWidth: 2, borderColor: COLORS.border, alignItems: 'center', backgroundColor: COLORS.paper, gap: 4 },
+  zoneBtnActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
+  zoneBtnText: { fontSize: 13, fontWeight: FONT.weight.bold, color: COLORS.ink },
+  zoneBtnTextActive: { color: COLORS.paper },
+
+  /* Lines inside cards */
+  line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 4 },
+  lineLabel: { fontSize: 14, color: COLORS.textMuted, flex: 1 },
+  lineValue: { fontSize: 14, fontWeight: FONT.weight.bold, color: COLORS.ink },
+  lineSub: { fontSize: 12, color: COLORS.textFaint, marginTop: 2 },
+  freeShipHint: { fontSize: 12, color: COLORS.green, fontWeight: FONT.weight.medium, marginTop: 6 },
+  divider: { height: 1, backgroundColor: COLORS.borderSoft, marginVertical: SPACING.sm },
+  dividerThick: { height: 2, backgroundColor: COLORS.ink, marginVertical: SPACING.sm },
+  totalLabel: { fontSize: 16, fontWeight: FONT.weight.black, color: COLORS.ink },
+  totalValue: { fontSize: 20, fontWeight: FONT.weight.black, color: COLORS.green },
+
+  /* Payment */
+  payRow: { flexDirection: 'row', gap: SPACING.sm },
+  payBtn: { flex: 1, paddingVertical: SPACING.md, borderRadius: RADIUS.md, borderWidth: 2, borderColor: COLORS.border, alignItems: 'center', backgroundColor: COLORS.paper, gap: 4 },
+  payBtnActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
+  payBtnDisabled: { opacity: 0.5 },
+  payBtnText: { fontSize: 14, fontWeight: FONT.weight.bold, color: COLORS.ink },
+  payBtnTextActive: { color: COLORS.paper },
+  payBtnTextDisabled: { color: COLORS.textFaint },
+  payBadge: { fontSize: 10, color: COLORS.textMuted, marginTop: 2, fontWeight: FONT.weight.medium },
+
+  /* Toggle */
+  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.sm },
+  checkbox: { width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: COLORS.borderStrong, alignItems: 'center', justifyContent: 'center' },
+  checkboxOn: { backgroundColor: COLORS.green, borderColor: COLORS.green },
+  toggleLabel: { fontSize: 13, color: COLORS.ink, fontWeight: FONT.weight.medium },
+
+  error: { color: COLORS.red, fontSize: 13, backgroundColor: 'rgba(206,17,38,0.06)', padding: 12, borderRadius: RADIUS.md, marginBottom: SPACING.md },
+
+  payBtnMain: { backgroundColor: COLORS.ink, borderRadius: RADIUS.full, paddingVertical: 18, alignItems: 'center' },
+  payBtnMainText: { color: COLORS.paper, fontWeight: FONT.weight.black, fontSize: 16 },
 })

@@ -211,15 +211,37 @@ function Section({
             const state = album[group.id]?.[st.n] ?? { owned: 0, needed: 0 }
             const owned = state.owned > 0
             const dups = state.owned > 1 ? state.owned - 1 : 0
+            const rarity = st.rarity ?? 'common'
+            const wrap = [
+              s.sticker,
+              owned ? s.stickerOwned : s.stickerEmpty,
+              rarity === 'bronze' && (owned ? s.stickerBronzeOwned : s.stickerBronze),
+              rarity === 'silver' && (owned ? s.stickerSilverOwned : s.stickerSilver),
+              rarity === 'gold' && (owned ? s.stickerGoldOwned : s.stickerGold),
+              rarity === 'foil' && (owned ? s.stickerFoilOwned : s.stickerFoil),
+              rarity === 'special' && (owned ? s.stickerSpecialOwned : s.stickerSpecial),
+            ]
+            const numStyle = [
+              s.stickerNum,
+              owned ? s.stickerNumOwned : s.stickerNumEmpty,
+              rarity === 'bronze' && (owned ? s.numBronzeOwned : s.numBronze),
+              rarity === 'silver' && (owned ? s.numSilverOwned : s.numSilver),
+              rarity === 'gold' && (owned ? s.numGoldOwned : s.numGold),
+              rarity === 'foil' && (owned ? s.numFoilOwned : s.numFoil),
+              rarity === 'special' && (owned ? s.numSpecialOwned : s.numSpecial),
+            ]
             return (
               <TouchableOpacity
                 key={st.n}
                 onPress={() => onSticker(st.n)}
                 onLongPress={() => onDup(st.n)}
-                style={[s.sticker, owned ? s.stickerOwned : s.stickerEmpty]}
+                style={wrap}
                 activeOpacity={0.7}
               >
-                <Text style={[s.stickerNum, owned ? s.stickerNumOwned : s.stickerNumEmpty]}>{st.n}</Text>
+                <Text style={numStyle}>{st.n}</Text>
+                {rarity === 'gold' && <Text style={s.cornerBadge}>★</Text>}
+                {rarity === 'foil' && <Text style={s.cornerBadge}>✦</Text>}
+                {rarity === 'special' && <Text style={s.cornerBadgeRare}>R</Text>}
                 {dups > 0 && (
                   <View style={s.dupBadge}>
                     <Text style={s.dupBadgeText}>{dups}</Text>
@@ -277,6 +299,36 @@ const s = StyleSheet.create({
   stickerNum: { fontSize: 18, fontWeight: FONT.weight.bold },
   stickerNumEmpty: { color: '#B45309' },
   stickerNumOwned: { color: COLORS.paper, textDecorationLine: 'line-through' },
+
+  /* Rarity variants — empty + owned states */
+  stickerBronze:        { backgroundColor: '#F5E3D2', borderWidth: 2, borderColor: '#B87333' },
+  stickerBronzeOwned:   { backgroundColor: '#6B4423', borderWidth: 2, borderColor: '#B87333' },
+  numBronze:            { color: '#7A4A1F' },
+  numBronzeOwned:       { color: '#F5E3D2', textDecorationLine: 'line-through' },
+
+  stickerSilver:        { backgroundColor: '#EEF2F6', borderWidth: 2, borderColor: '#9CA3AF' },
+  stickerSilverOwned:   { backgroundColor: '#4B5563', borderWidth: 2, borderColor: '#D1D5DB' },
+  numSilver:            { color: '#4B5563' },
+  numSilverOwned:       { color: '#F3F4F6', textDecorationLine: 'line-through' },
+
+  stickerGold:          { backgroundColor: '#FFF8DC', borderWidth: 2, borderColor: COLORS.gold },
+  stickerGoldOwned:     { backgroundColor: COLORS.ink, borderWidth: 2, borderColor: COLORS.gold },
+  numGold:              { color: COLORS.goldDark, fontWeight: '900' },
+  numGoldOwned:         { color: COLORS.gold, textDecorationLine: 'line-through' },
+
+  stickerFoil:          { backgroundColor: '#FAF6EE', borderWidth: 2, borderColor: COLORS.green },
+  stickerFoilOwned:     { backgroundColor: COLORS.green, borderWidth: 2, borderColor: COLORS.gold },
+  numFoil:              { color: COLORS.green, fontWeight: '900' },
+  numFoilOwned:         { color: COLORS.gold, textDecorationLine: 'line-through' },
+
+  stickerSpecial:       { backgroundColor: '#FFE4E6', borderWidth: 2, borderColor: COLORS.red },
+  stickerSpecialOwned:  { backgroundColor: COLORS.red, borderWidth: 2, borderColor: COLORS.gold },
+  numSpecial:           { color: COLORS.red, fontWeight: '900' },
+  numSpecialOwned:      { color: COLORS.gold, textDecorationLine: 'line-through' },
+
+  cornerBadge:          { position: 'absolute', top: -4, left: -4, width: 18, height: 18, borderRadius: 9, backgroundColor: COLORS.gold, color: COLORS.ink, fontSize: 10, fontWeight: '900', textAlign: 'center', lineHeight: 18, overflow: 'hidden' },
+  cornerBadgeRare:      { position: 'absolute', top: -4, left: -4, width: 18, height: 18, borderRadius: 9, backgroundColor: COLORS.red, color: COLORS.paper, fontSize: 9, fontWeight: '900', textAlign: 'center', lineHeight: 18, overflow: 'hidden' },
+
   dupBadge: { position: 'absolute', top: -4, right: -4, minWidth: 22, height: 22, borderRadius: 11, backgroundColor: '#3B82F6', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
   dupBadgeText: { color: COLORS.paper, fontWeight: FONT.weight.black, fontSize: 11 },
 

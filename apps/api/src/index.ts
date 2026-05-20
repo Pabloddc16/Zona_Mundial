@@ -27,6 +27,7 @@ import albumRoutes from './routes/album.js'
 import tradesRoutes from './routes/trades.js'
 import stripeWebhook from './routes/webhooks/stripe.js'
 import mercadopagoWebhook from './routes/webhooks/mercadopago.js'
+import paymentsRoutes from './routes/payments.js'
 
 const app = Fastify({
   logger: {
@@ -78,6 +79,7 @@ await app.register(stockRoutes, { prefix: '/api/stock' })
 await app.register(movementsRoutes, { prefix: '/api/movements' })
 await app.register(albumRoutes, { prefix: '/api/album' })
 await app.register(tradesRoutes, { prefix: '/api/trades' })
+await app.register(paymentsRoutes, { prefix: '/api/payments' })
 
 const port = Number(process.env['PORT'] ?? 4000)
 const host = process.env['HOST'] ?? '0.0.0.0'
