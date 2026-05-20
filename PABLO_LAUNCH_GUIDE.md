@@ -94,9 +94,17 @@ When I have these I paste them into Render's environment, redeploy, and the app 
 
 ---
 
-## 3) EAS (Expo) build account — $19 USD on your account
+## 3) EAS (Expo) build account — under your name (maybe free, maybe $19)
 
 Free tier on my personal Expo account is used up. Resets June 1, but we can't ship until we build the final production AAB / IPA. **Goal: everything billed under your account, nothing attached to my personal account.**
+
+### Cost reality
+
+A brand-new Expo account starts with a **fresh free tier** — ~5 Android + ~5 iOS builds per month. We need 2 final builds (one each platform). If they both succeed first try, **the launch costs $0** in build credits.
+
+If a build errors (config drift, dep issue), retries eat the free quota fast. Past pattern in our project: many preview builds errored. Safer to budget **$19/month** for the launch month so we can re-build freely. Cancel right after launch.
+
+**Decision:** start free on your new account. Upgrade to $19 only if we hit the limit or the queue is too slow. Total spend: **$0 best case, $19 worst case.**
 
 ### Recommended path — you own the Expo account
 
@@ -107,14 +115,17 @@ Free tier on my personal Expo account is used up. Resets June 1, but we can't sh
 3. Pick a username — suggest `cromos26` or `pabloddc16`
 4. **Share the password with me via Signal / 1Password.** I'll log in to set up the project + builds. (You can change the password after launch.)
 
-#### B. Upgrade to Production plan
+#### B. (Maybe later) Upgrade to Production plan
 
-I can do this for you once I'm logged in — pay $19/mo on your card. Or you do it yourself:
+Skip this initially. We try the free quota first.
+
+If we run out of free builds or the queue is too slow, then:
 1. Account settings → **Billing**
 2. Pick **Production** ($19 USD / month)
-3. Add your card
+3. Add your card — charges go to your account, not mine
+4. Cancel next month after launch is approved
 
-Charges land on your statement, not mine.
+I can do all this for you once I'm logged into your account.
 
 #### C. Transfer the existing project to your account — INSTANT, no support ticket
 
@@ -258,13 +269,13 @@ If nothing exists yet, no problem — the structure is correct, only the labels 
 |------|--------|------|-----|
 | Apple Developer Program | $99 USD / year | Already paid | Required to put any app on iOS |
 | Google Play one-time fee | $25 USD | Already paid | Required to publish on Android |
-| **EAS Production plan** | **$19 USD / month** | **Pay now** | Build the production app (cancel after launch) |
+| **EAS Production plan** | **$0 best / $19 worst** | **Only if needed** | Free quota on new account covers 2 successful builds. Upgrade only if we burn through retries. |
 | Mercado Pago | 0 setup | — | They take a % of each sale, no monthly fee |
 | Render hosting (API) | Free tier OK for now | — | Upgrade later when traffic grows ($7/mo for warm server, optional) |
 | Supabase (database) | Free tier OK | — | Upgrade later if needed ($25/mo for production tier) |
 | Vercel (website) | Free tier OK | — | Stays free unless major traffic |
 | Domain (optional) | ~$12 / year | Later | If you want cromos26.com instead of zona-mundial.vercel.app |
-| **Estimated total to launch** | **~$19 USD** | This week | Just the EAS build credit |
+| **Estimated total to launch** | **$0 - $19 USD** | This week | $0 if free EAS quota holds, $19 if we need to upgrade |
 
 ---
 
@@ -295,9 +306,10 @@ Tick each one before forwarding:
 - ☐ TEST credentials copied
 - ☐ PROD credentials copied (secure channel ready)
 - ☐ Webhook URL added + signing secret copied
-- ☐ **Expo account created + Cromos26 organization made**
-- ☐ **Production plan $19 paid on the Expo org**
-- ☐ **stulanik@gmail.com invited to the org as Developer**
+- ☐ **Expo account created**
+- ☐ **Expo password shared via Signal/1Password (temporary)**
+- ☐ **stulanik@gmail.com invited as team member**
+- ☐ (Optional) **Production plan $19 paid** — only if free quota insufficient
 - ☐ Play Console service account JSON downloaded
 - ☐ Questions Q1-Q6 answered (or "use defaults" — that works too)
 - ☐ TestFlight build #7 status checked
