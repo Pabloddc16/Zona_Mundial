@@ -9,9 +9,9 @@
  * Everything related to delivery / payment lives in /checkout now —
  * Tienda is for discovery + cart only.
  */
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useCartStore } from '@/lib/cart-store'
@@ -34,12 +34,23 @@ const PRODUCT_CATEGORIES = [
 
 const MY_PANINI_PRICE = 200
 
+const API = process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:4000'
+
 export default function TiendaScreen() {
   const cart = useCartStore((s) => s.cart)
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0)
   const products = useProductsStore((s) => s.products)
+  const fetchProducts = useProductsStore((s) => s.fetch)
   const album = useAlbumStore((s) => s.album)
   const stats = albumStats(album)
+
+  // Refetch products every time Tienda gains focus so admin-uploaded
+  // image_url changes propagate without an app restart.
+  useFocusEffect(
+    useCallback(() => {
+      fetchProducts(API).catch(() => {})
+    }, [fetchProducts]),
+  )
 
   const completionPct = Math.round((stats.owned / TOTAL_STICKERS) * 100)
   const missing = TOTAL_STICKERS - stats.owned
