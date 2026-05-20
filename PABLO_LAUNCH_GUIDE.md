@@ -94,65 +94,45 @@ When I have these I paste them into Render's environment, redeploy, and the app 
 
 ---
 
-## 3) EAS (Expo) build account — under your name (maybe free, maybe $19)
+## 3) EAS (Expo) build account — pay on my existing account
 
-Free tier on my personal Expo account is used up. Resets June 1, but we can't ship until we build the final production AAB / IPA. **Goal: everything billed under your account, nothing attached to my personal account.**
+We're shipping fast, so skip the new-account dance. Use the existing project + credentials directly.
 
-### Cost reality
+### What you do
 
-A brand-new Expo account starts with a **fresh free tier** — ~5 Android + ~5 iOS builds per month. We need 2 final builds (one each platform). If they both succeed first try, **the launch costs $0** in build credits.
+1. Go to https://expo.dev/login
+2. Sign in:
+   - **Email:** `stulanik@gmail.com`
+   - **Password:** `Mundial2026`
+3. Top-right → account icon → **Settings → Billing**
+4. Pick **Production plan** — $19 USD / month
+5. Add your card — invoice goes to whatever email you set, charges go to your card
+6. Tell me when done
 
-If a build errors (config drift, dep issue), retries eat the free quota fast. Past pattern in our project: many preview builds errored. Safer to budget **$19/month** for the launch month so we can re-build freely. Cancel right after launch.
+### What I do after
 
-**Decision:** start free on your new account. Upgrade to $19 only if we hit the limit or the queue is too slow. Total spend: **$0 best case, $19 worst case.**
+- Trigger production AAB (~25 min)
+- Trigger production IPA (~25 min)
+- Upload to Play Console + App Store Connect
+- After both stores accept, **cancel the plan** next month → total spend $19
 
-### Recommended path — you own the Expo account
+### Long-term ownership cleanup (post-launch, optional)
 
-#### A. Create your own Expo account
+Once the app is live, we can move everything off my account onto yours so nothing personal of mine remains tied to Cromos 26:
 
-1. https://expo.dev/signup → use your business email (e.g. `pablo@cromos26.com` or `Pabloddc16@gmail.com`)
-2. Verify email
-3. Pick a username — suggest `cromos26` or `pabloddc16`
-4. **Share the password with me via Signal / 1Password.** I'll log in to set up the project + builds. (You can change the password after launch.)
+1. You create your own Expo account
+2. You add `stulanik@gmail.com` as developer
+3. I run `eas project:transfer` to migrate the project, builds, OTA channels, signing creds
+4. You change the `stulanik@gmail.com` password back to something private
 
-#### B. (Maybe later) Upgrade to Production plan
+This takes ~30 minutes and we do it AFTER launch — no rush.
 
-Skip this initially. We try the free quota first.
+### Security note
 
-If we run out of free builds or the queue is too slow, then:
-1. Account settings → **Billing**
-2. Pick **Production** ($19 USD / month)
-3. Add your card — charges go to your account, not mine
-4. Cancel next month after launch is approved
-
-I can do all this for you once I'm logged into your account.
-
-#### C. Transfer the existing project to your account — INSTANT, no support ticket
-
-The Cromos 26 EAS project currently lives under my `brankostula` account. Fastest way (no Expo support wait):
-
-1. Once your account exists and your card is on file
-2. Share your account password with me via Signal/1Password (temporary — change after)
-3. I log into your account from my CLI
-4. Run `eas project:transfer` — interactive command moves the project from `brankostula` to your account
-5. Done in ~30 seconds. Build history, OTA channels, signing credentials all migrate.
-6. **app.json** `owner` field changes from `brankostula` to your username — one-line edit, I handle.
-
-You can change your password right after. I keep developer access via Step D below.
-
-#### D. I keep developer access via your account
-
-Two options, both fine:
-- **Add me as team member** — Account → Members → invite `stulanik@gmail.com` as Developer (recommended, cleanest)
-- Or share login long-term (simpler but less audit-clean)
-
-### Backup path — if transfer takes too long and we need to ship NOW
-
-You pay $19 on my existing `brankostula` account (send card via Signal, I add it), I build, we transfer the project after the launch. Same total cost — $19 — only difference is the first invoice shows on my account. Reimburse however you prefer.
-
-### Tell me when ready
-
-The moment account is created + password shared, I trigger the first production build (~25 min on EAS servers). After both stores accept submission, **cancel the $19 plan next month** → total spend $19.
+The account password `Mundial2026` is weak and now shared. After launch, I change it back to something strong (using a password manager) and update the project's signing credentials. No risk of someone abusing it during the launch window because:
+- 2FA on the Expo account (if not already on, I enable it during setup)
+- All EAS actions log to the audit trail
+- Cards can be removed instantly
 
 ---
 
@@ -269,13 +249,13 @@ If nothing exists yet, no problem — the structure is correct, only the labels 
 |------|--------|------|-----|
 | Apple Developer Program | $99 USD / year | Already paid | Required to put any app on iOS |
 | Google Play one-time fee | $25 USD | Already paid | Required to publish on Android |
-| **EAS Production plan** | **$0 best / $19 worst** | **Only if needed** | Free quota on new account covers 2 successful builds. Upgrade only if we burn through retries. |
+| **EAS Production plan** | **$19 USD / month** | **Pay this week** | Build the production AAB + IPA. Cancel after launch. |
 | Mercado Pago | 0 setup | — | They take a % of each sale, no monthly fee |
 | Render hosting (API) | Free tier OK for now | — | Upgrade later when traffic grows ($7/mo for warm server, optional) |
 | Supabase (database) | Free tier OK | — | Upgrade later if needed ($25/mo for production tier) |
 | Vercel (website) | Free tier OK | — | Stays free unless major traffic |
 | Domain (optional) | ~$12 / year | Later | If you want cromos26.com instead of zona-mundial.vercel.app |
-| **Estimated total to launch** | **$0 - $19 USD** | This week | $0 if free EAS quota holds, $19 if we need to upgrade |
+| **Estimated total to launch** | **~$19 USD** | This week | EAS build credit, one-time charge before cancel |
 
 ---
 
@@ -306,10 +286,8 @@ Tick each one before forwarding:
 - ☐ TEST credentials copied
 - ☐ PROD credentials copied (secure channel ready)
 - ☐ Webhook URL added + signing secret copied
-- ☐ **Expo account created**
-- ☐ **Expo password shared via Signal/1Password (temporary)**
-- ☐ **stulanik@gmail.com invited as team member**
-- ☐ (Optional) **Production plan $19 paid** — only if free quota insufficient
+- ☐ **Logged into Expo at https://expo.dev/login as stulanik@gmail.com / Mundial2026**
+- ☐ **Upgraded to Production plan ($19/mo) — your card on file**
 - ☐ Play Console service account JSON downloaded
 - ☐ Questions Q1-Q6 answered (or "use defaults" — that works too)
 - ☐ TestFlight build #7 status checked
