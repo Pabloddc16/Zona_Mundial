@@ -64,8 +64,8 @@ export default function StarsShopScreen() {
           <Ionicons name="chevron-back" size={22} color={COLORS.ink} />
         </TouchableOpacity>
         <View>
-          <Text style={s.titleSmall}>Tienda · Stars</Text>
-          <Text style={s.titleBig}>20 jugadores · 4 tiers</Text>
+          <Text style={s.titleSmall}>Store · Stars</Text>
+          <Text style={s.titleBig}>20 players · 4 tiers</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -79,7 +79,7 @@ export default function StarsShopScreen() {
             style={[s.chip, tier === t && s.chipActive]}
           >
             <Text style={[s.chipText, tier === t && s.chipTextActive]}>
-              {t === 'all' ? 'Todos los tiers' : t}
+              {t === 'all' ? 'All tiers' : t}
             </Text>
           </TouchableOpacity>
         ))}
@@ -98,7 +98,7 @@ export default function StarsShopScreen() {
             ]}
           >
             <Text style={[s.chipText, rarity === r && s.chipTextActive]}>
-              {r === 'all' ? 'Todas las rarezas' : RARITY_DISPLAY[r as StarRarity].label}
+              {r === 'all' ? 'All rarities' : RARITY_DISPLAY[r as StarRarity].label}
             </Text>
           </TouchableOpacity>
         ))}
@@ -139,7 +139,7 @@ export default function StarsShopScreen() {
         ListEmptyComponent={
           <View style={s.empty}>
             <Ionicons name="filter-outline" size={32} color={COLORS.textMuted} />
-            <Text style={s.emptyText}>Sin SKUs en este filtro</Text>
+            <Text style={s.emptyText}>No SKUs match this filter</Text>
           </View>
         }
       />

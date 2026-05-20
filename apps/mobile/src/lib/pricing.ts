@@ -23,7 +23,7 @@ export function priceFor(tier: StarTier, rarity: StarRarity): number {
 
 export const RARITY_DISPLAY: Record<StarRarity, { label: string; color: string; bg: string }> = {
   BASE:   { label: 'Base',   color: '#0B1F15', bg: '#FAF6EE' },
-  BRONCE: { label: 'Bronce', color: '#7A4A1F', bg: '#F5E3D2' },
-  PLATA:  { label: 'Plata',  color: '#4B5563', bg: '#EEF2F6' },
-  ORO:    { label: 'Oro',    color: '#806100', bg: '#FFF8DC' },
+  BRONCE: { label: 'Bronze', color: '#7A4A1F', bg: '#F5E3D2' },
+  PLATA:  { label: 'Silver', color: '#4B5563', bg: '#EEF2F6' },
+  ORO:    { label: 'Gold',   color: '#806100', bg: '#FFF8DC' },
 }

@@ -12,16 +12,16 @@ import { useProductsStore } from '@/lib/products-store'
 import { ALBUM, fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
 
-type Tab = 'faltantes' | 'recomendadas' | 'intercambio' | 'packs'
+type Tab = 'missing' | 'recommended' | 'swap' | 'packs'
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'faltantes',    label: 'Faltantes' },
-  { id: 'recomendadas', label: 'Recomendadas' },
-  { id: 'intercambio',  label: 'Intercambio' },
-  { id: 'packs',        label: 'Packs' },
+  { id: 'missing',     label: 'Missing' },
+  { id: 'recommended', label: 'Recommended' },
+  { id: 'swap',        label: 'Swap' },
+  { id: 'packs',       label: 'Packs' },
 ]
 
 export default function AlbumFillScreen() {
-  const [tab, setTab] = useState<Tab>('faltantes')
+  const [tab, setTab] = useState<Tab>('missing')
   const album = useAlbumStore((s) => s.album)
   const products = useProductsStore((s) => s.products)
 
@@ -67,7 +67,7 @@ export default function AlbumFillScreen() {
         <TouchableOpacity onPress={() => router.back()} style={s.back} hitSlop={8}>
           <Ionicons name="chevron-back" size={22} color={COLORS.ink} />
         </TouchableOpacity>
-        <Text style={s.title}>Llena tu álbum</Text>
+        <Text style={s.title}>Fill your album</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -81,9 +81,9 @@ export default function AlbumFillScreen() {
       </View>
 
       <ScrollView contentContainerStyle={s.scroll}>
-        {tab === 'faltantes' && (
+        {tab === 'missing' && (
           missing.length === 0
-            ? <Empty icon="checkmark-circle-outline" text="¡Álbum completo!" />
+            ? <Empty icon="checkmark-circle-outline" text="Album complete!" />
             : missing.slice(0, 100).map((m) => (
                 <View key={m.code} style={s.row}>
                   <View style={s.rowBadge}><Text style={s.rowBadgeText}>{m.code}</Text></View>
@@ -96,9 +96,9 @@ export default function AlbumFillScreen() {
               ))
         )}
 
-        {tab === 'recomendadas' && (
+        {tab === 'recommended' && (
           almostDone.length === 0
-            ? <Empty icon="trending-up-outline" text="Sigue marcando — apareceran secciones casi completas." />
+            ? <Empty icon="trending-up-outline" text="Keep marking — almost-complete sections will appear here." />
             : almostDone.map((g) => (
                 <View key={g.id} style={s.row}>
                   <Text style={{ fontSize: 28, marginRight: SPACING.md }}>{g.emoji}</Text>
@@ -111,7 +111,7 @@ export default function AlbumFillScreen() {
               ))
         )}
 
-        {tab === 'intercambio' && <Empty icon="sync-outline" text="Próximamente — top stickers que aparecen en intercambios." />}
+        {tab === 'swap' && <Empty icon="sync-outline" text="Coming soon — top stickers seen in swap offers." />}
 
         {tab === 'packs' && (
           packs.map((p) => (

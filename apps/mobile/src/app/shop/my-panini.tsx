@@ -11,20 +11,20 @@ export default function MyPaniniScreen() {
         <TouchableOpacity onPress={() => router.back()} style={s.back} hitSlop={8}>
           <Ionicons name="chevron-back" size={22} color={COLORS.ink} />
         </TouchableOpacity>
-        <Text style={s.title}>Mi Panini</Text>
+        <Text style={s.title}>My Panini</Text>
         <View style={{ width: 40 }} />
       </View>
       <View style={s.body}>
         <View style={s.iconWrap}>
           <Ionicons name="camera" size={40} color={COLORS.green} />
         </View>
-        <Text style={s.heroTitle}>Crea tu sticker personalizada</Text>
-        <Text style={s.heroSub}>Toma una selfie y la convertimos en un sticker estilo Panini oficial. $200 MXN.</Text>
+        <Text style={s.heroTitle}>Create your custom sticker</Text>
+        <Text style={s.heroSub}>Take a selfie and we'll turn it into an official Panini-style sticker. $200 MXN.</Text>
         <View style={s.comingSoonBadge}>
           <Ionicons name="time-outline" size={14} color={COLORS.gold} />
-          <Text style={s.comingSoonText}>Próximamente</Text>
+          <Text style={s.comingSoonText}>Coming soon</Text>
         </View>
-        <Text style={s.note}>Estamos terminando el editor de fotos. Si te interesa, deja tu email cuando lance.</Text>
+        <Text style={s.note}>Photo editor is in final testing. Drop your email and we'll ping you at launch.</Text>
       </View>
     </SafeAreaView>
   )

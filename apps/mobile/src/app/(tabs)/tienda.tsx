@@ -21,15 +21,15 @@ import { ALBUM, TOTAL_STICKERS, fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 const PRODUCT_CATEGORIES = [
-  { id: 'all',          label: 'Todos',         icon: 'apps-outline' as const,         emoji: '🛒' },
-  { id: 'albumes',      label: 'Álbumes',       icon: 'book-outline' as const,         emoji: '📘' },
-  { id: 'sobres',       label: 'Sobres',        icon: 'mail-outline' as const,         emoji: '✉️' },
+  { id: 'all',          label: 'All',           icon: 'apps-outline' as const,         emoji: '🛒' },
+  { id: 'albumes',      label: 'Albums',        icon: 'book-outline' as const,         emoji: '📘' },
+  { id: 'sobres',       label: 'Packs',         icon: 'mail-outline' as const,         emoji: '✉️' },
   { id: 'packs',        label: 'Sets',          icon: 'gift-outline' as const,         emoji: '🎁' },
   { id: 'coca',         label: 'Coca-Cola',     icon: 'wine-outline' as const,         emoji: '🥤' },
-  { id: 'jerseys',      label: 'Playeras',      icon: 'shirt-outline' as const,        emoji: '👕' },
-  { id: 'balones',      label: 'Balones',       icon: 'football-outline' as const,     emoji: '⚽' },
-  { id: 'trofeos',      label: 'Trofeos',       icon: 'trophy-outline' as const,       emoji: '🏆' },
-  { id: 'accesorios',   label: 'Accesorios',    icon: 'pricetag-outline' as const,     emoji: '🧢' },
+  { id: 'jerseys',      label: 'Jerseys',       icon: 'shirt-outline' as const,        emoji: '👕' },
+  { id: 'balones',      label: 'Balls',         icon: 'football-outline' as const,     emoji: '⚽' },
+  { id: 'trofeos',      label: 'Trophies',      icon: 'trophy-outline' as const,       emoji: '🏆' },
+  { id: 'accesorios',   label: 'Accessories',   icon: 'pricetag-outline' as const,     emoji: '🧢' },
 ]
 
 const MY_PANINI_PRICE = 200
@@ -61,7 +61,7 @@ export default function TiendaScreen() {
       {/* Header — Tienda / Mundial 26 Shop, cart top-right, NO settings */}
       <View style={s.header}>
         <View>
-          <Text style={s.titleSmall}>Tienda</Text>
+          <Text style={s.titleSmall}>Store</Text>
           <Text style={s.titleBig}>Mundial 26 Shop</Text>
         </View>
         <TouchableOpacity onPress={() => router.push('/carrito')} style={s.cartBtn} hitSlop={8}>
@@ -84,11 +84,11 @@ export default function TiendaScreen() {
           <View style={s.heroIconCircle}>
             <Ionicons name="camera" size={28} color={COLORS.gold} />
           </View>
-          <Text style={s.heroEyebrow}>NUEVO · $200</Text>
-          <Text style={s.heroTitle}>Crea tu sticker personalizada</Text>
-          <Text style={s.heroSub}>Tu cara en una carta estilo Panini oficial.</Text>
+          <Text style={s.heroEyebrow}>NEW · $200</Text>
+          <Text style={s.heroTitle}>Create your custom sticker</Text>
+          <Text style={s.heroSub}>Your face on an official Panini-style card.</Text>
           <View style={s.heroCta}>
-            <Text style={s.heroCtaText}>Crear mi Panini</Text>
+            <Text style={s.heroCtaText}>Create my Panini</Text>
             <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
           </View>
         </TouchableOpacity>
@@ -103,10 +103,10 @@ export default function TiendaScreen() {
             <Ionicons name="star" size={28} color={COLORS.gold} />
           </View>
           <Text style={s.heroEyebrow}>GOAT · CRACK · STAR</Text>
-          <Text style={s.heroTitle}>Obtén tus stickers favoritas</Text>
-          <Text style={s.heroSub}>GOATs, CRACK, STAR. Base, Bronce, Plata u Oro.</Text>
+          <Text style={s.heroTitle}>Get your favorite stickers</Text>
+          <Text style={s.heroSub}>GOAT, CRACK, STAR. Base, Bronze, Silver, or Gold.</Text>
           <View style={[s.heroCta, { backgroundColor: COLORS.gold }]}>
-            <Text style={[s.heroCtaText, { color: COLORS.red }]}>Explorar extras</Text>
+            <Text style={[s.heroCtaText, { color: COLORS.red }]}>Explore extras</Text>
             <Ionicons name="arrow-forward" size={14} color={COLORS.red} />
           </View>
         </TouchableOpacity>
@@ -122,24 +122,24 @@ export default function TiendaScreen() {
           </View>
           {missing > 0 ? (
             <>
-              <Text style={s.heroEyebrow}>TU ÁLBUM · {completionPct}%</Text>
-              <Text style={s.heroTitle}>Te faltan {missing} stickers</Text>
+              <Text style={s.heroEyebrow}>YOUR ALBUM · {completionPct}%</Text>
+              <Text style={s.heroTitle}>You're missing {missing} stickers</Text>
               <View style={s.albumProgressBar}>
                 <View style={[s.albumProgressFill, { width: `${completionPct}%` }]} />
               </View>
-              <Text style={s.heroSub}>Total estimado: {fmt(estCostToFinish)} pesos</Text>
+              <Text style={s.heroSub}>Estimated total: {fmt(estCostToFinish)} MXN</Text>
               <View style={s.heroCta}>
-                <Text style={s.heroCtaText}>Completar álbum</Text>
+                <Text style={s.heroCtaText}>Complete album</Text>
                 <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
               </View>
             </>
           ) : (
             <>
-              <Text style={s.heroEyebrow}>¡FELICIDADES!</Text>
-              <Text style={s.heroTitle}>¡Álbum completo! 🏆</Text>
-              <Text style={s.heroSub}>Reserva tu lugar para Mundial 2030.</Text>
+              <Text style={s.heroEyebrow}>CONGRATULATIONS!</Text>
+              <Text style={s.heroTitle}>Album complete! 🏆</Text>
+              <Text style={s.heroSub}>Reserve your spot for World Cup 2030.</Text>
               <View style={s.heroCta}>
-                <Text style={s.heroCtaText}>Reservar para 2030</Text>
+                <Text style={s.heroCtaText}>Reserve for 2030</Text>
                 <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
               </View>
             </>
@@ -149,7 +149,7 @@ export default function TiendaScreen() {
         {/* 4. PRODUCTOS DEL MUNDIAL */}
         <View style={s.productsHeader}>
           <Ionicons name="trophy" size={20} color={COLORS.ink} />
-          <Text style={s.productsTitle}>Productos del Mundial</Text>
+          <Text style={s.productsTitle}>World Cup products</Text>
         </View>
 
         {/* 4a — category carousel */}
@@ -172,7 +172,7 @@ export default function TiendaScreen() {
               >
                 <Text style={s.catEmoji}>{c.emoji}</Text>
                 <Text style={s.catLabel}>{c.label}</Text>
-                <Text style={s.catCount}>{count} productos</Text>
+                <Text style={s.catCount}>{count} items</Text>
               </TouchableOpacity>
             )
           })}

@@ -160,11 +160,11 @@ export default function AlbumScreen() {
             <Ionicons name="gift" size={26} color={COLORS.gold} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={s.referralTitle}>Invita a un amigo, ganas 5%</Text>
-            <Text style={s.referralSub}>Por cada compra de tu amigo, ganas 5% de crédito.</Text>
+            <Text style={s.referralTitle}>Invite a friend, earn 5%</Text>
+            <Text style={s.referralSub}>For every purchase your friend makes, you earn 5% credit.</Text>
           </View>
           <View style={s.referralCta}>
-            <Text style={s.referralCtaText}>Mi código</Text>
+            <Text style={s.referralCtaText}>My code</Text>
             <Ionicons name="arrow-forward" size={14} color={COLORS.ink} />
           </View>
         </TouchableOpacity>

@@ -14,10 +14,10 @@ import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 type Filter = 'all' | 'foil' | 'special' | 'gold'
 
 const FILTERS: { id: Filter; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { id: 'all',     label: 'Todas',         icon: 'apps-outline' },
-  { id: 'foil',    label: 'Doradas',       icon: 'star-outline' },
-  { id: 'special', label: 'Edición Ltd.',  icon: 'sparkles-outline' },
-  { id: 'gold',    label: 'Legendarias',   icon: 'trophy-outline' },
+  { id: 'all',     label: 'All',           icon: 'apps-outline' },
+  { id: 'foil',    label: 'Foil',          icon: 'star-outline' },
+  { id: 'special', label: 'Limited Ed.',   icon: 'sparkles-outline' },
+  { id: 'gold',    label: 'Legendary',     icon: 'trophy-outline' },
 ]
 
 export default function ExtrasScreen() {
@@ -89,7 +89,7 @@ export default function ExtrasScreen() {
         ListEmptyComponent={
           <View style={s.empty}>
             <Ionicons name="sparkles-outline" size={32} color={COLORS.textMuted} />
-            <Text style={s.emptyText}>No hay stickers en este filtro</Text>
+            <Text style={s.emptyText}>No stickers match this filter</Text>
           </View>
         }
       />

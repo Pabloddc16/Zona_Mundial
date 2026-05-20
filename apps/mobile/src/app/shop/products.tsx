@@ -12,16 +12,16 @@ import { fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 const CAT_LABEL: Record<string, string> = {
-  all: 'Todos los productos',
-  albumes: 'Álbumes',
-  sobres: 'Sobres',
-  packs: 'Sets completos',
+  all: 'All products',
+  albumes: 'Albums',
+  sobres: 'Packs',
+  packs: 'Complete sets',
   coca: 'Coca-Cola',
-  jerseys: 'Playeras',
-  balones: 'Balones',
-  trofeos: 'Trofeos',
-  accesorios: 'Accesorios',
-  cartas: 'Cartas',
+  jerseys: 'Jerseys',
+  balones: 'Balls',
+  trofeos: 'Trophies',
+  accesorios: 'Accessories',
+  cartas: 'Cards',
 }
 
 export default function ProductsScreen() {
@@ -76,7 +76,7 @@ export default function ProductsScreen() {
         {visible.length === 0 && (
           <View style={s.empty}>
             <Ionicons name="search-outline" size={32} color={COLORS.textMuted} />
-            <Text style={s.emptyText}>Sin productos en esta categoría todavía</Text>
+            <Text style={s.emptyText}>No products in this category yet</Text>
           </View>
         )}
       </ScrollView>
