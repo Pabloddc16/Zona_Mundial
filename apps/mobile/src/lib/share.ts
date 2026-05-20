@@ -18,7 +18,7 @@ import type { AlbumState } from './album-store'
  *   Descarga la app
  *   https://cromos26.app/descargar
  */
-export const DOWNLOAD_URL = 'https://cromos26.app/descargar'  // PENDING — confirm with Pablo
+export const DOWNLOAD_URL = 'https://zona-mundial.vercel.app/descargar'
 
 const FWC_DISPLAY_PREFIX: Record<string, string> = {
   'FWC-T': 'FWC 🏆',

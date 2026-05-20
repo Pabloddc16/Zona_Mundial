@@ -1,205 +1,351 @@
-import { useState } from 'react'
-import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, FlatList } from 'react-native'
+/**
+ * Tienda — full redesign per Pablo's PDF spec (May 2026).
+ * Hierarchy: 4 hero sections, vertical scroll, no subtabs.
+ *   1. Mi Panini (custom sticker photo, $200)
+ *   2. Extra Stickers (rarity-filtered catalog)
+ *   3. Llena tu álbum (dynamic — reacts to user's album state)
+ *   4. Productos del Mundial (category carousel + product grid)
+ *
+ * Everything related to delivery / payment lives in /checkout now —
+ * Tienda is for discovery + cart only.
+ */
+import { useMemo } from 'react'
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import * as Haptics from 'expo-haptics'
-import { CATEGORIES, fmt } from '@/lib/data'
+import { Ionicons } from '@expo/vector-icons'
 import { useCartStore } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
-import { Ionicons } from '@expo/vector-icons'
+import { useAlbumStore, albumStats } from '@/lib/album-store'
+import { ALBUM, TOTAL_STICKERS, fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
-type Mode = 'delivery' | 'pickup' | 'gift'
+const PRODUCT_CATEGORIES = [
+  { id: 'all',          label: 'Todos',         icon: 'apps-outline' as const,         emoji: '🛒' },
+  { id: 'albumes',      label: 'Álbumes',       icon: 'book-outline' as const,         emoji: '📘' },
+  { id: 'sobres',       label: 'Sobres',        icon: 'mail-outline' as const,         emoji: '✉️' },
+  { id: 'packs',        label: 'Sets',          icon: 'gift-outline' as const,         emoji: '🎁' },
+  { id: 'coca',         label: 'Coca-Cola',     icon: 'wine-outline' as const,         emoji: '🥤' },
+  { id: 'jerseys',      label: 'Playeras',      icon: 'shirt-outline' as const,        emoji: '👕' },
+  { id: 'balones',      label: 'Balones',       icon: 'football-outline' as const,     emoji: '⚽' },
+  { id: 'trofeos',      label: 'Trofeos',       icon: 'trophy-outline' as const,       emoji: '🏆' },
+  { id: 'accesorios',   label: 'Accesorios',    icon: 'pricetag-outline' as const,     emoji: '🧢' },
+]
+
+const MY_PANINI_PRICE = 200
 
 export default function TiendaScreen() {
-  const [cat, setCat] = useState('all')
-  const [mode, setMode] = useState<Mode>('delivery')
-  const [added, setAdded] = useState<string | null>(null)
-  const add = useCartStore((s) => s.add)
   const cart = useCartStore((s) => s.cart)
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0)
   const products = useProductsStore((s) => s.products)
+  const album = useAlbumStore((s) => s.album)
+  const stats = albumStats(album)
 
-  const visible = cat === 'all' ? products : products.filter((p) => p.category === cat)
+  const completionPct = Math.round((stats.owned / TOTAL_STICKERS) * 100)
+  const missing = TOTAL_STICKERS - stats.owned
 
-  function handleAdd(id: string) {
-    add(id)
-    setAdded(id)
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
-    setTimeout(() => setAdded(null), 1200)
-  }
+  // Estimate cost to complete: avg sticker $5 from PRICE_BY_TIER.comun
+  const estCostToFinish = useMemo(() => {
+    let total = 0
+    for (const g of ALBUM) {
+      const gs = album[g.id] ?? {}
+      for (const st of g.stickers) {
+        if ((gs[st.n]?.owned ?? 0) === 0) total += st.price
+      }
+    }
+    return total
+  }, [album])
 
   return (
     <SafeAreaView style={s.safe}>
-      {/* Header — cart left, Cards quick-filter top-right */}
-      <View style={s.headerBar}>
-        <TouchableOpacity onPress={() => router.push('/carrito')} style={s.cartBtn}>
-          <Ionicons name="cart-outline" size={20} color={COLORS.paper} />
+      {/* Header — Tienda / Mundial 26 Shop, cart top-right, NO settings */}
+      <View style={s.header}>
+        <View>
+          <Text style={s.titleSmall}>Tienda</Text>
+          <Text style={s.titleBig}>Mundial 26 Shop</Text>
+        </View>
+        <TouchableOpacity onPress={() => router.push('/carrito')} style={s.cartBtn} hitSlop={8}>
+          <Ionicons name="cart-outline" size={22} color={COLORS.paper} />
           {cartCount > 0 && (
             <View style={s.cartBadge}>
               <Text style={s.cartBadgeText}>{cartCount}</Text>
             </View>
           )}
         </TouchableOpacity>
-        <Text style={s.title}>Store</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <TouchableOpacity
-            onPress={() => setCat(cat === 'cartas' ? 'all' : 'cartas')}
-            style={[s.cardaBtn, cat === 'cartas' && s.cardaBtnActive]}
-          >
-            <Ionicons
-              name="albums-outline"
-              size={14}
-              color={cat === 'cartas' ? COLORS.paper : COLORS.ink}
-            />
-            <Text style={[s.cardaBtnText, cat === 'cartas' && s.cardaBtnTextActive]}>Cards</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.back()} style={s.backBtn} hitSlop={8}>
-            <Ionicons name="close" size={20} color={COLORS.ink} />
-          </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={s.scroll}>
+        {/* 1. MI PANINI — hero */}
+        <TouchableOpacity
+          onPress={() => router.push('/shop/my-panini')}
+          activeOpacity={0.9}
+          style={[s.hero, s.heroPanini]}
+        >
+          <View style={s.heroIconCircle}>
+            <Ionicons name="camera" size={28} color={COLORS.gold} />
+          </View>
+          <Text style={s.heroEyebrow}>NUEVO · $200</Text>
+          <Text style={s.heroTitle}>Crea tu sticker personalizada</Text>
+          <Text style={s.heroSub}>Tu cara en una carta estilo Panini oficial.</Text>
+          <View style={s.heroCta}>
+            <Text style={s.heroCtaText}>Crear mi Panini</Text>
+            <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
+          </View>
+        </TouchableOpacity>
+
+        {/* 2. EXTRA STICKERS */}
+        <TouchableOpacity
+          onPress={() => router.push('/shop/extras')}
+          activeOpacity={0.9}
+          style={[s.hero, s.heroExtras]}
+        >
+          <View style={s.heroIconCircle}>
+            <Ionicons name="star" size={28} color={COLORS.gold} />
+          </View>
+          <Text style={s.heroEyebrow}>LEGENDARIAS · DORADAS</Text>
+          <Text style={s.heroTitle}>Obtén tus stickers favoritas</Text>
+          <Text style={s.heroSub}>Legendarias, doradas y ediciones limitadas.</Text>
+          <View style={[s.heroCta, { backgroundColor: COLORS.gold }]}>
+            <Text style={[s.heroCtaText, { color: COLORS.red }]}>Explorar extras</Text>
+            <Ionicons name="arrow-forward" size={14} color={COLORS.red} />
+          </View>
+        </TouchableOpacity>
+
+        {/* 3. LLENA TU ÁLBUM — dynamic */}
+        <TouchableOpacity
+          onPress={() => router.push('/shop/album')}
+          activeOpacity={0.9}
+          style={[s.hero, s.heroAlbum]}
+        >
+          <View style={s.heroIconCircle}>
+            <Ionicons name="book" size={28} color={COLORS.gold} />
+          </View>
+          {missing > 0 ? (
+            <>
+              <Text style={s.heroEyebrow}>TU ÁLBUM · {completionPct}%</Text>
+              <Text style={s.heroTitle}>Te faltan {missing} stickers</Text>
+              <View style={s.albumProgressBar}>
+                <View style={[s.albumProgressFill, { width: `${completionPct}%` }]} />
+              </View>
+              <Text style={s.heroSub}>Total estimado: {fmt(estCostToFinish)} pesos</Text>
+              <View style={s.heroCta}>
+                <Text style={s.heroCtaText}>Completar álbum</Text>
+                <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={s.heroEyebrow}>¡FELICIDADES!</Text>
+              <Text style={s.heroTitle}>¡Álbum completo! 🏆</Text>
+              <Text style={s.heroSub}>Reserva tu lugar para Mundial 2030.</Text>
+              <View style={s.heroCta}>
+                <Text style={s.heroCtaText}>Reservar para 2030</Text>
+                <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
+              </View>
+            </>
+          )}
+        </TouchableOpacity>
+
+        {/* 4. PRODUCTOS DEL MUNDIAL */}
+        <View style={s.productsHeader}>
+          <Ionicons name="trophy" size={20} color={COLORS.ink} />
+          <Text style={s.productsTitle}>Productos del Mundial</Text>
         </View>
-      </View>
 
-      {/* Uber-Eats style 3 mode buttons */}
-      <View style={s.modeRow}>
-        <TouchableOpacity style={[s.modeBtn, mode === 'delivery' && s.modeBtnActive]} onPress={() => setMode('delivery')}>
-          <Ionicons name="cube-outline" size={22} color={mode === 'delivery' ? COLORS.paper : COLORS.ink} />
-          <Text style={mode === 'delivery' ? s.modeBtnTextActive : s.modeBtnText}>Delivery</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[s.modeBtn, mode === 'pickup' && s.modeBtnActive]} onPress={() => setMode('pickup')}>
-          <Ionicons name="storefront-outline" size={22} color={mode === 'pickup' ? COLORS.paper : COLORS.ink} />
-          <Text style={mode === 'pickup' ? s.modeBtnTextActive : s.modeBtnText}>Pickup</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[s.modeBtn, mode === 'gift' && s.modeBtnActive]} onPress={() => setMode('gift')}>
-          <Ionicons name="gift-outline" size={22} color={mode === 'gift' ? COLORS.paper : COLORS.ink} />
-          <Text style={mode === 'gift' ? s.modeBtnTextActive : s.modeBtnText}>Gift</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Mode hint banner */}
-      <View style={s.modeHint}>
-        <Text style={s.modeHintText}>
-          {mode === 'delivery' && '📍 Ships to your address in 2-5 days'}
-          {mode === 'pickup' && '🏬 Reserve and pick up at the store, no shipping fee'}
-          {mode === 'gift' && '💝 Send to a friend with a personal message'}
-        </Text>
-      </View>
-
-      {/* Category pills — horizontal stable scroll */}
-      <View style={s.catWrap}>
+        {/* 4a — category carousel */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={s.catScroll}
-          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={s.carousel}
         >
-          {CATEGORIES.map((c) => {
-            const active = cat === c.id
+          {PRODUCT_CATEGORIES.map((c) => {
+            const count = c.id === 'all'
+              ? products.length
+              : products.filter((p) => p.category === c.id).length
+            if (c.id !== 'all' && count === 0) return null
             return (
               <TouchableOpacity
                 key={c.id}
-                onPress={() => setCat(c.id)}
-                style={[s.pill, active && s.pillActive]}
-                activeOpacity={0.7}
+                onPress={() => router.push(`/shop/products?cat=${c.id}`)}
+                style={s.catCard}
+                activeOpacity={0.85}
               >
-                <Text style={[s.pillText, active && s.pillTextActive]} numberOfLines={1}>{c.label}</Text>
+                <Text style={s.catEmoji}>{c.emoji}</Text>
+                <Text style={s.catLabel}>{c.label}</Text>
+                <Text style={s.catCount}>{count} productos</Text>
               </TouchableOpacity>
             )
           })}
         </ScrollView>
-      </View>
 
-      <FlatList
-        data={visible}
-        keyExtractor={(p) => p.id}
-        numColumns={2}
-        contentContainerStyle={s.list}
-        columnWrapperStyle={s.row}
-        renderItem={({ item: p }) => (
-          <TouchableOpacity style={s.card} onPress={() => router.push(`/producto/${p.id}`)} activeOpacity={0.8}>
-            <View style={[s.cardImg, { backgroundColor: p.gradient[0] }]}>
-              {p.image ? (
-                <Image source={{ uri: p.image }} style={s.cardImage} resizeMode="cover" />
-              ) : (
-                <Text style={s.cardEmoji}>{p.emoji}</Text>
-              )}
-            </View>
-            {p.badge && <Text style={s.badge}>{p.badge}</Text>}
-            <Text style={s.cardName} numberOfLines={2}>{p.name}</Text>
-            <View style={s.cardFooter}>
-              <Text style={s.price}>{fmt(p.price)}</Text>
+        {/* 4b — 2-col grid of all products */}
+        <View style={s.gridWrap}>
+          <View style={s.grid}>
+            {products.map((p) => (
               <TouchableOpacity
-                onPress={() => handleAdd(p.id)}
-                style={[s.addBtn, added === p.id && s.addBtnDone]}
+                key={p.id}
+                style={s.productCard}
+                onPress={() => router.push(`/producto/${p.id}`)}
+                activeOpacity={0.85}
               >
-                <Text style={s.addBtnText}>{added === p.id ? '✓' : '+'}</Text>
+                <View style={[s.productImg, { backgroundColor: p.gradient[0] }]}>
+                  {p.image ? (
+                    <Image source={{ uri: p.image }} style={s.productImgInner} resizeMode="cover" />
+                  ) : (
+                    <Text style={s.productEmoji}>{p.emoji}</Text>
+                  )}
+                  {p.badge && (
+                    <View style={s.productBadge}>
+                      <Text style={s.productBadgeText}>{p.badge}</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={s.productName} numberOfLines={2}>{p.name}</Text>
+                <View style={s.productFooter}>
+                  <Text style={s.productPrice}>{fmt(p.price)}</Text>
+                  <TouchableOpacity
+                    onPress={() => useCartStore.getState().add(p.id)}
+                    style={s.productAddBtn}
+                    hitSlop={6}
+                  >
+                    <Ionicons name="add" size={18} color={COLORS.paper} />
+                  </TouchableOpacity>
+                </View>
               </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+            ))}
+          </View>
+        </View>
+
+        <View style={{ height: SPACING.xxxl }} />
+      </ScrollView>
     </SafeAreaView>
   )
 }
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.cream },
-  headerBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.sm },
-  backBtn: { width: 36, height: 36, borderRadius: RADIUS.md, backgroundColor: COLORS.surface2, alignItems: 'center', justifyContent: 'center' },
-  backIcon: { fontSize: 22, color: COLORS.ink, lineHeight: 26 },
-  cartBtn: { width: 40, height: 40, borderRadius: RADIUS.full, backgroundColor: COLORS.ink, alignItems: 'center', justifyContent: 'center' },
-  cartBadge: { position: 'absolute', top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: COLORS.red, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
-  cartBadgeText: { color: COLORS.paper, fontWeight: '800', fontSize: 10 },
-  modeRow: { flexDirection: 'row', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
-  modeBtn: { flex: 1, padding: SPACING.md, borderRadius: RADIUS.lg, backgroundColor: COLORS.paper, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, gap: 6 },
-  modeBtnActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
-  modeBtnText: { fontSize: FONT.size.bodyM, fontWeight: '700', color: COLORS.ink },
-  modeBtnTextActive: { fontSize: FONT.size.bodyM, fontWeight: '700', color: COLORS.paper },
-  modeHint: { paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm },
-  modeHintText: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, fontStyle: 'italic' },
-  cardaBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: COLORS.paper, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: COLORS.border },
-  cardaBtnActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
-  cardaBtnText: { fontSize: 12, fontWeight: '700', color: COLORS.ink },
-  cardaBtnTextActive: { color: COLORS.paper },
-  titleRow: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm, paddingBottom: SPACING.xs },
-  title: { fontSize: FONT.size.displayL, fontWeight: FONT.weight.black, color: COLORS.ink },
-  catWrap: { height: 52, justifyContent: 'center' },
-  catScroll: { paddingHorizontal: SPACING.lg, alignItems: 'center', gap: SPACING.sm, paddingVertical: 0 },
-  pill: {
-    height: 36,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    borderWidth: 1.5,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.paper,
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 60,
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.md,
   },
-  pillActive: {
+  titleSmall: { fontSize: 13, color: COLORS.textMuted, fontWeight: '600' },
+  titleBig: { fontSize: 26, fontWeight: FONT.weight.black, color: COLORS.ink, letterSpacing: -0.5 },
+  cartBtn: {
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: COLORS.ink,
-    borderColor: COLORS.ink,
+    alignItems: 'center', justifyContent: 'center',
   },
-  pillText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.textMuted,
-    includeFontPadding: false,
+  cartBadge: {
+    position: 'absolute', top: -4, right: -4,
+    minWidth: 18, height: 18, borderRadius: 9,
+    backgroundColor: COLORS.red,
+    alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 4,
   },
-  pillTextActive: {
-    color: COLORS.paper,
+  cartBadgeText: { color: COLORS.paper, fontWeight: '800', fontSize: 10 },
+
+  scroll: { paddingBottom: SPACING.lg },
+
+  /* Hero cards */
+  hero: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    padding: SPACING.lg,
+    borderRadius: RADIUS.xl,
+    minHeight: 180,
+    ...SHADOW.md,
   },
-  list: { paddingHorizontal: SPACING.md, paddingBottom: SPACING.xxxl },
-  row: { gap: SPACING.md, marginBottom: SPACING.md },
-  card: { flex: 1, backgroundColor: COLORS.paper, borderRadius: RADIUS.xl, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border, ...SHADOW.sm },
-  cardImg: { height: 130, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  cardImage: { width: '100%', height: '100%' },
-  cardEmoji: { fontSize: 48 },
-  badge: { marginHorizontal: SPACING.md, marginTop: SPACING.sm, fontSize: FONT.size.label, fontWeight: FONT.weight.black, color: COLORS.red, letterSpacing: 1 },
-  cardName: { marginHorizontal: SPACING.md, marginTop: SPACING.xs, fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.ink, lineHeight: 17 },
-  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SPACING.md },
-  price: { fontSize: FONT.size.bodyL, fontWeight: FONT.weight.black, color: COLORS.green },
-  addBtn: { width: 36, height: 36, borderRadius: RADIUS.full, backgroundColor: COLORS.ink, alignItems: 'center', justifyContent: 'center' },
-  addBtnDone: { backgroundColor: COLORS.green },
-  addBtnText: { fontSize: 20, fontWeight: FONT.weight.bold, color: COLORS.paper, lineHeight: 22 },
+  heroPanini: { backgroundColor: COLORS.green, borderWidth: 2, borderColor: COLORS.gold },
+  heroExtras: { backgroundColor: COLORS.red },
+  heroAlbum:  { backgroundColor: COLORS.green },
+  heroIconCircle: {
+    width: 52, height: 52, borderRadius: 26,
+    backgroundColor: 'rgba(255,209,0,0.18)',
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: SPACING.sm,
+  },
+  heroEyebrow: {
+    fontSize: 11, fontWeight: '800',
+    color: COLORS.gold, letterSpacing: 1.5, marginBottom: 4,
+  },
+  heroTitle: {
+    fontSize: 22, fontWeight: FONT.weight.black,
+    color: COLORS.paper, lineHeight: 26, letterSpacing: -0.3,
+    marginBottom: 6,
+  },
+  heroSub: { fontSize: 13, color: 'rgba(255,255,255,0.85)', marginBottom: SPACING.md, lineHeight: 18 },
+  heroCta: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.cream,
+    paddingHorizontal: 14, paddingVertical: 8,
+    borderRadius: 99,
+  },
+  heroCtaText: { fontSize: 13, fontWeight: '900', color: COLORS.green },
+
+  albumProgressBar: {
+    height: 6, backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 99, overflow: 'hidden', marginBottom: SPACING.sm,
+  },
+  albumProgressFill: { height: '100%', backgroundColor: COLORS.gold, borderRadius: 99 },
+
+  /* Productos section */
+  productsHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
+  productsTitle: { fontSize: 18, fontWeight: FONT.weight.black, color: COLORS.ink, letterSpacing: -0.3 },
+
+  carousel: { paddingHorizontal: SPACING.lg, gap: SPACING.sm, paddingBottom: SPACING.md },
+  catCard: {
+    width: 110,
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    borderWidth: 1, borderColor: COLORS.border,
+    alignItems: 'flex-start',
+    gap: 4,
+  },
+  catEmoji: { fontSize: 28, marginBottom: 4 },
+  catLabel: { fontSize: 13, fontWeight: '800', color: COLORS.ink },
+  catCount: { fontSize: 11, color: COLORS.textMuted },
+
+  /* Grid */
+  gridWrap: { paddingHorizontal: SPACING.md, paddingTop: SPACING.sm },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md },
+  productCard: {
+    width: '47%',
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    borderWidth: 1, borderColor: COLORS.border,
+    ...SHADOW.sm,
+  },
+  productImg: { height: 130, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  productImgInner: { width: '100%', height: '100%' },
+  productEmoji: { fontSize: 48 },
+  productBadge: {
+    position: 'absolute', top: 8, left: 8,
+    backgroundColor: COLORS.paper,
+    paddingHorizontal: 6, paddingVertical: 2,
+    borderRadius: 4,
+  },
+  productBadgeText: { fontSize: 9, fontWeight: '900', color: COLORS.red, letterSpacing: 0.5 },
+  productName: { fontSize: 13, fontWeight: '800', color: COLORS.ink, paddingHorizontal: SPACING.md, paddingTop: SPACING.sm, lineHeight: 16 },
+  productFooter: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    padding: SPACING.md,
+  },
+  productPrice: { fontSize: 15, fontWeight: FONT.weight.black, color: COLORS.green },
+  productAddBtn: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: COLORS.ink,
+    alignItems: 'center', justifyContent: 'center',
+  },
 })
