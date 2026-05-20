@@ -1,5 +1,7 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native'
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { router } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
 import { ALBUM, TOTAL_STICKERS } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
@@ -22,7 +24,12 @@ export default function StatsScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.scroll}>
-        <Text style={s.title}>Stats</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={s.title}>Stats</Text>
+          <TouchableOpacity onPress={() => router.push('/settings')} hitSlop={8} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="settings-outline" size={20} color={COLORS.ink} style={{ opacity: 0.6 }} />
+          </TouchableOpacity>
+        </View>
 
         {/* Big card */}
         <View style={s.heroCard}>

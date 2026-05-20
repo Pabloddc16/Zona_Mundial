@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import QRCode from 'react-native-qrcode-svg'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { Ionicons } from '@expo/vector-icons'
+import { router } from 'expo-router'
 import { useAlbumStore } from '@/lib/album-store'
 import { useAuthStore } from '@/lib/auth-store'
 import { ALBUM } from '@/lib/data'
@@ -63,7 +64,12 @@ export default function SwapScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.scroll}>
-        <Text style={s.title}>Swap</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={s.title}>Swap</Text>
+          <TouchableOpacity onPress={() => router.push('/settings')} hitSlop={8} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="settings-outline" size={20} color={COLORS.ink} style={{ opacity: 0.6 }} />
+          </TouchableOpacity>
+        </View>
 
         <View style={s.tabRow}>
           {(['offer', 'scan'] as Mode[]).map((m) => (

@@ -23,7 +23,6 @@ import {
   DELIVERY_SUB,
   deliveryAmountToFreeShipping,
   deliveryFee,
-  paymentMethodsFor,
   WELCOME_CREDIT_MXN,
   maxReferralApplied,
   type DeliveryZone,
@@ -42,7 +41,7 @@ export default function CheckoutScreen() {
   const [address, setAddress] = useState('')
   const [notes, setNotes] = useState('')
   const [zone, setZone] = useState<DeliveryZone>('gdl')
-  const [payment, setPayment] = useState<PaymentMethod>('card')
+  const payment: PaymentMethod = 'card'  // Pablo: card-only everywhere via MP
   // Stub credits — wire to backend in Phase 5/8
   const [welcomeApplied] = useState(WELCOME_CREDIT_MXN)
   const [referralBalance] = useState(0)
@@ -50,12 +49,6 @@ export default function CheckoutScreen() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const allowedMethods = paymentMethodsFor(zone)
-  // Auto-correct payment if zone change removed the option
-  if (!allowedMethods.includes(payment) && allowedMethods[0]) {
-    setPayment(allowedMethods[0])
-  }
 
   const shipping = deliveryFee(zone, subtotal)
   const remainingForFree = deliveryAmountToFreeShipping(zone, subtotal)
@@ -160,32 +153,11 @@ export default function CheckoutScreen() {
             </Card>
           </Group>
 
-          {/* PAYMENT */}
+          {/* PAYMENT — card-only via Mercado Pago, no toggle */}
           <Group label="Payment method">
-            <View style={s.payRow}>
-              {(['card', 'cash'] as PaymentMethod[]).map((m) => {
-                const allowed = allowedMethods.includes(m)
-                const active = payment === m && allowed
-                return (
-                  <TouchableOpacity
-                    key={m}
-                    onPress={() => allowed && setPayment(m)}
-                    disabled={!allowed}
-                    style={[s.payBtn, active && s.payBtnActive, !allowed && s.payBtnDisabled]}
-                  >
-                    <Ionicons
-                      name={m === 'card' ? 'card-outline' : 'cash-outline'}
-                      size={22}
-                      color={active ? COLORS.paper : !allowed ? COLORS.textFaint : COLORS.ink}
-                    />
-                    <Text style={[s.payBtnText, active && s.payBtnTextActive, !allowed && s.payBtnTextDisabled]}>
-                      {m === 'card' ? 'Card' : 'Cash'}
-                    </Text>
-                    {m === 'card' && <Text style={s.payBadge}>Mercado Pago</Text>}
-                    {m === 'cash' && !allowed && <Text style={s.payBadge}>Pickup only</Text>}
-                  </TouchableOpacity>
-                )
-              })}
+            <View style={[s.payBtn, s.payBtnActive, { flexDirection: 'row', justifyContent: 'center', gap: 12 }]}>
+              <Ionicons name="card-outline" size={22} color={COLORS.paper} />
+              <Text style={[s.payBtnText, s.payBtnTextActive]}>Card · Mercado Pago</Text>
             </View>
           </Group>
 

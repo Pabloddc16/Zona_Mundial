@@ -12,16 +12,20 @@ export interface Product {
   badge?: string
 }
 
+// Pablo's official 7-product order (May 2026):
+//   1. Álbum pasta blanda   2. Sobre   3. Álbum pasta dura
+//   4. Caja   5. Set completo   6. Sobre Coca-Cola   7. Set completo Coca-Cola
 export const PRODUCTS: Product[] = [
-  { id: 'CAJA-100', name: 'Box of 100 packs', price: 2500, category: 'sobres', description: 'Sealed box. 100 packs × 7 stickers each.', emoji: '📦', image: '/images/productos/caja-100-sobres.webp', gradient: ['#CE1126', '#8B0B1C'], badge: 'BEST VALUE' },
-  { id: 'SOBRE-1', name: 'Single pack', price: 25, category: 'sobres', description: 'One pack with 7 random stickers.', emoji: '✉️', image: '/images/productos/sobre.webp', gradient: ['#006341', '#004a30'], badge: 'BEST SELLER' },
-  { id: 'ALBUM-HARD', name: 'Hardcover album', price: 349, category: 'albumes', description: 'Collector edition, premium hardcover.', emoji: '📗', image: '/images/productos/album-hardcover.webp', gradient: ['#006341', '#FFD100'], badge: 'COLLECTOR' },
-  { id: 'ALBUM-SOFT', name: 'Softcover album', price: 99, category: 'albumes', description: 'Standard softcover edition, same pages.', emoji: '📘', image: '/images/productos/album-softcover.webp', gradient: ['#006341', '#00815a'] },
-  { id: 'SET-COCA', name: 'Coca-Cola set', price: 490, category: 'coca', description: 'Exclusive cards not found in regular packs.', emoji: '🥤', gradient: ['#CE1126', '#FFD100'], badge: 'SPECIAL EDITION' },
-  { id: 'SOBRE-COCA', name: 'Coca-Cola pack', price: 40, category: 'coca', description: 'Exclusive pack with limited edition stickers.', emoji: '🎟️', gradient: ['#CE1126', '#006341'], badge: 'LIMITED' },
+  { id: 'ALBUM-SOFT', name: 'Álbum pasta blanda', price: 99, category: 'albumes', description: 'Official Mundial 26 sticker album, soft cover.', emoji: '📘', image: '/products/album-soft.webp', gradient: ['#006341', '#00815a'], badge: 'OFICIAL' },
+  { id: 'SOBRE-1', name: 'Sobre (1 paquete)', price: 25, category: 'sobres', description: 'One sealed pack with 7 random stickers.', emoji: '✉️', image: '/products/pack-single.webp', gradient: ['#006341', '#004a30'], badge: 'BEST SELLER' },
+  { id: 'ALBUM-HARD', name: 'Álbum pasta dura', price: 349, category: 'albumes', description: 'Collector edition hardcover album.', emoji: '📗', image: '/products/album-hard.webp', gradient: ['#006341', '#FFD100'], badge: 'COLLECTOR' },
+  { id: 'CAJA-100', name: 'Caja de sobres', price: 2500, category: 'sobres', description: 'Sealed box of 100 packs × 7 stickers each.', emoji: '📦', image: '/products/box-100.webp', gradient: ['#CE1126', '#8B0B1C'], badge: 'BEST VALUE' },
+  { id: 'SET-COMPLETO', name: 'Set completo', price: 3500, category: 'packs', description: 'Hardcover album + every pack you need to finish it.', emoji: '🏆', image: '/products/set-complete.webp', gradient: ['#FFD100', '#006341'], badge: 'COMPLETE THE ALBUM' },
+  { id: 'SOBRE-COCA', name: 'Sobre Coca-Cola', price: 40, category: 'coca', description: '2 Panini stickers + 1 exclusive Coca-Cola sticker.', emoji: '🥤', image: '/products/coca-pack.webp', gradient: ['#CE1126', '#FFD100'], badge: 'LIMITED' },
+  { id: 'SET-COCA', name: 'Set completo Coca-Cola', price: 490, category: 'coca', description: 'Complete Coca-Cola promo set in one bundle.', emoji: '🎁', image: '/products/coca-set.webp', gradient: ['#CE1126', '#FFD100'], badge: 'SPECIAL EDITION' },
+  // Carry-overs (kept for catalog completeness, shown after the main 7)
   { id: 'CARTA-COCA', name: 'Coca-Cola card', price: 40, category: 'coca', description: 'Single Coca-Cola holographic card.', emoji: '✨', gradient: ['#FFD100', '#CE1126'], badge: 'HOLOGRAPHIC' },
-  { id: 'CARTA-SUELTA', name: 'Single sticker', price: 5, category: 'cartas', description: 'Single sticker to complete your album.', emoji: '🃏', gradient: ['#006341', '#FFD100'], badge: 'COMPLETE THE ALBUM' },
-  { id: 'COLECCION', name: 'Complete collection', price: 3500, category: 'packs', description: 'Hardcover album + 140 packs. Express shipping.', emoji: '🏆', image: '/images/productos/combo.webp', gradient: ['#FFD100', '#006341'], badge: 'RECOMMENDED' },
+  { id: 'CARTA-SUELTA', name: 'Single sticker', price: 5, category: 'cartas', description: 'Single sticker to complete your album.', emoji: '🃏', gradient: ['#006341', '#FFD100'] },
   { id: 'JERSEY-MX-LOCAL', name: 'Mexico home jersey 26', price: 2199, category: 'jerseys', description: 'Mexico national team home jersey.', emoji: '🇲🇽', gradient: ['#006341', '#CE1126'], badge: 'OFFICIAL' },
   { id: 'JERSEY-MX-VISITA', name: 'Mexico away jersey 26', price: 2199, category: 'jerseys', description: 'Mexico national team away jersey.', emoji: '⚽', gradient: ['#FAF6EE', '#006341'], badge: 'OFFICIAL' },
   { id: 'JERSEY-ARG', name: 'Argentina jersey 26', price: 2299, category: 'jerseys', description: 'Argentina national team jersey.', emoji: '🇦🇷', gradient: ['#6FA8DC', '#FFFFFF'] },
@@ -50,69 +54,54 @@ export const CATEGORIES = [
 ]
 
 /**
- * 48 confirmed/likely qualifier nations for the 2026 World Cup. The exact
- * roster is finalized after the inter-confederation playoffs (March 2026);
- * this list reflects the most likely participants based on confederation
- * spots + recent form. Pablo can hand-edit later when Panini publishes
- * the official checklist.
+ * Pablo's official "USA · Méx · Can 26" album country roster — 42 codes
+ * confirmed, 6 more to land once playoff bracket finalizes. Order matters
+ * (per Pablo's PDF spec): kept in the exact sequence he provided.
  */
 const TEAMS = [
-  // Hosts (3)
-  { code: 'MEX', name: 'Mexico', flag: '🇲🇽', group: 'Hosts' },
-  { code: 'USA', name: 'United States', flag: '🇺🇸', group: 'Hosts' },
-  { code: 'CAN', name: 'Canada', flag: '🇨🇦', group: 'Hosts' },
-  // South America (6)
-  { code: 'ARG', name: 'Argentina', flag: '🇦🇷', group: 'South America' },
-  { code: 'BRA', name: 'Brazil', flag: '🇧🇷', group: 'South America' },
-  { code: 'URU', name: 'Uruguay', flag: '🇺🇾', group: 'South America' },
-  { code: 'COL', name: 'Colombia', flag: '🇨🇴', group: 'South America' },
-  { code: 'ECU', name: 'Ecuador', flag: '🇪🇨', group: 'South America' },
-  { code: 'PAR', name: 'Paraguay', flag: '🇵🇾', group: 'South America' },
-  // Europe (16)
-  { code: 'ESP', name: 'Spain', flag: '🇪🇸', group: 'Europe' },
-  { code: 'FRA', name: 'France', flag: '🇫🇷', group: 'Europe' },
-  { code: 'ENG', name: 'England', flag: '🇬🇧', group: 'Europe' },
-  { code: 'GER', name: 'Germany', flag: '🇩🇪', group: 'Europe' },
-  { code: 'ITA', name: 'Italy', flag: '🇮🇹', group: 'Europe' },
-  { code: 'POR', name: 'Portugal', flag: '🇵🇹', group: 'Europe' },
-  { code: 'NED', name: 'Netherlands', flag: '🇳🇱', group: 'Europe' },
-  { code: 'BEL', name: 'Belgium', flag: '🇧🇪', group: 'Europe' },
-  { code: 'CRO', name: 'Croatia', flag: '🇭🇷', group: 'Europe' },
-  { code: 'SUI', name: 'Switzerland', flag: '🇨🇭', group: 'Europe' },
-  { code: 'DEN', name: 'Denmark', flag: '🇩🇰', group: 'Europe' },
-  { code: 'POL', name: 'Poland', flag: '🇵🇱', group: 'Europe' },
-  { code: 'AUT', name: 'Austria', flag: '🇦🇹', group: 'Europe' },
-  { code: 'SRB', name: 'Serbia', flag: '🇷🇸', group: 'Europe' },
-  { code: 'NOR', name: 'Norway', flag: '🇳🇴', group: 'Europe' },
-  { code: 'TUR', name: 'Türkiye', flag: '🇹🇷', group: 'Europe' },
-  // Asia (8)
-  { code: 'JPN', name: 'Japan', flag: '🇯🇵', group: 'Asia' },
-  { code: 'KOR', name: 'South Korea', flag: '🇰🇷', group: 'Asia' },
-  { code: 'IRN', name: 'Iran', flag: '🇮🇷', group: 'Asia' },
-  { code: 'KSA', name: 'Saudi Arabia', flag: '🇸🇦', group: 'Asia' },
-  { code: 'AUS', name: 'Australia', flag: '🇦🇺', group: 'Asia' },
-  { code: 'UAE', name: 'UAE', flag: '🇦🇪', group: 'Asia' },
-  { code: 'IRQ', name: 'Iraq', flag: '🇮🇶', group: 'Asia' },
-  { code: 'QAT', name: 'Qatar', flag: '🇶🇦', group: 'Asia' },
-  // Africa (9)
-  { code: 'MAR', name: 'Morocco', flag: '🇲🇦', group: 'Africa' },
-  { code: 'SEN', name: 'Senegal', flag: '🇸🇳', group: 'Africa' },
-  { code: 'EGY', name: 'Egypt', flag: '🇪🇬', group: 'Africa' },
-  { code: 'NGA', name: 'Nigeria', flag: '🇳🇬', group: 'Africa' },
-  { code: 'ALG', name: 'Algeria', flag: '🇩🇿', group: 'Africa' },
-  { code: 'TUN', name: 'Tunisia', flag: '🇹🇳', group: 'Africa' },
-  { code: 'CMR', name: 'Cameroon', flag: '🇨🇲', group: 'Africa' },
-  { code: 'GHA', name: 'Ghana', flag: '🇬🇭', group: 'Africa' },
-  { code: 'CIV', name: 'Ivory Coast', flag: '🇨🇮', group: 'Africa' },
-  // Concacaf (3)
-  { code: 'CRC', name: 'Costa Rica', flag: '🇨🇷', group: 'Concacaf' },
-  { code: 'PAN', name: 'Panama', flag: '🇵🇦', group: 'Concacaf' },
-  { code: 'JAM', name: 'Jamaica', flag: '🇯🇲', group: 'Concacaf' },
-  // Oceania (1)
-  { code: 'NZL', name: 'New Zealand', flag: '🇳🇿', group: 'Oceania' },
-  // Playoff winners (2)
-  { code: 'PO1', name: 'Playoff Winner 1', flag: '⚽', group: 'Playoffs' },
-  { code: 'PO2', name: 'Playoff Winner 2', flag: '⚽', group: 'Playoffs' },
+  { code: 'MEX', name: 'México',           flag: '🇲🇽', group: 'Concacaf' },
+  { code: 'RSA', name: 'Sudáfrica',        flag: '🇿🇦', group: 'Africa' },
+  { code: 'KOR', name: 'Corea del Sur',    flag: '🇰🇷', group: 'Asia' },
+  { code: 'CAN', name: 'Canadá',           flag: '🇨🇦', group: 'Concacaf' },
+  { code: 'QAT', name: 'Qatar',            flag: '🇶🇦', group: 'Asia' },
+  { code: 'SUI', name: 'Suiza',            flag: '🇨🇭', group: 'Europe' },
+  { code: 'BRA', name: 'Brasil',           flag: '🇧🇷', group: 'South America' },
+  { code: 'MAR', name: 'Marruecos',        flag: '🇲🇦', group: 'Africa' },
+  { code: 'HAI', name: 'Haití',            flag: '🇭🇹', group: 'Concacaf' },
+  { code: 'SCO', name: 'Escocia',          flag: '🏴', group: 'Europe' },
+  { code: 'USA', name: 'United States',    flag: '🇺🇸', group: 'Concacaf' },
+  { code: 'PAR', name: 'Paraguay',         flag: '🇵🇾', group: 'South America' },
+  { code: 'AUS', name: 'Australia',        flag: '🇦🇺', group: 'Asia' },
+  { code: 'GER', name: 'Alemania',         flag: '🇩🇪', group: 'Europe' },
+  { code: 'CUW', name: 'Curazao',          flag: '🇨🇼', group: 'Concacaf' },
+  { code: 'CIV', name: 'Costa de Marfil',  flag: '🇨🇮', group: 'Africa' },
+  { code: 'ECU', name: 'Ecuador',          flag: '🇪🇨', group: 'South America' },
+  { code: 'NED', name: 'Países Bajos',     flag: '🇳🇱', group: 'Europe' },
+  { code: 'JPN', name: 'Japón',            flag: '🇯🇵', group: 'Asia' },
+  { code: 'TUN', name: 'Túnez',            flag: '🇹🇳', group: 'Africa' },
+  { code: 'BEL', name: 'Bélgica',          flag: '🇧🇪', group: 'Europe' },
+  { code: 'EGY', name: 'Egipto',           flag: '🇪🇬', group: 'Africa' },
+  { code: 'IRN', name: 'Irán',             flag: '🇮🇷', group: 'Asia' },
+  { code: 'NZL', name: 'Nueva Zelanda',    flag: '🇳🇿', group: 'Oceania' },
+  { code: 'ESP', name: 'España',           flag: '🇪🇸', group: 'Europe' },
+  { code: 'CPV', name: 'Cabo Verde',       flag: '🇨🇻', group: 'Africa' },
+  { code: 'KSA', name: 'Arabia Saudí',     flag: '🇸🇦', group: 'Asia' },
+  { code: 'URU', name: 'Uruguay',          flag: '🇺🇾', group: 'South America' },
+  { code: 'FRA', name: 'Francia',          flag: '🇫🇷', group: 'Europe' },
+  { code: 'SEN', name: 'Senegal',          flag: '🇸🇳', group: 'Africa' },
+  { code: 'NOR', name: 'Noruega',          flag: '🇳🇴', group: 'Europe' },
+  { code: 'ARG', name: 'Argentina',        flag: '🇦🇷', group: 'South America' },
+  { code: 'ALG', name: 'Argelia',          flag: '🇩🇿', group: 'Africa' },
+  { code: 'AUT', name: 'Austria',          flag: '🇦🇹', group: 'Europe' },
+  { code: 'JOR', name: 'Jordania',         flag: '🇯🇴', group: 'Asia' },
+  { code: 'POR', name: 'Portugal',         flag: '🇵🇹', group: 'Europe' },
+  { code: 'UZB', name: 'Uzbekistán',       flag: '🇺🇿', group: 'Asia' },
+  { code: 'COL', name: 'Colombia',         flag: '🇨🇴', group: 'South America' },
+  { code: 'ENG', name: 'Inglaterra',       flag: '🏴', group: 'Europe' },
+  { code: 'CRO', name: 'Croacia',          flag: '🇭🇷', group: 'Europe' },
+  { code: 'GHA', name: 'Ghana',            flag: '🇬🇭', group: 'Africa' },
+  { code: 'PAN', name: 'Panamá',           flag: '🇵🇦', group: 'Concacaf' },
+  // ⚠ 6 more codes pending — Pablo will confirm once playoffs end
 ]
 
 export const PRICE_BY_TIER = { comun: 5, media: 15, dificil: 30, legend: 60, coca: 25 } as const
@@ -160,8 +149,12 @@ export interface AlbumGroup {
   stickers: Sticker[]
 }
 
+// Pablo's spec: 20 stickers per country section (a few may end up 18-22
+// once the physical album is published — adjust per-section if needed).
+const STICKERS_PER_TEAM = 20
+
 function stickersTeam(prefix: string): Sticker[] {
-  return Array.from({ length: 18 }, (_, i) => {
+  return Array.from({ length: STICKERS_PER_TEAM }, (_, i) => {
     const n = i + 1
     const type = stickerType(n)
     const tier = tierFor(type, 'team', prefix)
@@ -176,34 +169,6 @@ function stickersTeam(prefix: string): Sticker[] {
       rarity: isCrest ? ('foil' as const) : ('common' as const),
     }
   })
-}
-
-const LEGEND_TIERS: { suffix: string; rarity: Rarity }[] = [
-  { suffix: 'B', rarity: 'common' },   // Base
-  { suffix: 'R', rarity: 'bronze' },   // Bronze
-  { suffix: 'S', rarity: 'silver' },   // Silver
-  { suffix: 'G', rarity: 'gold' },     // Gold
-]
-
-function stickersLegends(): Sticker[] {
-  const out: Sticker[] = []
-  for (let p = 1; p <= 20; p++) {
-    LEGEND_TIERS.forEach((t, ti) => {
-      const n = (p - 1) * 4 + ti + 1
-      const tierLabel = ['Base', 'Bronze', 'Silver', 'Gold'][ti]
-      out.push({
-        n,
-        code: `LEG${pad(p)}${t.suffix}`,
-        label: `Legend ${pad(p)} · ${tierLabel}`,
-        type: 'legend',
-        tier: 'legend',
-        price: PRICE_BY_TIER.legend * (ti + 1),  // gold tier 4× base
-        rarity: t.rarity,
-        player: p,
-      })
-    })
-  }
-  return out
 }
 
 function stickersCocaCola(): Sticker[] {
@@ -221,14 +186,16 @@ function stickersCocaCola(): Sticker[] {
   })
 }
 
+// Pablo's official FWC special sections (3 — replaces our prior 4).
+// Counts per section are placeholders until Pablo confirms with physical album.
 const FWC_SPECIALS_BASE = [
-  { id: 'MAS', fullId: 'MASCOTAS', name: 'FWC Mascots',  emoji: '🦅', count: 8 },
-  { id: 'TRO', fullId: 'TROFEO',   name: 'FWC Balls',    emoji: '🏆', count: 6 },
-  { id: 'EST', fullId: 'ESTADIOS', name: 'FWC Stadiums', emoji: '🏟️', count: 12 },
+  { id: 'FWC-T', fullId: 'FWC-TROFEO',  name: 'FWC Trofeo',  emoji: '🏆', count: 10 },
+  { id: 'FWC-W', fullId: 'FWC-MUNDO',   name: 'FWC Mundo',   emoji: '🌎', count: 10 },
+  { id: 'FWC-H', fullId: 'FWC-HISTORIA', name: 'FWC Historia', emoji: '📜', count: 20 },
 ]
 
 export const ALBUM: AlbumGroup[] = [
-  // 1. FWC special pages (intro / mascots / balls / stadiums / history)
+  // 1. FWC special pages (Trofeo, Mundo, Historia)
   ...FWC_SPECIALS_BASE.map((s) => ({
     id: s.fullId,
     prefix: s.id,
@@ -250,18 +217,7 @@ export const ALBUM: AlbumGroup[] = [
     }),
   })),
 
-  // 2. Legends — 20 players × 4 tiers (Base / Bronze / Silver / Gold)
-  {
-    id: 'LEGENDS',
-    prefix: 'LEG',
-    name: 'FWC Legends',
-    subtitle: '20 icons · 4 tiers each',
-    emoji: '⭐',
-    kind: 'legend',
-    stickers: stickersLegends(),
-  },
-
-  // 3. Teams — 48 × 18 = 864
+  // 2. Teams — 42 × 20 (6 more pending playoff results)
   ...TEAMS.map((t) => ({
     id: 'TEAM-' + t.code,
     prefix: t.code,
@@ -272,7 +228,8 @@ export const ALBUM: AlbumGroup[] = [
     stickers: stickersTeam(t.code),
   })),
 
-  // 4. Coca-Cola promo (Mexico region exclusive)
+  // 3. Coca-Cola promo (Mexico exclusive). Count placeholder until Pablo
+  //    confirms with the brand kit.
   {
     id: 'COCACOLA',
     prefix: 'CC',

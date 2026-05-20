@@ -4,9 +4,11 @@ import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
 import { Ionicons } from '@expo/vector-icons'
+import * as Clipboard from 'expo-clipboard'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
 import { ALBUM, TOTAL_STICKERS, type AlbumGroup } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
+import { generateRepetidasShareText } from '@/lib/share'
 
 type Tab = 'All' | 'Need' | 'Swaps'
 const TABS: Tab[] = ['All', 'Need', 'Swaps']
@@ -55,23 +57,38 @@ export default function AlbumScreen() {
     })
   }
 
+  // Tap = always +1 (cycles 0 → 1 → 2 → 3 → N, unlimited)
   function handleSticker(groupId: string, n: number) {
     if (locked) return
-    const state = album[groupId]?.[n] ?? { owned: 0, needed: 0 }
-    markOwned(groupId, n, state.owned > 0 ? -1 : 1)
+    markOwned(groupId, n, 1)
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {})
   }
 
+  // Long press = -1 (decrement, floor 0). If already 0, heavy haptic to
+  // signal "nothing to remove" without changing state.
   function handleAddDup(groupId: string, n: number) {
     if (locked) return
-    markOwned(groupId, n, 1)
+    const state = album[groupId]?.[n] ?? { owned: 0, needed: 0 }
+    if (state.owned <= 0) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {})
+      return
+    }
+    markOwned(groupId, n, -1)
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {})
   }
 
+  // "Compartir repetidas" — generates the exact format Pablo specified and
+  // uses the native share sheet, falling back to clipboard if unavailable.
   async function handleShare() {
-    await Share.share({
-      message: `My Cromos 26 album: ${pct}% complete (${stats.owned}/${TOTAL_STICKERS}) 🏆`,
-    }).catch(() => {})
+    const message = generateRepetidasShareText(album)
+    try {
+      const result = await Share.share({ message })
+      if (result.action === Share.dismissedAction) {
+        await Clipboard.setStringAsync(message)
+      }
+    } catch {
+      await Clipboard.setStringAsync(message).catch(() => {})
+    }
   }
 
   return (
@@ -87,11 +104,14 @@ export default function AlbumScreen() {
             <Ionicons name={locked ? 'lock-closed' : 'lock-open-outline'} size={20} color={COLORS.ink} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleShare} style={s.iconBtn} hitSlop={8}>
-            <Ionicons name="share-outline" size={20} color={COLORS.ink} />
+            <Ionicons name="share-social-outline" size={20} color={COLORS.ink} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/tienda')} style={s.storeBtn}>
             <Ionicons name="storefront" size={14} color={COLORS.paper} />
             <Text style={s.storeBtnText}>Store</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/settings')} style={s.iconBtn} hitSlop={8}>
+            <Ionicons name="settings-outline" size={20} color={COLORS.ink} style={{ opacity: 0.6 }} />
           </TouchableOpacity>
         </View>
       </View>
@@ -130,6 +150,25 @@ export default function AlbumScreen() {
 
       {/* Sections */}
       <ScrollView contentContainerStyle={s.scroll}>
+        {/* Refiere y gana — Pablo's signature acquisition card */}
+        <TouchableOpacity
+          onPress={() => router.push('/referral')}
+          activeOpacity={0.85}
+          style={s.referralCard}
+        >
+          <View style={s.referralIconWrap}>
+            <Ionicons name="gift" size={26} color={COLORS.gold} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.referralTitle}>Invita a un amigo, gana crédito</Text>
+            <Text style={s.referralSub}>Por cada amigo que complete su primera compra, ganas crédito.</Text>
+          </View>
+          <View style={s.referralCta}>
+            <Text style={s.referralCtaText}>Mi código</Text>
+            <Ionicons name="arrow-forward" size={14} color={COLORS.ink} />
+          </View>
+        </TouchableOpacity>
+
         {visibleGroups.length === 0 && (
           <View style={s.empty}>
             <Ionicons name="search-outline" size={40} color={COLORS.textMuted} style={{ marginBottom: 8 }} />
@@ -282,6 +321,35 @@ const s = StyleSheet.create({
   progressLabel: { fontSize: FONT.size.bodyS, color: COLORS.textMuted, paddingHorizontal: SPACING.lg, paddingTop: 4 },
 
   scroll: { paddingTop: SPACING.lg },
+
+  /* Refiere y gana hero card */
+  referralCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.green,
+    borderWidth: 1.5,
+    borderColor: COLORS.gold,
+  },
+  referralIconWrap: {
+    width: 48, height: 48, borderRadius: 24,
+    backgroundColor: 'rgba(255,209,0,0.18)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  referralTitle: { fontSize: 15, fontWeight: '900', color: COLORS.paper, marginBottom: 2 },
+  referralSub: { fontSize: 11, color: 'rgba(255,255,255,0.85)', lineHeight: 15 },
+  referralCta: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: COLORS.gold,
+    paddingHorizontal: 10, paddingVertical: 6,
+    borderRadius: 99,
+  },
+  referralCtaText: { fontSize: 11, fontWeight: '900', color: COLORS.ink },
+
 
   empty: { alignItems: 'center', paddingVertical: SPACING.xxxl },
   emptyText: { fontSize: FONT.size.bodyM, color: COLORS.textMuted },

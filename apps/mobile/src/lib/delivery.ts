@@ -46,22 +46,37 @@ export function deliveryAmountToFreeShipping(zone: DeliveryZone, subtotal: numbe
 }
 
 /**
- * Payment methods allowed per zone. Delivery → card-only (paid beforehand
- * via Mercado Pago). Pickup → card or cash at the store.
+ * Card-only across every zone (Pablo, May 2026). Cash was killed entirely —
+ * delivery, pickup, everything routes through Mercado Pago paid before-hand.
  */
-export type PaymentMethod = 'card' | 'cash'
-export function paymentMethodsFor(zone: DeliveryZone): PaymentMethod[] {
-  return zone === 'pickup' ? ['card', 'cash'] : ['card']
+export type PaymentMethod = 'card'
+export function paymentMethodsFor(_zone: DeliveryZone): PaymentMethod[] {
+  return ['card']
 }
 
-export function canPayCash(zone: DeliveryZone): boolean {
-  return zone === 'pickup'
-}
-
-/* Welcome credit & referral credit defaults — confirm amounts with Pablo. */
+/* ── Welcome + referral credits (Pablo's final mechanics, May 2026) ───────
+ *
+ *   Welcome credit:  $100 MXN off the user's first order (any size).
+ *
+ *   Referral:
+ *     · Inviter earns 5% of the invitee's first purchase, credited only
+ *       after that first purchase actually happens (anti-fraud guard).
+ *     · Invitee gets $100 MXN off their first order, ONLY when that order
+ *       is $1,000 MXN or more.
+ */
 export const WELCOME_CREDIT_MXN = 100
-export const REFERRAL_REWARD_INVITER = 100
-export const REFERRAL_REWARD_INVITEE = 50
+
+export const REFERRAL_INVITER_PCT = 0.05
+export const REFERRAL_INVITEE_DISCOUNT_MXN = 100
+export const REFERRAL_INVITEE_MIN_ORDER_MXN = 1000
+
+export function referralInviteeDiscount(orderSubtotal: number): number {
+  return orderSubtotal >= REFERRAL_INVITEE_MIN_ORDER_MXN ? REFERRAL_INVITEE_DISCOUNT_MXN : 0
+}
+
+export function referralInviterReward(inviteeFirstPurchaseSubtotal: number): number {
+  return Math.round(inviteeFirstPurchaseSubtotal * REFERRAL_INVITER_PCT)
+}
 
 /** Caps referral credit at the order subtotal AFTER welcome credit is applied. */
 export function maxReferralApplied(subtotal: number, welcomeApplied: number, balance: number): number {

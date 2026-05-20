@@ -36,12 +36,10 @@ export default function TabsLayout() {
         name="swap"
         options={{ title: 'Trade', tabBarIcon: ({ color, size }) => <Ionicons name="sync-circle-outline" size={size} color={color} /> }}
       />
-      <Tabs.Screen
-        name="settings"
-        options={{ title: 'Settings', tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} /> }}
-      />
 
-      {/* Hidden — cart still routable from inside Store */}
+      {/* Hidden routes — Settings is reached via gear icon in screen headers;
+          Cart is reached from inside Store. */}
+      <Tabs.Screen name="settings" options={{ href: null }} />
       <Tabs.Screen name="carrito" options={{ href: null }} />
     </Tabs>
   )
