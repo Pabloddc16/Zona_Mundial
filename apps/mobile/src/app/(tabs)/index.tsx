@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { Fragment, useState, useMemo } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, Modal, Pressable, Share } from 'react-native'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -168,16 +168,50 @@ export default function AlbumScreen() {
             <Text style={s.emptyText}>No stickers match this filter</Text>
           </View>
         )}
-        {visibleGroups.map((g) => (
-          <Section
-            key={g.id}
-            group={g}
-            album={album}
-            collapsed={collapsed.has(g.id)}
-            onToggle={() => toggleCollapsed(g.id)}
-            onSticker={(n) => handleSticker(g.id, n)}
-            onDup={(n) => handleAddDup(g.id, n)}
-          />
+        {visibleGroups.map((g, i) => (
+          <Fragment key={g.id}>
+            <Section
+              group={g}
+              album={album}
+              collapsed={collapsed.has(g.id)}
+              onToggle={() => toggleCollapsed(g.id)}
+              onSticker={(n) => handleSticker(g.id, n)}
+              onDup={(n) => handleAddDup(g.id, n)}
+            />
+            {/* Recurring banner every 4 sections, alternating between
+                "buy missing" and "invite a friend". */}
+            {(i + 1) % 4 === 0 && i < visibleGroups.length - 1 && (
+              (Math.floor(i / 4) % 2 === 0 && (TOTAL_STICKERS - stats.owned) > 0 ? (
+                <TouchableOpacity
+                  onPress={() => router.push('/shop/album')}
+                  activeOpacity={0.85}
+                  style={s.bannerMissing}
+                >
+                  <View style={s.bannerIconWrap}>
+                    <Ionicons name="book" size={20} color={COLORS.gold} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.bannerTitle}>Missing {TOTAL_STICKERS - stats.owned} stickers?</Text>
+                    <Text style={s.bannerSub}>Buy them all in one click →</Text>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => router.push('/profile')}
+                  activeOpacity={0.85}
+                  style={s.bannerReferral}
+                >
+                  <View style={[s.bannerIconWrap, { backgroundColor: 'rgba(0,99,65,0.18)' }]}>
+                    <Ionicons name="gift" size={20} color={COLORS.green} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[s.bannerTitle, { color: COLORS.ink }]}>Invite a friend, earn 5%</Text>
+                    <Text style={[s.bannerSub, { color: COLORS.textMuted }]}>5% of every purchase your friend makes →</Text>
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
+          </Fragment>
         ))}
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -330,6 +364,39 @@ const s = StyleSheet.create({
     borderColor: 'rgba(0,99,65,0.15)',
   },
   completeCtaText: { flex: 1, fontSize: 12, fontWeight: '700', color: COLORS.green },
+
+  /* Recurring inline banners (every 4 sections, alternating) */
+  bannerMissing: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginVertical: SPACING.md,
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.green,
+    borderWidth: 1.5,
+    borderColor: COLORS.gold,
+  },
+  bannerReferral: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginVertical: SPACING.md,
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.paper,
+    borderWidth: 1.5,
+    borderColor: COLORS.green,
+  },
+  bannerIconWrap: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(255,209,0,0.18)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  bannerTitle: { fontSize: 14, fontWeight: '900', color: COLORS.paper },
+  bannerSub: { fontSize: 11, color: 'rgba(255,255,255,0.85)', marginTop: 2 },
 
 
   empty: { alignItems: 'center', paddingVertical: SPACING.xxxl },
