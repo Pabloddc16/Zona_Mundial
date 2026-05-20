@@ -93,18 +93,18 @@ export default function TiendaScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* 2. EXTRA STICKERS */}
+        {/* 2. EXTRA STICKERS — Stars catalog (80 SKUs) */}
         <TouchableOpacity
-          onPress={() => router.push('/shop/extras')}
+          onPress={() => router.push('/shop/stars')}
           activeOpacity={0.9}
           style={[s.hero, s.heroExtras]}
         >
           <View style={s.heroIconCircle}>
             <Ionicons name="star" size={28} color={COLORS.gold} />
           </View>
-          <Text style={s.heroEyebrow}>LEGENDARIAS · DORADAS</Text>
+          <Text style={s.heroEyebrow}>GOAT · CRACK · STAR</Text>
           <Text style={s.heroTitle}>Obtén tus stickers favoritas</Text>
-          <Text style={s.heroSub}>Legendarias, doradas y ediciones limitadas.</Text>
+          <Text style={s.heroSub}>GOATs, CRACK, STAR. Base, Bronce, Plata u Oro.</Text>
           <View style={[s.heroCta, { backgroundColor: COLORS.gold }]}>
             <Text style={[s.heroCtaText, { color: COLORS.red }]}>Explorar extras</Text>
             <Ionicons name="arrow-forward" size={14} color={COLORS.red} />

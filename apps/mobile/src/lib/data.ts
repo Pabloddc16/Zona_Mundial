@@ -1,3 +1,5 @@
+import { STAR_PLAYERS } from './star-players'
+
 const pad = (n: number) => String(n).padStart(2, '0')
 
 export interface Product {
@@ -101,7 +103,13 @@ const TEAMS = [
   { code: 'CRO', name: 'Croacia',          flag: '🇭🇷', group: 'Europe' },
   { code: 'GHA', name: 'Ghana',            flag: '🇬🇭', group: 'Africa' },
   { code: 'PAN', name: 'Panamá',           flag: '🇵🇦', group: 'Concacaf' },
-  // ⚠ 6 more codes pending — Pablo will confirm once playoffs end
+  // 6 newly qualified (Pablo's spec, May 2026):
+  { code: 'BIH', name: 'Bosnia',           flag: '🇧🇦', group: 'Europe' },
+  { code: 'SWE', name: 'Suecia',           flag: '🇸🇪', group: 'Europe' },
+  { code: 'TUR', name: 'Türkiye',          flag: '🇹🇷', group: 'Europe' },
+  { code: 'CZE', name: 'República Checa',  flag: '🇨🇿', group: 'Europe' },
+  { code: 'IRQ', name: 'Iraq',             flag: '🇮🇶', group: 'Asia' },
+  { code: 'COD', name: 'RD del Congo',     flag: '🇨🇩', group: 'Africa' },
 ]
 
 export const PRICE_BY_TIER = { comun: 5, media: 15, dificil: 30, legend: 60, coca: 25 } as const
@@ -171,6 +179,30 @@ function stickersTeam(prefix: string): Sticker[] {
   })
 }
 
+// 20 star-player slots — one per player. Tier/rarity tracked separately
+// in the shop SKU catalog (see star-players.ts + pricing.ts).
+function stickersStars(): Sticker[] {
+  return STAR_PLAYERS
+    .slice()
+    .sort((a, b) => a.albumSlot - b.albumSlot)
+    .map((p) => {
+      const rarity: Rarity =
+        p.tier === 'GOAT' ? 'gold'
+        : p.tier === 'CRACK' ? 'silver'
+        : 'bronze'
+      return {
+        n: p.albumSlot,
+        code: 'STAR' + pad(p.albumSlot),
+        label: `${p.name} (${p.country})`,
+        type: 'star',
+        tier: 'legend',
+        price: PRICE_BY_TIER.legend,
+        rarity,
+        player: p.albumSlot,
+      }
+    })
+}
+
 function stickersCocaCola(): Sticker[] {
   return Array.from({ length: 24 }, (_, i) => {
     const n = i + 1
@@ -228,7 +260,18 @@ export const ALBUM: AlbumGroup[] = [
     stickers: stickersTeam(t.code),
   })),
 
-  // 3. Coca-Cola promo (Mexico exclusive). Count placeholder until Pablo
+  // 3. Stars — 20 player slots (GOAT/CRACK/STAR tiers)
+  {
+    id: 'STARS',
+    prefix: 'STAR',
+    name: 'Stars',
+    subtitle: '20 jugadores · GOAT / CRACK / STAR',
+    emoji: '⭐',
+    kind: 'legend',
+    stickers: stickersStars(),
+  },
+
+  // 4. Coca-Cola promo (Mexico exclusive). Count placeholder until Pablo
   //    confirms with the brand kit.
   {
     id: 'COCACOLA',

@@ -160,8 +160,8 @@ export default function AlbumScreen() {
             <Ionicons name="gift" size={26} color={COLORS.gold} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={s.referralTitle}>Invita a un amigo, gana $50</Text>
-            <Text style={s.referralSub}>Por cada amigo que complete su primera compra, ganas $50 de crédito.</Text>
+            <Text style={s.referralTitle}>Invita a un amigo, ganas 5%</Text>
+            <Text style={s.referralSub}>Por cada compra de tu amigo, ganas 5% de crédito.</Text>
           </View>
           <View style={s.referralCta}>
             <Text style={s.referralCtaText}>Mi código</Text>

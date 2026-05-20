@@ -30,6 +30,7 @@ const NAV_SECTIONS = [
     label: 'Inventory',
     items: [
       { label: 'Stock', href: '/admin/inventory', icon: TrendingUp },
+      { label: 'Stars stock', href: '/admin/stars-inventory', icon: TrendingUp },
       { label: 'Purchases', href: '/admin/purchases', icon: Package },
       { label: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight },
       { label: 'Conversions', href: '/admin/conversions', icon: GitMerge },
