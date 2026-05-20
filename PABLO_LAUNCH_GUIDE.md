@@ -94,50 +94,51 @@ When I have these I paste them into Render's environment, redeploy, and the app 
 
 ---
 
-## 3) EAS (Expo) build credits — $19 USD one month, BUT under your account
+## 3) EAS (Expo) build account — $19 USD on your account
 
-We hit the free tier limit on my personal Expo account. Resets June 1 if we wait, but **we can't ship until we build** the final production AAB / IPA. Better long-term path: you own the Expo billing instead of me carrying it on a personal account.
+Free tier on my personal Expo account is used up. Resets June 1, but we can't ship until we build the final production AAB / IPA. **Goal: everything billed under your account, nothing attached to my personal account.**
 
-### Steps for you (Pablo)
+### Recommended path — you own the Expo account
 
-#### A. Create your own Expo account + organization
+#### A. Create your own Expo account
 
-1. https://expo.dev/signup → use your email (your business Gmail is fine)
+1. https://expo.dev/signup → use your business email (e.g. `pablo@cromos26.com` or `Pabloddc16@gmail.com`)
 2. Verify email
-3. Top-right menu → **Create organization** → name it `Cromos26` (or your company name)
-4. The organization is free. Plans + billing live at the org level.
+3. Pick a username — suggest `cromos26` or `pabloddc16`
+4. **Share the password with me via Signal / 1Password.** I'll log in to set up the project + builds. (You can change the password after launch.)
 
-#### B. Upgrade the organization to Production plan
+#### B. Upgrade to Production plan
 
-1. Org settings → **Billing**
+I can do this for you once I'm logged in — pay $19/mo on your card. Or you do it yourself:
+1. Account settings → **Billing**
 2. Pick **Production** ($19 USD / month)
-3. Add your card — charges go to your account, not mine
+3. Add your card
 
-#### C. Invite me as a developer
+Charges land on your statement, not mine.
 
-1. Org → **Members** → **Invite member**
-2. Email: `stulanik@gmail.com`
-3. Role: **Developer** (or Admin if you want me to manage members later)
-4. I accept the invite from my CLI
+#### C. Transfer the existing project to your account
 
-#### D. Transfer the existing project to your org
+The Cromos 26 EAS project currently lives under my `brankostula` account. Once you're set up, I email Expo support:
 
-The Cromos 26 EAS project currently lives under my `brankostula` account. Cleanest way to move it:
+- https://expo.dev/contact
+- "Please transfer EAS project `732ed138-a83a-41dc-8886-4f8217289d4f` from `brankostula` to `<your new account>`. Current owner consents."
+- They migrate the project, build history, OTA channels, and signing credentials in one operation. ~24-48h turnaround.
 
-**Option 1 — Expo support ticket (recommended, ~24-48h)**
+After transfer, **app.json** `owner` field changes from `brankostula` to your username — one-line edit, I handle.
 
-- Email Expo support: https://expo.dev/contact
-- Subject: "Transfer project to organization"
-- Body: "Please transfer EAS project `732ed138-a83a-41dc-8886-4f8217289d4f` from owner `brankostula` to organization `Cromos26` (owner email: <Pablo's email>). I have the consent of the current owner."
-- They migrate the project, build history, OTA channels, and credentials in one go.
+#### D. I keep developer access via your account
 
-**Option 2 — Skip for now**
+Once the project is yours, you can either:
+- Share the password long-term and I work as you, OR
+- **Invite me as a team member** — Account → Teams → invite `stulanik@gmail.com` as Developer. Cleaner separation, you keep your password private.
 
-If we want to ship fast, you can pay on your account but I trigger builds from mine for the very first release. We do the transfer after launch (no rush). The $19 still goes to your account because the **billing follows the user who triggered the build**, not the project owner. Confirmed with Expo.
+### Backup path — if transfer takes too long and we need to ship NOW
 
-#### E. Tell me when steps A–C are done
+You pay $19 on my existing `brankostula` account (send card via Signal, I add it), I build, we transfer the project after the launch. Same total cost — $19 — only difference is the first invoice shows on my account. Reimburse however you prefer.
 
-I trigger the first production build immediately (~25 min). After both stores accept the submission, you can **cancel the plan** next month → total spend $19.
+### Tell me when ready
+
+The moment account is created + password shared, I trigger the first production build (~25 min on EAS servers). After both stores accept submission, **cancel the $19 plan next month** → total spend $19.
 
 ---
 
@@ -160,20 +161,11 @@ When I have it, I add it to `apps/mobile/google-service-account.json` and `eas s
 
 ---
 
-## 5) Apple App Store — already mostly done, but verify ownership
+## 5) Apple App Store — already mostly done
 
-- ✅ Apple Developer Program paid ($99/yr) — Team ID `7D7NLMWLYL`
+- ✅ Apple Developer Program paid ($99/yr) — Team ID `7D7NLMWLYL` (on your account ✓)
 - ✅ App in App Store Connect — App ID `6769002053`
 - ✅ Build #7 submitted to TestFlight earlier
-
-### ⚠ Confirm whose Apple Developer account this is
-
-Important: the Apple Developer account that paid the $99/yr — is it under **your name + your business**, or under mine? Same logic as the Expo billing — long-term you want this in your name.
-
-- If **already yours:** nothing to do. We continue using Team `7D7NLMWLYL`.
-- If currently **mine:** you'll need to enroll your own Apple Developer Program ($99 USD/yr) and we re-submit the app under your team. Adds 1 week to launch (Apple reviews enrollments). Decision: do this **after** initial TestFlight testing, before public launch.
-
-Reply quickly: whose name is on the $99 invoice from Apple?
 
 ### Pending
 
@@ -304,7 +296,6 @@ Tick each one before forwarding:
 - ☐ **Production plan $19 paid on the Expo org**
 - ☐ **stulanik@gmail.com invited to the org as Developer**
 - ☐ Play Console service account JSON downloaded
-- ☐ Apple Developer account ownership confirmed (yours or mine?)
 - ☐ Questions Q1-Q6 answered (or "use defaults" — that works too)
 - ☐ TestFlight build #7 status checked
 
