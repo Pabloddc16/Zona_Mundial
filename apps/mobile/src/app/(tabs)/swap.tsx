@@ -104,7 +104,7 @@ export default function SwapScreen() {
                   <Text style={s.qrCaption}>Show this to a friend</Text>
                 </View>
                 <TouchableOpacity style={s.btn} onPress={copyCode}>
-                  <Text style={s.btnText}>Copy code (fallback)</Text>
+                  <Text style={s.btnText}>Copy code</Text>
                 </TouchableOpacity>
               </>
             )}

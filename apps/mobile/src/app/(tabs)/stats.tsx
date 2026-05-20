@@ -54,6 +54,13 @@ export default function StatsScreen() {
           </View>
         </View>
 
+        {/* Subtle CTA — refer-a-friend */}
+        <TouchableOpacity onPress={() => router.push('/profile')} style={s.subtleCta} activeOpacity={0.85}>
+          <Ionicons name="gift-outline" size={16} color={COLORS.green} />
+          <Text style={s.subtleCtaText}>Invite friends, earn 5% on every purchase</Text>
+          <Ionicons name="chevron-forward" size={14} color={COLORS.green} />
+        </TouchableOpacity>
+
         {/* Group breakdown */}
         {completed.length > 0 && <Section title={`Complete (${completed.length})`} groups={completed} />}
         {inProgress.length > 0 && <Section title={`In progress (${inProgress.length})`} groups={inProgress} />}
@@ -113,4 +120,14 @@ const s = StyleSheet.create({
   groupRowBorder: { borderTopWidth: 1, borderTopColor: COLORS.borderSoft },
   groupName: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, color: COLORS.ink, marginBottom: SPACING.xs },
   groupCount: { fontSize: FONT.size.bodyS, fontWeight: FONT.weight.bold, color: COLORS.textMuted, minWidth: 40, textAlign: 'right' },
+
+  subtleCta: {
+    flexDirection: 'row', alignItems: 'center', gap: SPACING.sm,
+    paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
+    borderRadius: 99,
+    backgroundColor: 'rgba(0,99,65,0.06)',
+    borderWidth: 1, borderColor: 'rgba(0,99,65,0.15)',
+    marginBottom: SPACING.lg,
+  },
+  subtleCtaText: { flex: 1, fontSize: 12, fontWeight: '700', color: COLORS.green },
 })

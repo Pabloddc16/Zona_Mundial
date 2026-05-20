@@ -87,6 +87,20 @@ export default function OrdenScreen() {
           <Text style={[s.statusText, { color: fg }]}>{STATUS_LABEL[order.status] ?? order.status}</Text>
         </View>
 
+        {/* Pickup code — local-pickup orders */}
+        {order.delivery_type === 'local' && (
+          <View style={s.pickupCodeCard}>
+            <Text style={s.pickupCodeLabel}>Your pickup code</Text>
+            <Text style={s.pickupCode}>{order.order_number.slice(-6).toUpperCase()}</Text>
+            <Text style={s.pickupCodeSub}>Show this at the counter to grab your order.</Text>
+            <View style={s.pickupAddrBox}>
+              <Text style={s.pickupAddrLine}>Miguel Lerdo de Tejada 2081 — casa Anomalistyc</Text>
+              <Text style={s.pickupAddrLine}>Col. Americana, Lafayette · 44150 Guadalajara, Jal.</Text>
+              <Text style={s.pickupAddrHours}>Mon–Sat · 10am – 7pm</Text>
+            </View>
+          </View>
+        )}
+
         {/* Details */}
         <View style={s.card}>
           <Row label="Customer" value={order.customer_name} />
@@ -154,4 +168,29 @@ const s = StyleSheet.create({
   itemRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
   btn: { backgroundColor: '#006341', borderRadius: 16, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   btnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
+
+  pickupCodeCard: {
+    backgroundColor: '#006341',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#FFD100',
+    alignItems: 'center',
+  },
+  pickupCodeLabel: { fontSize: 11, fontWeight: '900', color: '#FFD100', letterSpacing: 2 },
+  pickupCode: {
+    fontSize: 44, fontWeight: '900', color: '#FAF6EE',
+    letterSpacing: 6, marginVertical: 8,
+    fontVariant: ['tabular-nums'],
+  },
+  pickupCodeSub: { fontSize: 12, color: 'rgba(255,255,255,0.85)', textAlign: 'center', marginBottom: 14 },
+  pickupAddrBox: {
+    backgroundColor: 'rgba(0,0,0,0.18)',
+    borderRadius: 10,
+    padding: 12,
+    alignSelf: 'stretch',
+  },
+  pickupAddrLine: { fontSize: 12, color: '#FAF6EE', fontWeight: '700', lineHeight: 16 },
+  pickupAddrHours: { fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 6, fontWeight: '600' },
 })

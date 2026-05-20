@@ -23,6 +23,7 @@ import {
   DELIVERY_SUB,
   deliveryAmountToFreeShipping,
   deliveryFee,
+  STORE_ADDRESS,
   WELCOME_CREDIT_MXN,
   maxReferralApplied,
   type DeliveryZone,
@@ -149,6 +150,19 @@ export default function CheckoutScreen() {
                     textAlignVertical="top"
                   />
                 </Field>
+              )}
+              {zone === 'pickup' && (
+                <View style={s.pickupCard}>
+                  <View style={s.pickupHeader}>
+                    <Ionicons name="storefront" size={18} color={COLORS.green} />
+                    <Text style={s.pickupTitle}>Pickup location</Text>
+                  </View>
+                  <Text style={s.pickupLine}>{STORE_ADDRESS.line1}</Text>
+                  <Text style={s.pickupLine}>{STORE_ADDRESS.line2}</Text>
+                  <Text style={s.pickupLine}>{STORE_ADDRESS.zip} · {STORE_ADDRESS.city}</Text>
+                  <Text style={s.pickupHours}>{STORE_ADDRESS.hours}</Text>
+                  <Text style={s.pickupHint}>After payment, you'll get a pickup code. Show it at the counter.</Text>
+                </View>
               )}
             </Card>
           </Group>
@@ -328,4 +342,19 @@ const s = StyleSheet.create({
 
   payBtnMain: { backgroundColor: COLORS.ink, borderRadius: RADIUS.full, paddingVertical: 18, alignItems: 'center' },
   payBtnMainText: { color: COLORS.paper, fontWeight: FONT.weight.black, fontSize: 16 },
+
+  /* Pickup store-address card */
+  pickupCard: {
+    marginTop: SPACING.md,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(0,99,65,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,99,65,0.18)',
+  },
+  pickupHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: SPACING.sm },
+  pickupTitle: { fontSize: 13, fontWeight: '900', color: COLORS.green, letterSpacing: 0.5 },
+  pickupLine: { fontSize: 14, fontWeight: '700', color: COLORS.ink, lineHeight: 19 },
+  pickupHours: { fontSize: 12, color: COLORS.textMuted, marginTop: 6, fontWeight: '600' },
+  pickupHint: { fontSize: 11, color: COLORS.textFaint, marginTop: 8, fontStyle: 'italic' },
 })

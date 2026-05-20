@@ -150,24 +150,17 @@ export default function AlbumScreen() {
 
       {/* Sections */}
       <ScrollView contentContainerStyle={s.scroll}>
-        {/* Refiere y gana — Pablo's signature acquisition card */}
-        <TouchableOpacity
-          onPress={() => router.push('/referral')}
-          activeOpacity={0.85}
-          style={s.referralCard}
-        >
-          <View style={s.referralIconWrap}>
-            <Ionicons name="gift" size={26} color={COLORS.gold} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.referralTitle}>Invite a friend, earn 5%</Text>
-            <Text style={s.referralSub}>For every purchase your friend makes, you earn 5% credit.</Text>
-          </View>
-          <View style={s.referralCta}>
-            <Text style={s.referralCtaText}>My code</Text>
-            <Ionicons name="arrow-forward" size={14} color={COLORS.ink} />
-          </View>
-        </TouchableOpacity>
+        {/* Subtle "Complete album" CTA — only show when user is missing > 100 stickers */}
+        {(TOTAL_STICKERS - stats.owned) > 100 && (
+          <TouchableOpacity
+            onPress={() => router.push('/shop/album')}
+            activeOpacity={0.85}
+            style={s.completeCta}
+          >
+            <Ionicons name="book-outline" size={18} color={COLORS.green} />
+            <Text style={s.completeCtaText}>You're missing {TOTAL_STICKERS - stats.owned} stickers · Buy them all →</Text>
+          </TouchableOpacity>
+        )}
 
         {visibleGroups.length === 0 && (
           <View style={s.empty}>
@@ -322,33 +315,21 @@ const s = StyleSheet.create({
 
   scroll: { paddingTop: SPACING.lg },
 
-  /* Refiere y gana hero card */
-  referralCard: {
+  /* Subtle "complete album" CTA */
+  completeCta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
+    gap: SPACING.sm,
     marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
-    padding: SPACING.md,
-    borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.green,
-    borderWidth: 1.5,
-    borderColor: COLORS.gold,
-  },
-  referralIconWrap: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: 'rgba(255,209,0,0.18)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  referralTitle: { fontSize: 15, fontWeight: '900', color: COLORS.paper, marginBottom: 2 },
-  referralSub: { fontSize: 11, color: 'rgba(255,255,255,0.85)', lineHeight: 15 },
-  referralCta: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: 10, paddingVertical: 6,
+    marginBottom: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: 99,
+    backgroundColor: 'rgba(0,99,65,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,99,65,0.15)',
   },
-  referralCtaText: { fontSize: 11, fontWeight: '900', color: COLORS.ink },
+  completeCtaText: { flex: 1, fontSize: 12, fontWeight: '700', color: COLORS.green },
 
 
   empty: { alignItems: 'center', paddingVertical: SPACING.xxxl },

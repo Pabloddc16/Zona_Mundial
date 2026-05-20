@@ -66,6 +66,19 @@ export function paymentMethodsFor(_zone: DeliveryZone): PaymentMethod[] {
  */
 export const WELCOME_CREDIT_MXN = 100
 
+/**
+ * Physical store address for the Pickup zone (Pablo, May 2026).
+ * Customers see this during checkout; on payment success, the order
+ * confirmation displays a 6-digit pickup code they show at the counter.
+ */
+export const STORE_ADDRESS = {
+  line1: 'Miguel Lerdo de Tejada 2081 — casa Anomalistyc',
+  line2: 'Col. Americana, Lafayette',
+  zip: '44150',
+  city: 'Guadalajara, Jal.',
+  hours: 'Mon–Sat · 10am – 7pm',
+}
+
 export const REFERRAL_INVITER_PCT = 0.05
 export const REFERRAL_INVITEE_DISCOUNT_MXN = 100
 export const REFERRAL_INVITEE_MIN_ORDER_MXN = 1000
