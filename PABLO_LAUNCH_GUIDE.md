@@ -116,21 +116,24 @@ I can do this for you once I'm logged in — pay $19/mo on your card. Or you do 
 
 Charges land on your statement, not mine.
 
-#### C. Transfer the existing project to your account
+#### C. Transfer the existing project to your account — INSTANT, no support ticket
 
-The Cromos 26 EAS project currently lives under my `brankostula` account. Once you're set up, I email Expo support:
+The Cromos 26 EAS project currently lives under my `brankostula` account. Fastest way (no Expo support wait):
 
-- https://expo.dev/contact
-- "Please transfer EAS project `732ed138-a83a-41dc-8886-4f8217289d4f` from `brankostula` to `<your new account>`. Current owner consents."
-- They migrate the project, build history, OTA channels, and signing credentials in one operation. ~24-48h turnaround.
+1. Once your account exists and your card is on file
+2. Share your account password with me via Signal/1Password (temporary — change after)
+3. I log into your account from my CLI
+4. Run `eas project:transfer` — interactive command moves the project from `brankostula` to your account
+5. Done in ~30 seconds. Build history, OTA channels, signing credentials all migrate.
+6. **app.json** `owner` field changes from `brankostula` to your username — one-line edit, I handle.
 
-After transfer, **app.json** `owner` field changes from `brankostula` to your username — one-line edit, I handle.
+You can change your password right after. I keep developer access via Step D below.
 
 #### D. I keep developer access via your account
 
-Once the project is yours, you can either:
-- Share the password long-term and I work as you, OR
-- **Invite me as a team member** — Account → Teams → invite `stulanik@gmail.com` as Developer. Cleaner separation, you keep your password private.
+Two options, both fine:
+- **Add me as team member** — Account → Members → invite `stulanik@gmail.com` as Developer (recommended, cleanest)
+- Or share login long-term (simpler but less audit-clean)
 
 ### Backup path — if transfer takes too long and we need to ship NOW
 
