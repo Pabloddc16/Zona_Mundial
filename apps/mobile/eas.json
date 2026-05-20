@@ -8,7 +8,9 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY_ANDROID": "AIzaSyCB9Qi-DFPCBoEcY8kZx6XcnO7rWSvQ97A",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY_IOS": "AIzaSyBJInzfbHjWvSPjK4n4WkwkiUQOldiYeqw"
       },
       "android": {
         "buildType": "apk"
@@ -21,7 +23,9 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY_ANDROID": "AIzaSyCB9Qi-DFPCBoEcY8kZx6XcnO7rWSvQ97A",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY_IOS": "AIzaSyBJInzfbHjWvSPjK4n4WkwkiUQOldiYeqw"
       },
       "ios": {
         "simulator": false
@@ -33,7 +37,9 @@
     },
     "production": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY_ANDROID": "AIzaSyCB9Qi-DFPCBoEcY8kZx6XcnO7rWSvQ97A",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY_IOS": "AIzaSyBJInzfbHjWvSPjK4n4WkwkiUQOldiYeqw"
       },
       "ios": {
         "autoIncrement": true

@@ -18,6 +18,7 @@ import { useProductsStore } from '@/lib/products-store'
 import { api, type OrderPayload } from '@/lib/api'
 import { fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
+import { AddressForm, emptyAddress, type AddressValue } from '@/components/AddressForm'
 import {
   DELIVERY_LABEL,
   DELIVERY_SUB,
@@ -39,7 +40,7 @@ export default function CheckoutScreen() {
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
+  const [address, setAddress] = useState<AddressValue>(emptyAddress())
   const [notes, setNotes] = useState('')
   const [zone, setZone] = useState<DeliveryZone>('gdl')
   const payment: PaymentMethod = 'card'  // Pablo: card-only everywhere via MP
@@ -59,7 +60,7 @@ export default function CheckoutScreen() {
 
   async function submit() {
     if (!name.trim() || !phone.trim()) { setError('Name and phone are required'); return }
-    if (zone !== 'pickup' && !address.trim()) { setError('Address is required for delivery'); return }
+    if (zone !== 'pickup' && !address.formatted.trim()) { setError('Address is required for delivery'); return }
     if (items.length === 0) { setError('Your cart is empty'); return }
     setLoading(true)
     setError('')
@@ -68,7 +69,7 @@ export default function CheckoutScreen() {
       const payload: OrderPayload = {
         customer_name: name.trim(),
         phone: phone.trim(),
-        address: address.trim(),
+        address: address.formatted.trim(),
         delivery_type: zone === 'pickup' ? 'local' : 'envio',
         payment_method: payment === 'card' ? 'tarjeta' : 'efectivo',
         shipping,
@@ -140,16 +141,7 @@ export default function CheckoutScreen() {
                 <Text style={s.freeShipHint}>Add {fmt(remainingForFree)} more for free shipping</Text>
               )}
               {zone !== 'pickup' && (
-                <Field label="Address" topGap>
-                  <TextInput
-                    style={[s.input, { minHeight: 60 }]}
-                    value={address}
-                    onChangeText={setAddress}
-                    placeholder="Street, number, neighborhood, city"
-                    multiline
-                    textAlignVertical="top"
-                  />
-                </Field>
+                <AddressForm value={address} onChange={setAddress} />
               )}
               {zone === 'pickup' && (
                 <View style={s.pickupCard}>
