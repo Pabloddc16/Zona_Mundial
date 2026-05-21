@@ -11,3 +11,9 @@ coverage/
 /apps/*/node_modules/
 /packages/*/node_modules/
 .vercel
+
+# Secrets-bearing Pablo files (MP tokens, account passwords).
+# Keep the file locally, never commit.
+PABLO_CONTENT/notes.md
+PABLO_CONTENT/launch-playbook.md
+PABLO_CONTENT/launch-guide.docx
