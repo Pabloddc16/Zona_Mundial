@@ -7,7 +7,7 @@ Older planning docs moved to `docs/archive/`.
 
 ## Pablo owes (waiting on)
 
-Send `PABLO_QUESTIONS_ROUND3.md` and wait for answers. Specifically:
+Send `docs/pablo-questions-round3.md` and wait for answers. Specifically:
 
 | # | Topic | Blocker for |
 |---|-------|-------------|
@@ -140,10 +140,10 @@ After Pablo answers the questions, in this order:
 
 | File | Purpose |
 |------|---------|
-| `REMAINING_TASKS.md` | **This file** — single source of truth |
-| `PABLO_QUESTIONS_ROUND3.md` | 12 open questions to send Pablo |
-| `PABLO_LAUNCH_GUIDE.md` | One-pager for Pablo on the 4 launch blockers (MP / EAS / Play / TestFlight) |
-| `PABLO_CONTENT/` | Pablo's source material — PDFs, screenshots, product photos |
+| `REMAINING_TASKS.md` | **This file** — single source of truth (root) |
+| `docs/pablo-questions-round3.md` | 12 open questions to send Pablo |
+| `docs/pablo-launch-guide.md` | One-pager for Pablo on the 4 launch blockers (MP / EAS / Play / TestFlight) |
+| `PABLO_CONTENT/` | Pablo's source material — PDFs, screenshots, product photos, launch-guide.docx |
 | `docs/MASTER_PLAN.md` | Project architecture overview |
 | `docs/ADMIN_GUIDE.md` | Admin panel usage guide |
 | `docs/INVENTORY_PLAN.md` | Inventory + movements ledger design |
