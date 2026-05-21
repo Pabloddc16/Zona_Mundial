@@ -277,7 +277,7 @@ export const ALBUM: AlbumGroup[] = [
     id: 'COCACOLA',
     prefix: 'CC',
     name: 'Coca-Cola Promo',
-    subtitle: 'Mexico exclusive',
+    subtitle: 'OXXO Coca-Cola packs only',
     emoji: '🥤',
     kind: 'coca',
     stickers: stickersCocaCola(),

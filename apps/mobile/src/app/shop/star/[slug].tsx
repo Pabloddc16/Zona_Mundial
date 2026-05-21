@@ -9,7 +9,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import { STAR_PLAYERS, type StarTier } from '@/lib/star-players'
-import { STAR_RARITIES, STAR_PRICING, RARITY_DISPLAY, type StarRarity } from '@/lib/pricing'
+import { STAR_RARITIES, STAR_PRICING, RARITY_DISPLAY, isAvailable, type StarRarity } from '@/lib/pricing'
 import { fmt } from '@/lib/data'
 import { useCartStore } from '@/lib/cart-store'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
@@ -75,7 +75,7 @@ export default function StarDetailScreen() {
         {/* Rarity options */}
         <Text style={s.sectionLabel}>CHOOSE YOUR RARITY</Text>
         <View style={s.rarityList}>
-          {STAR_RARITIES.map((r) => {
+          {STAR_RARITIES.filter((r) => isAvailable(player.tier, r)).map((r) => {
             const d = RARITY_DISPLAY[r]
             const price = STAR_PRICING[player.tier][r]
             const isAdded = added === r

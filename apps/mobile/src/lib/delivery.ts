@@ -83,6 +83,14 @@ export const REFERRAL_INVITER_PCT = 0.05
 export const REFERRAL_INVITEE_DISCOUNT_MXN = 100
 export const REFERRAL_INVITEE_MIN_ORDER_MXN = 1000
 
+// Redemption rules (Pablo, May 2026):
+//   - Credit applies to the entire cart, no category restrictions.
+//   - No minimum balance to redeem.
+//   - Each credited amount expires 12 months from the date it lands.
+export const REFERRAL_CREDIT_EXPIRY_MONTHS = 12
+export const REFERRAL_REDEMPTION_MIN_MXN = 0
+export const REFERRAL_REDEMPTION_CATEGORY_FILTER: string[] | null = null  // null = all categories
+
 export function referralInviteeDiscount(orderSubtotal: number): number {
   return orderSubtotal >= REFERRAL_INVITEE_MIN_ORDER_MXN ? REFERRAL_INVITEE_DISCOUNT_MXN : 0
 }

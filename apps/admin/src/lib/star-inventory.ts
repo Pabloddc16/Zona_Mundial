@@ -10,10 +10,12 @@ export type StarTier = (typeof STAR_TIERS)[number]
 export const STAR_RARITIES = ['BASE', 'BRONCE', 'PLATA', 'ORO'] as const
 export type StarRarity = (typeof STAR_RARITIES)[number]
 
+// STAR caps at PLATA (Pablo confirmed STAR-ORO was a typo, May 2026).
+// 0 = no SKU exists for this combination.
 export const STAR_PRICING: Record<StarTier, Record<StarRarity, number>> = {
   GOAT:  { BASE: 500, BRONCE: 800, PLATA: 5000, ORO: 10000 },
   CRACK: { BASE: 300, BRONCE: 500, PLATA: 3000, ORO: 4000 },
-  STAR:  { BASE: 100, BRONCE: 200, PLATA: 1500, ORO: 2500 },
+  STAR:  { BASE: 100, BRONCE: 200, PLATA: 1500, ORO: 0 },
 }
 
 export interface StarPlayer {
@@ -24,26 +26,26 @@ export interface StarPlayer {
 }
 
 export const STAR_PLAYERS: StarPlayer[] = [
-  { slug: 'messi',      name: 'Messi',      country: 'ARG', tier: 'GOAT' },
-  { slug: 'cristiano',  name: 'Cristiano',  country: 'POR', tier: 'GOAT' },
-  { slug: 'haaland',    name: 'Haaland',    country: 'NOR', tier: 'GOAT' },
-  { slug: 'yamal',      name: 'Yamal',      country: 'ESP', tier: 'GOAT' },
-  { slug: 'vinicius',   name: 'Vinicius',   country: 'BRA', tier: 'CRACK' },
-  { slug: 'modric',     name: 'Modric',     country: 'CRO', tier: 'CRACK' },
-  { slug: 'salah',      name: 'Salah',      country: 'EGY', tier: 'CRACK' },
-  { slug: 'bellingham', name: 'Bellingham', country: 'ENG', tier: 'CRACK' },
-  { slug: 'mbappe',     name: 'Mbappé',     country: 'FRA', tier: 'CRACK' },
-  { slug: 'hakimi',     name: 'Hakimi',     country: 'MAR', tier: 'CRACK' },
-  { slug: 'son',        name: 'Son',        country: 'KOR', tier: 'CRACK' },
-  { slug: 'valverde',   name: 'Valverde',   country: 'URU', tier: 'CRACK' },
-  { slug: 'doku',       name: 'Doku',       country: 'BEL', tier: 'STAR' },
-  { slug: 'a-davies',   name: 'A. Davies',  country: 'CAN', tier: 'STAR' },
-  { slug: 'l-diaz',     name: 'L. Díaz',    country: 'COL', tier: 'STAR' },
-  { slug: 'caicedo',    name: 'Caicedo',    country: 'ECU', tier: 'STAR' },
-  { slug: 'wirtz',      name: 'Wirtz',      country: 'GER', tier: 'STAR' },
-  { slug: 'r-jimenez',  name: 'R. Jiménez', country: 'MEX', tier: 'STAR' },
-  { slug: 'gakpo',      name: 'Gakpo',      country: 'NED', tier: 'STAR' },
-  { slug: 'pulisic',    name: 'Pulisic',    country: 'USA', tier: 'STAR' },
+  { slug: 'messi',      name: 'Messi',             country: 'ARG', tier: 'GOAT' },
+  { slug: 'cristiano',  name: 'Cristiano Ronaldo', country: 'POR', tier: 'GOAT' },
+  { slug: 'haaland',    name: 'Haaland',           country: 'NOR', tier: 'GOAT' },
+  { slug: 'yamal',      name: 'Lamine Yamal',      country: 'ESP', tier: 'GOAT' },
+  { slug: 'vinicius',   name: 'Vinicius Jr.',      country: 'BRA', tier: 'CRACK' },
+  { slug: 'modric',     name: 'Luka Modric',       country: 'CRO', tier: 'CRACK' },
+  { slug: 'salah',      name: 'Salah',             country: 'EGY', tier: 'CRACK' },
+  { slug: 'bellingham', name: 'Bellingham',        country: 'ENG', tier: 'CRACK' },
+  { slug: 'mbappe',     name: 'Mbappé',            country: 'FRA', tier: 'CRACK' },
+  { slug: 'hakimi',     name: 'Hakimi',            country: 'MAR', tier: 'CRACK' },
+  { slug: 'son',        name: 'Heung-min Son',     country: 'KOR', tier: 'CRACK' },
+  { slug: 'valverde',   name: 'Valverde',          country: 'URU', tier: 'CRACK' },
+  { slug: 'doku',       name: 'Doku',              country: 'BEL', tier: 'STAR' },
+  { slug: 'a-davies',   name: 'Alphonso Davies',   country: 'CAN', tier: 'STAR' },
+  { slug: 'l-diaz',     name: 'Luis Díaz',         country: 'COL', tier: 'STAR' },
+  { slug: 'caicedo',    name: 'Moisés Caicedo',    country: 'ECU', tier: 'STAR' },
+  { slug: 'wirtz',      name: 'Florian Wirtz',     country: 'GER', tier: 'STAR' },
+  { slug: 'r-jimenez',  name: 'Raúl Jiménez',      country: 'MEX', tier: 'STAR' },
+  { slug: 'gakpo',      name: 'Cody Gakpo',        country: 'NED', tier: 'STAR' },
+  { slug: 'pulisic',    name: 'Christian Pulisic', country: 'USA', tier: 'STAR' },
 ]
 
 // [BASE, BRONCE, PLATA, ORO]
@@ -60,13 +62,14 @@ export const INITIAL_STOCK: Record<string, [number, number, number, number]> = {
   hakimi:     [9, 5, 1, 2],
   son:        [11, 8, 2, 1],
   valverde:   [10, 7, 3, 0],
-  doku:       [13, 5, 1, 1],
+  // STAR tier — ORO column always 0 (SKU doesn't exist).
+  doku:       [13, 5, 1, 0],
   'a-davies': [14, 6, 4, 0],
-  'l-diaz':   [14, 1, 3, 2],
+  'l-diaz':   [14, 1, 3, 0],
   caicedo:    [9, 2, 2, 0],
-  wirtz:      [10, 4, 2, 1],
+  wirtz:      [10, 4, 2, 0],
   'r-jimenez': [16, 10, 0, 0],
-  gakpo:      [13, 11, 2, 1],
+  gakpo:      [13, 11, 2, 0],
   pulisic:    [11, 5, 7, 0],
 }
 

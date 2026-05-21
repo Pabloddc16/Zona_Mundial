@@ -11,14 +11,20 @@ export type StarRarity = 'BASE' | 'BRONCE' | 'PLATA' | 'ORO'
 
 export const STAR_RARITIES: StarRarity[] = ['BASE', 'BRONCE', 'PLATA', 'ORO']
 
+// STAR tier caps at PLATA (Pablo confirmed STAR-ORO was a typo, May 2026).
+// We use 0 as a sentinel meaning "no SKU exists for this combination".
 export const STAR_PRICING: Record<StarTier, Record<StarRarity, number>> = {
   GOAT:  { BASE: 500, BRONCE: 800, PLATA: 5000, ORO: 10000 },
   CRACK: { BASE: 300, BRONCE: 500, PLATA: 3000, ORO: 4000 },
-  STAR:  { BASE: 100, BRONCE: 200, PLATA: 1500, ORO: 2500 },
+  STAR:  { BASE: 100, BRONCE: 200, PLATA: 1500, ORO: 0 },
 }
 
 export function priceFor(tier: StarTier, rarity: StarRarity): number {
   return STAR_PRICING[tier][rarity]
+}
+
+export function isAvailable(tier: StarTier, rarity: StarRarity): boolean {
+  return STAR_PRICING[tier][rarity] > 0
 }
 
 export const RARITY_DISPLAY: Record<StarRarity, { label: string; color: string; bg: string }> = {
