@@ -3,6 +3,8 @@ import type { AuthUser } from './api'
 import { api, clearTokens, setAT, setRT } from './api'
 import { getAT, getCachedUser, setCachedUser } from './auth-storage'
 import { useAlbumStore } from './album-store'
+import { signInWithGoogle, signOutGoogle } from './google-auth'
+import { supabase } from './supabase'
 
 interface AuthStore {
   user: AuthUser | null
@@ -10,6 +12,7 @@ interface AuthStore {
   setUser: (u: AuthUser | null) => void
   setHydrated: (b: boolean) => void
   signIn: (email: string, password: string) => Promise<void>
+  signInWithGoogle: () => Promise<{ ok: boolean; cancelled?: boolean; error?: string }>
   signUp: (body: { email: string; password: string; username?: string; referralCode?: string }) => Promise<void>
   signOut: () => Promise<void>
   deleteAccount: () => Promise<void>
@@ -42,7 +45,45 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 
+  signInWithGoogle: async () => {
+    const result = await signInWithGoogle()
+    if (!result.ok || !result.accessToken || !result.refreshToken) {
+      const out: { ok: boolean; cancelled?: boolean; error?: string } = { ok: false }
+      if (result.cancelled !== undefined) out.cancelled = result.cancelled
+      if (result.error !== undefined) out.error = result.error
+      return out
+    }
+    await setAT(result.accessToken)
+    await setRT(result.refreshToken)
+
+    // Fetch user profile from API so the rest of the app gets the same shape
+    // as email/password sign-in. Supabase ID token has email but not role/username.
+    try {
+      const me = await api.auth.me()
+      const fresh = { id: me.id, email: me.email, username: me.username, role: me.role }
+      await setCachedUser(fresh)
+      set({ user: fresh })
+      useAlbumStore.getState().syncFromServer()
+    } catch (e) {
+      // Profile fetch failed — likely public.users row missing (first Google sign-in).
+      // Use the Supabase user directly so the gate lets them in; profile sync will retry.
+      const { data: { user: sbUser } } = await supabase.auth.getUser()
+      if (sbUser) {
+        const fallback = {
+          id: sbUser.id,
+          email: sbUser.email ?? '',
+          username: sbUser.user_metadata?.['name'] as string ?? sbUser.email?.split('@')[0] ?? 'cromos',
+          role: 'customer',
+        }
+        await setCachedUser(fallback)
+        set({ user: fallback })
+      }
+    }
+    return { ok: true }
+  },
+
   signOut: async () => {
+    await signOutGoogle().catch(() => {})
     await api.auth.logout().catch(() => {})
     await clearTokens()
     await setCachedUser(null)

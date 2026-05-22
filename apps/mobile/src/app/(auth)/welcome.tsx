@@ -1,13 +1,28 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { useState } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
+import { useAuthStore } from '@/lib/auth-store'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 export default function WelcomeScreen() {
-  function comingSoon(provider: 'google' | 'apple') {
-    // Disabled placeholder until Pablo sends OAuth credentials (R4 #1).
-    // Tap is a no-op for now; visual disabled state shown.
+  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle)
+  const [googleLoading, setGoogleLoading] = useState(false)
+
+  async function handleGoogle() {
+    setGoogleLoading(true)
+    const r = await signInWithGoogle()
+    setGoogleLoading(false)
+    if (r.ok) {
+      router.replace('/')
+    } else if (!r.cancelled && r.error) {
+      Alert.alert('Google sign-in failed', r.error)
+    }
+  }
+
+  function comingSoon(provider: 'apple') {
+    // Apple still blocked on Pablo's .p8 + Services ID.
     void provider
   }
 
@@ -42,14 +57,19 @@ export default function WelcomeScreen() {
           </View>
 
           <TouchableOpacity
-            style={[s.btn, s.btnSecondary, s.btnDisabled]}
-            onPress={() => comingSoon('google')}
-            activeOpacity={1}
-            disabled
+            style={[s.btn, s.btnSecondary, googleLoading && s.btnDisabled]}
+            onPress={handleGoogle}
+            activeOpacity={0.85}
+            disabled={googleLoading}
           >
-            <Ionicons name="logo-google" size={18} color={COLORS.textFaint} />
-            <Text style={s.btnSecondaryText}>Continue with Google</Text>
-            <Text style={s.soon}>SOON</Text>
+            {googleLoading ? (
+              <ActivityIndicator color={COLORS.green} />
+            ) : (
+              <>
+                <Ionicons name="logo-google" size={18} color={COLORS.ink} />
+                <Text style={s.btnSecondaryText}>Continue with Google</Text>
+              </>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity

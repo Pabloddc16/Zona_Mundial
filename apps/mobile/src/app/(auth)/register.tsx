@@ -21,7 +21,13 @@ export default function RegisterScreen() {
     }
     setLoading(true)
     try {
-      await signUp({ email: email.trim().toLowerCase(), password, username: username.trim() || undefined })
+      const body: { email: string; password: string; username?: string } = {
+        email: email.trim().toLowerCase(),
+        password,
+      }
+      const uname = username.trim()
+      if (uname) body.username = uname
+      await signUp(body)
       router.replace('/')
     } catch (e) {
       setError((e as Error).message || 'Sign up failed')

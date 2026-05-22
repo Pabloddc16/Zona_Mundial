@@ -10,7 +10,12 @@
       "bundleIdentifier": "com.pabloapp.mundial2026",
       "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["com.googleusercontent.apps.101210295525-acth5d6aubeg2sqotr8m4l08bk62b4mb"]
+          }
+        ]
       }
     },
     "android": {
@@ -35,7 +40,13 @@
       ],
       "expo-font",
       "expo-asset",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.101210295525-acth5d6aubeg2sqotr8m4l08bk62b4mb"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
