@@ -1,28 +1,50 @@
 import { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native'
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  KeyboardAvoidingView, Platform, ActivityIndicator,
+} from 'react-native'
 import { Link, router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useAuthStore } from '@/lib/auth-store'
+import { Ionicons } from '@expo/vector-icons'
+import { api } from '@/lib/api'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
 
-export default function LoginScreen() {
-  const signIn = useAuthStore((s) => s.signIn)
+export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [sent, setSent] = useState(false)
 
   async function handleSubmit() {
     setError('')
     setLoading(true)
     try {
-      await signIn(email.trim().toLowerCase(), password)
-      router.replace('/')
+      await api.auth.requestReset(email.trim().toLowerCase())
+      setSent(true)
     } catch (e) {
-      setError((e as Error).message || 'Login failed')
+      setError((e as Error).message || 'Could not send reset email')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (sent) {
+    return (
+      <SafeAreaView style={s.safe}>
+        <View style={s.content}>
+          <View style={s.successIcon}>
+            <Ionicons name="mail" size={48} color={COLORS.green} />
+          </View>
+          <Text style={s.title}>Check your inbox</Text>
+          <Text style={s.subtitle}>
+            If an account exists for {email}, we sent a reset link. It expires in 60 minutes.
+          </Text>
+          <TouchableOpacity style={s.cta} onPress={() => router.replace('/login')} activeOpacity={0.85}>
+            <Text style={s.ctaText}>Back to sign in</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    )
   }
 
   return (
@@ -30,8 +52,8 @@ export default function LoginScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={s.content}>
           <Text style={s.brand}>Cromos 26</Text>
-          <Text style={s.title}>Sign in</Text>
-          <Text style={s.subtitle}>Continue your album</Text>
+          <Text style={s.title}>Forgot password?</Text>
+          <Text style={s.subtitle}>Enter your email — we'll send you a reset link.</Text>
 
           <View style={s.form}>
             <Text style={s.label}>Email</Text>
@@ -46,39 +68,20 @@ export default function LoginScreen() {
               placeholderTextColor={COLORS.textFaint}
             />
 
-            <Text style={s.label}>Password</Text>
-            <TextInput
-              style={s.input}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="password"
-              placeholder="••••••••"
-              placeholderTextColor={COLORS.textFaint}
-            />
-
             {error ? <Text style={s.error}>{error}</Text> : null}
 
-            <Link href="/forgot-password" style={s.forgotLink}>Forgot password?</Link>
-
             <TouchableOpacity
-              style={[s.cta, (!email || !password || loading) && s.ctaDisabled]}
+              style={[s.cta, (!email || loading) && s.ctaDisabled]}
               onPress={handleSubmit}
-              disabled={!email || !password || loading}
+              disabled={!email || loading}
               activeOpacity={0.85}
             >
-              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Sign in</Text>}
+              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Send reset link</Text>}
             </TouchableOpacity>
 
             <View style={s.footer}>
-              <Text style={s.footerText}>New here? </Text>
-              <Link href="/register" style={s.link}>Create account</Link>
+              <Link href="/login" style={s.link}>Back to sign in</Link>
             </View>
-
-            <Text style={s.disclaimer}>
-              Not affiliated with FIFA or Panini. By continuing you agree to our Terms and
-              Privacy Policy.
-            </Text>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -90,18 +93,23 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.cream },
   content: { flex: 1, padding: SPACING.xl, justifyContent: 'center' },
   brand: { fontSize: FONT.size.bodyM, fontWeight: FONT.weight.black, color: COLORS.green, letterSpacing: 2, textTransform: 'uppercase', marginBottom: SPACING.lg },
-  title: { fontSize: FONT.size.displayXXL, fontWeight: FONT.weight.black, color: COLORS.ink, marginBottom: SPACING.xs },
-  subtitle: { fontSize: FONT.size.bodyL, color: COLORS.textMuted, marginBottom: SPACING.xxl },
+  title: { fontSize: FONT.size.displayXL, fontWeight: FONT.weight.black, color: COLORS.ink, marginBottom: SPACING.xs },
+  subtitle: { fontSize: FONT.size.bodyL, color: COLORS.textMuted, marginBottom: SPACING.xxl, lineHeight: 22 },
   form: { gap: SPACING.md },
   label: { fontSize: FONT.size.label, fontWeight: FONT.weight.bold, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 1.4, marginTop: SPACING.md },
   input: { backgroundColor: COLORS.paper, borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.border, paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md, fontSize: FONT.size.bodyL, color: COLORS.ink },
   error: { fontSize: FONT.size.bodyM, color: COLORS.red, marginTop: SPACING.sm },
-  cta: { backgroundColor: COLORS.ink, borderRadius: RADIUS.lg, paddingVertical: SPACING.lg, alignItems: 'center', marginTop: SPACING.lg },
+  cta: { backgroundColor: COLORS.green, borderWidth: 2, borderColor: COLORS.gold, borderRadius: RADIUS.full, paddingVertical: SPACING.lg, alignItems: 'center', marginTop: SPACING.lg },
   ctaDisabled: { opacity: 0.5 },
-  ctaText: { color: COLORS.paper, fontSize: FONT.size.bodyL, fontWeight: FONT.weight.bold },
+  ctaText: { color: COLORS.paper, fontSize: FONT.size.bodyL, fontWeight: FONT.weight.black },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.xl },
-  footerText: { color: COLORS.textMuted, fontSize: FONT.size.bodyM },
   link: { color: COLORS.green, fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold },
-  forgotLink: { color: COLORS.green, fontSize: FONT.size.bodyM, fontWeight: FONT.weight.bold, textAlign: 'right', marginTop: SPACING.sm },
-  disclaimer: { fontSize: FONT.size.bodyS, color: COLORS.textFaint, textAlign: 'center', marginTop: SPACING.xl, lineHeight: 16 },
+
+  successIcon: {
+    width: 96, height: 96, borderRadius: 48,
+    backgroundColor: COLORS.cream,
+    borderWidth: 2, borderColor: COLORS.green,
+    alignItems: 'center', justifyContent: 'center',
+    alignSelf: 'center', marginBottom: SPACING.xl,
+  },
 })

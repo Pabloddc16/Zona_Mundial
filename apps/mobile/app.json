@@ -3,7 +3,7 @@
     "name": "Cromos 26",
     "slug": "pablo-app",
     "version": "1.0.0",
-    "scheme": "pablo",
+    "scheme": "cromos26",
     "orientation": "portrait",
     "ios": {
       "supportsTablet": false,

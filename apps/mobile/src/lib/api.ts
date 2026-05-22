@@ -144,6 +144,10 @@ export const api = {
     me: () => get<AuthUser & { profile: unknown }>('/api/auth/me'),
     logout: () => post<{ ok: boolean }>('/api/auth/logout', {}),
     deleteAccount: () => del<{ ok: boolean }>('/api/auth/account'),
+    requestReset: (email: string) =>
+      post<{ ok: boolean; message: string }>('/api/auth/request-reset', { email }),
+    reset: (new_password: string) =>
+      post<{ ok: boolean }>('/api/auth/reset', { new_password }),
   },
   products: {
     list: (params?: Record<string, string>) =>

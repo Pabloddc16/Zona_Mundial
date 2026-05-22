@@ -27,7 +27,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hydrated) return
     const inAuth = segments[0] === '(auth)'
-    if (!user && !inAuth) router.replace('/login')
+    if (!user && !inAuth) router.replace('/welcome')
     else if (user && inAuth) router.replace('/')
   }, [hydrated, user, segments, router])
 
