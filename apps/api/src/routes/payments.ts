@@ -7,9 +7,22 @@
  *   2. Install `mercadopago` npm package.
  *   3. Replace stub block with real Preference.create() call.
  */
-import type { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { getClient } from '@pablo/db'
+
+/** Best-effort extract of the authenticated user id from a request — doesn't
+ *  fail if absent, so guest checkout still works. */
+async function softAuthUserId(req: FastifyRequest): Promise<string | null> {
+  const token = req.cookies['sb-token'] ?? req.headers.authorization?.replace('Bearer ', '')
+  if (!token) return null
+  try {
+    const { data } = await getClient().auth.getUser(token)
+    return data.user?.id ?? null
+  } catch {
+    return null
+  }
+}
 
 const PreferenceItemSchema = z.object({
   title: z.string().min(1).max(240),
@@ -64,6 +77,8 @@ const paymentsRoutes: FastifyPluginAsync = async (fastify) => {
       ? String(Math.floor(100000 + Math.random() * 900000))
       : null
 
+    const userId = await softAuthUserId(req)
+
     // Persist order placeholder (use existing orders table; status starts pending).
     const { error: orderErr } = await sb.from('orders').insert({
       order_number: orderNumber,
@@ -76,6 +91,7 @@ const paymentsRoutes: FastifyPluginAsync = async (fastify) => {
       status: 'CREATED',
       total,
       pickup_code: pickupCode,
+      user_id: userId,
     } as Record<string, unknown>)
 
     if (orderErr) {

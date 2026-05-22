@@ -42,10 +42,11 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
 
   // POST /api/auth/register — public customer signup (mobile app)
   fastify.post('/register', async (req, reply) => {
-    const body = req.body as { email?: string; password?: string; username?: string }
+    const body = req.body as { email?: string; password?: string; username?: string; referralCode?: string }
     const email = String(body?.email ?? '').trim().toLowerCase()
     const password = String(body?.password ?? '')
     const username = String(body?.username ?? '').trim() || email.split('@')[0]
+    const referralCode = String(body?.referralCode ?? '').trim().toLowerCase() || null
 
     req.log.info({ email, username, hasPassword: !!password }, 'register attempt')
 
@@ -91,6 +92,31 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
 
     if (!authUserId) return reply.internalServerError('register: missing auth user id')
 
+    // Look up inviter by referral_code if provided. Don't fail signup if invalid.
+    let referredById: string | null = null
+    if (referralCode) {
+      const { data: inviter } = await supabase
+        .from('users')
+        .select('id')
+        .eq('referral_code', referralCode)
+        .maybeSingle()
+      if (inviter?.id && inviter.id !== authUserId) {
+        referredById = inviter.id
+      } else {
+        req.log.warn({ referralCode }, 'register: unknown or self-referral code, ignoring')
+      }
+    }
+
+    // Generate a short shareable referral code for the new user. Username slug
+    // is the obvious anchor, but collisions are possible — fall back to random.
+    const baseCode = (username ?? '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12) || 'cromos'
+    let referralCodeForUser = baseCode
+    const { data: existingCode } = await supabase
+      .from('users').select('id').eq('referral_code', baseCode).maybeSingle()
+    if (existingCode) {
+      referralCodeForUser = `${baseCode}${Math.floor(1000 + Math.random() * 9000)}`
+    }
+
     // 2) Insert (or upsert) the public.users row.
     const { error: rowErr } = await supabase.from('users').upsert({
       id: authUserId,
@@ -98,6 +124,8 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
       email,
       role: 'customer',
       active: true,
+      referral_code: referralCodeForUser,
+      referred_by_id: referredById,
     }, { onConflict: 'id' })
     if (rowErr) {
       req.log.warn({ email, rowErr: rowErr.message, step: 'usersUpsert' }, 'register failed')

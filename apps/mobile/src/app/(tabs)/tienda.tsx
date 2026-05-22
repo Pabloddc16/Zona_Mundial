@@ -86,39 +86,88 @@ export default function TiendaScreen() {
       </View>
 
       <ScrollView contentContainerStyle={s.scroll}>
-        {/* 1. MI PANINI — hero */}
+        {/* 1. MI PANINI — hero with camera card mock */}
         <TouchableOpacity
           onPress={() => router.push('/shop/my-panini')}
           activeOpacity={0.9}
           style={[s.hero, s.heroPanini]}
         >
-          <View style={s.heroIconCircle}>
-            <Ionicons name="camera" size={28} color={COLORS.gold} />
-          </View>
-          <Text style={s.heroEyebrow}>NEW · $200</Text>
-          <Text style={s.heroTitle}>Create your custom sticker</Text>
-          <Text style={s.heroSub}>Your face on an official Panini-style card.</Text>
-          <View style={s.heroCta}>
-            <Text style={s.heroCtaText}>Create my Panini</Text>
-            <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
+          <View style={s.heroBody}>
+            <View style={s.heroText}>
+              <Text style={s.heroEyebrow}>NEW · $200</Text>
+              <Text style={s.heroTitle}>Your face,{'\n'}your sticker.</Text>
+              <Text style={s.heroSub}>
+                Snap a selfie. We turn it into an official-style Panini card in 5 seconds.
+              </Text>
+              <View style={s.heroCta}>
+                <Text style={s.heroCtaText}>Create my Panini</Text>
+                <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
+              </View>
+            </View>
+            {/* Card mock — dashed frame waiting for a photo */}
+            <View style={s.paniniCardMock}>
+              <View style={s.paniniCardStripe}>
+                <View style={[s.paniniStripeBox, { backgroundColor: COLORS.green }]} />
+                <View style={[s.paniniStripeBox, { backgroundColor: COLORS.gold }]} />
+                <View style={[s.paniniStripeBox, { backgroundColor: COLORS.red }]} />
+              </View>
+              <View style={s.paniniCardBody}>
+                <View style={s.paniniCameraCircle}>
+                  <Ionicons name="camera" size={26} color={COLORS.green} />
+                </View>
+                <Text style={s.paniniHint}>TU CARA{'\n'}AQUÍ</Text>
+              </View>
+              <View style={s.paniniCardFoot}>
+                <View style={s.paniniNameBar} />
+                <View style={[s.paniniNameBar, { width: '60%' }]} />
+              </View>
+            </View>
           </View>
         </TouchableOpacity>
 
-        {/* 2. EXTRA STICKERS — Stars catalog (80 SKUs) */}
+        {/* 2. EXTRA STICKERS — Stars catalog with Messi + Cristiano gold mockups */}
         <TouchableOpacity
           onPress={() => router.push('/shop/stars')}
           activeOpacity={0.9}
           style={[s.hero, s.heroExtras]}
         >
-          <View style={s.heroIconCircle}>
-            <Ionicons name="star" size={28} color={COLORS.gold} />
-          </View>
-          <Text style={s.heroEyebrow}>GOAT · CRACK · STAR</Text>
-          <Text style={s.heroTitle}>Get your favorite stickers</Text>
-          <Text style={s.heroSub}>GOAT, CRACK, STAR. Base, Bronze, Silver, or Gold.</Text>
-          <View style={[s.heroCta, { backgroundColor: COLORS.gold }]}>
-            <Text style={[s.heroCtaText, { color: COLORS.red }]}>Explore extras</Text>
-            <Ionicons name="arrow-forward" size={14} color={COLORS.red} />
+          <View style={s.heroBody}>
+            <View style={s.heroText}>
+              <Text style={s.heroEyebrow}>GOAT · CRACK · STAR</Text>
+              <Text style={s.heroTitle}>Buy the stars{'\n'}you're missing.</Text>
+              <Text style={s.heroSub}>Messi, Cristiano, Yamal and 17 more — Base, Bronze, Silver or Gold.</Text>
+              <View style={[s.heroCta, { backgroundColor: COLORS.gold }]}>
+                <Text style={[s.heroCtaText, { color: COLORS.red }]}>Explore extras</Text>
+                <Ionicons name="arrow-forward" size={14} color={COLORS.red} />
+              </View>
+            </View>
+            {/* Mini sticker stack — Messi front, Cristiano peeking behind */}
+            <View style={s.starMockWrap}>
+              <View style={[s.starMock, s.starMockBack]}>
+                <View style={s.starMockShine} />
+                <Text style={s.starMockNum}>2</Text>
+                <View style={s.starMockAvatar}>
+                  <Text style={s.starMockInitial}>CR</Text>
+                </View>
+                <Text style={s.starMockName}>RONALDO</Text>
+                <Text style={s.starMockCountry}>POR</Text>
+                <View style={s.starMockRarity}>
+                  <Text style={s.starMockRarityText}>GOLD</Text>
+                </View>
+              </View>
+              <View style={[s.starMock, s.starMockFront]}>
+                <View style={s.starMockShine} />
+                <Text style={s.starMockNum}>1</Text>
+                <View style={s.starMockAvatar}>
+                  <Text style={s.starMockInitial}>M</Text>
+                </View>
+                <Text style={s.starMockName}>MESSI</Text>
+                <Text style={s.starMockCountry}>ARG</Text>
+                <View style={s.starMockRarity}>
+                  <Text style={s.starMockRarityText}>GOLD</Text>
+                </View>
+              </View>
+            </View>
           </View>
         </TouchableOpacity>
 
@@ -273,12 +322,114 @@ const s = StyleSheet.create({
   heroPanini: { backgroundColor: COLORS.green, borderWidth: 2, borderColor: COLORS.gold },
   heroExtras: { backgroundColor: COLORS.red },
   heroAlbum:  { backgroundColor: COLORS.green },
+  heroBody: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+  heroText: { flex: 1 },
   heroIconCircle: {
     width: 52, height: 52, borderRadius: 26,
     backgroundColor: 'rgba(255,209,0,0.18)',
     alignItems: 'center', justifyContent: 'center',
     marginBottom: SPACING.sm,
   },
+
+  /* Mi Panini card mock — dashed-frame placeholder card */
+  paniniCardMock: {
+    width: 96,
+    backgroundColor: COLORS.paper,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+    borderStyle: 'dashed',
+    overflow: 'hidden',
+    transform: [{ rotate: '4deg' }],
+    ...SHADOW.md,
+  },
+  paniniCardStripe: {
+    flexDirection: 'row', height: 8,
+  },
+  paniniStripeBox: { flex: 1 },
+  paniniCardBody: {
+    height: 92,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(0,99,65,0.05)',
+    paddingTop: 6,
+  },
+  paniniCameraCircle: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: COLORS.cream,
+    borderWidth: 2, borderColor: COLORS.green,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 4,
+  },
+  paniniHint: {
+    fontSize: 8, fontWeight: '900',
+    color: COLORS.green, letterSpacing: 1,
+    textAlign: 'center', lineHeight: 9,
+  },
+  paniniCardFoot: {
+    padding: 6, gap: 3,
+    backgroundColor: COLORS.paper,
+  },
+  paniniNameBar: {
+    height: 3, backgroundColor: 'rgba(0,0,0,0.08)',
+    borderRadius: 2,
+  },
+
+  /* Extras — Messi + Cristiano mini stickers */
+  starMockWrap: {
+    width: 110, height: 140,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  starMock: {
+    position: 'absolute',
+    width: 78, height: 110,
+    backgroundColor: '#FFF8DC',
+    borderRadius: 8,
+    borderWidth: 2, borderColor: COLORS.gold,
+    padding: 6,
+    alignItems: 'center',
+    overflow: 'hidden',
+    ...SHADOW.md,
+  },
+  starMockFront: {
+    transform: [{ rotate: '-8deg' }, { translateX: -8 }],
+    zIndex: 2,
+  },
+  starMockBack: {
+    transform: [{ rotate: '12deg' }, { translateX: 14 }],
+    zIndex: 1,
+  },
+  starMockShine: {
+    position: 'absolute', top: 0, left: 0, right: 0, height: '40%',
+    backgroundColor: 'rgba(255,255,255,0.35)',
+  },
+  starMockNum: {
+    fontSize: 8, fontWeight: '900', color: COLORS.goldDark,
+    alignSelf: 'flex-start',
+  },
+  starMockAvatar: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: COLORS.green,
+    alignItems: 'center', justifyContent: 'center',
+    marginTop: 4, marginBottom: 4,
+    borderWidth: 1.5, borderColor: COLORS.gold,
+  },
+  starMockInitial: { color: COLORS.paper, fontWeight: '900', fontSize: 13 },
+  starMockName: {
+    fontSize: 9, fontWeight: '900',
+    color: COLORS.ink, letterSpacing: 0.5,
+  },
+  starMockCountry: {
+    fontSize: 7, fontWeight: '700',
+    color: COLORS.textMuted, letterSpacing: 1,
+    marginTop: 1,
+  },
+  starMockRarity: {
+    position: 'absolute', bottom: 4, right: 4,
+    backgroundColor: COLORS.gold,
+    paddingHorizontal: 4, paddingVertical: 1,
+    borderRadius: 3,
+  },
+  starMockRarityText: { fontSize: 7, fontWeight: '900', color: COLORS.red, letterSpacing: 0.5 },
   heroEyebrow: {
     fontSize: 11, fontWeight: '800',
     color: COLORS.gold, letterSpacing: 1.5, marginBottom: 4,

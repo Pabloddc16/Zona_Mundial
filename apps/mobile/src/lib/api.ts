@@ -140,7 +140,7 @@ export const api = {
   auth: {
     login: (email: string, password: string) =>
       post<LoginResp>('/api/auth/login', { email, password }),
-    register: (body: { email: string; password: string; username?: string }) =>
+    register: (body: { email: string; password: string; username?: string; referralCode?: string }) =>
       post<LoginResp>('/api/auth/register', body),
     me: () => get<AuthUser & { profile: unknown }>('/api/auth/me'),
     logout: () => post<{ ok: boolean }>('/api/auth/logout', {}),

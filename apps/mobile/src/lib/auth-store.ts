@@ -10,7 +10,7 @@ interface AuthStore {
   setUser: (u: AuthUser | null) => void
   setHydrated: (b: boolean) => void
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (body: { email: string; password: string; username?: string }) => Promise<void>
+  signUp: (body: { email: string; password: string; username?: string; referralCode?: string }) => Promise<void>
   signOut: () => Promise<void>
   deleteAccount: () => Promise<void>
   loadFromToken: () => Promise<void>

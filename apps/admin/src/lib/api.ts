@@ -282,6 +282,13 @@ export const api = {
     adjust: (body: { sku_id: string; location_id: string; qty: number; direction: 'in' | 'out'; reason?: string }) =>
       post<{ ok: boolean; id: string }>('/api/stock/adjust', body),
   },
+
+  // ─── Stars (live stock from star_player_stock table) ─────────────────────
+  stars: {
+    stock: () => get<{ items: Array<{ player_slug: string; rarity: string; count: number; updated_at: string }> }>('/api/stars/stock'),
+    setStock: (slug: string, rarity: string, count: number) =>
+      patch<{ player_slug: string; rarity: string; count: number }>(`/api/stars/stock/${slug}/${rarity}`, { count }),
+  },
 }
 
 // ─── Types (lightweight, for client use) ────────────────────────────────────
