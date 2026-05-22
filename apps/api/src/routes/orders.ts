@@ -73,6 +73,9 @@ const ordersRoutes: FastifyPluginAsync = async (fastify) => {
 
     const subtotal = enrichedItems.reduce((s, i) => s + i.qty * i.price, 0)
     const orderNumber = `ORD-${Date.now().toString().slice(-6)}`
+    const pickupCode = orderData.delivery_type === 'local'
+      ? String(Math.floor(100000 + Math.random() * 900000))
+      : null
 
     const { data: order, error: orderErr } = await supabase
       .from('orders')
@@ -83,6 +86,7 @@ const ordersRoutes: FastifyPluginAsync = async (fastify) => {
         total: subtotal + (orderData.shipping ?? 0),
         status: 'CREATED',
         created_at: new Date().toISOString(),
+        pickup_code: pickupCode,
       })
       .select().single()
 

@@ -57,6 +57,13 @@ const paymentsRoutes: FastifyPluginAsync = async (fastify) => {
 
     const orderNumber = 'MP-' + Date.now().toString(36).toUpperCase()
 
+    // Pickup-only: server-generates a stable random 6-digit code persisted on
+    // the order row. Mobile reads order.pickup_code to display; staff searches
+    // by it from admin. Index on orders.pickup_code keeps lookups O(log n).
+    const pickupCode = data.delivery === 'pickup'
+      ? String(Math.floor(100000 + Math.random() * 900000))
+      : null
+
     // Persist order placeholder (use existing orders table; status starts pending).
     const { error: orderErr } = await sb.from('orders').insert({
       order_number: orderNumber,
@@ -67,8 +74,8 @@ const paymentsRoutes: FastifyPluginAsync = async (fastify) => {
       payment_method: data.payment === 'card' ? 'tarjeta' : 'efectivo',
       shipping,
       status: 'CREATED',
-      // store totals on the order so webhook can verify before marking paid
       total,
+      pickup_code: pickupCode,
     } as Record<string, unknown>)
 
     if (orderErr) {

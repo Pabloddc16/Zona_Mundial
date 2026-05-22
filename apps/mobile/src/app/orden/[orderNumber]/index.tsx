@@ -91,7 +91,7 @@ export default function OrdenScreen() {
         {order.delivery_type === 'local' && (
           <View style={s.pickupCodeCard}>
             <Text style={s.pickupCodeLabel}>Your pickup code</Text>
-            <Text style={s.pickupCode}>{order.order_number.slice(-6).toUpperCase()}</Text>
+            <Text style={s.pickupCode}>{order.pickup_code ?? order.order_number.slice(-6).toUpperCase()}</Text>
             <Text style={s.pickupCodeSub}>Show this at the counter to grab your order.</Text>
             <View style={s.pickupAddrBox}>
               <Text style={s.pickupAddrLine}>Miguel Lerdo de Tejada 2081 — casa Anomalistyc</Text>

@@ -17,3 +17,6 @@ coverage/
 PABLO_CONTENT/notes.md
 PABLO_CONTENT/launch-playbook.md
 PABLO_CONTENT/launch-guide.docx
+RENDER_ENV.local.md
+supabase/.temp/
+PABLO_CONTENT/*.jpeg

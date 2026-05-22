@@ -120,6 +120,7 @@ export interface Order {
   payment_method: string
   delivery_type: string
   date: string
+  pickup_code?: string | null
   order_items?: Array<{ name: string; qty: number; price: number; product_id?: string }>
 }
 

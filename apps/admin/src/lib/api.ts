@@ -293,7 +293,7 @@ export interface WholesaleCustomer { source: 'wholesale'; id: string; name: stri
 export interface Deliverer { id: string; name: string; phone?: string; vehicle?: string; status: string; zone?: string; username?: string; rating: number; deliveries_today: number; deliveries_total: number; lat?: number; lng?: number }
 export interface Wholesaler { id: string; razon_social: string; rfc?: string; email?: string; contacto?: string; nota?: string; active: boolean; created_at: string }
 export interface WholesaleSale { id: string; wholesaler_id?: string; wholesaler_name: string; payment_method: string; subtotal: number; total: number; amount_paid: number; saldo: number; status: string; payments: unknown[]; created_at: string }
-export interface Order { order_number: string; customer_name?: string; phone?: string; address?: string; status: string; total: number; delivery_type?: string; deliverer_id?: string; date: string; order_items?: OrderItem[] }
+export interface Order { order_number: string; customer_name?: string; phone?: string; address?: string; status: string; total: number; delivery_type?: string; deliverer_id?: string; date: string; pickup_code?: string | null; order_items?: OrderItem[] }
 export interface OrderItem { product_id?: string; name: string; qty: number; price: number }
 export interface Sale { id: string; payment_method: string; total: number; created_at: string; sale_items?: SaleItem[] }
 export interface SaleItem { product_id?: string; name: string; quantity: number; unit_price: number; subtotal: number }

@@ -54,6 +54,12 @@ export default function OrdersPage() {
     { key: 'order_number', header: 'Order', cell: (r: Order) => <span className="font-mono text-xs">{r.order_number}</span> },
     { key: 'date', header: 'Date', cell: (r: Order) => format(new Date(r.date), 'MM/dd/yy HH:mm') },
     { key: 'customer_name', header: 'Customer' },
+    {
+      key: 'pickup_code', header: 'Pickup', cell: (r: Order) =>
+        r.delivery_type === 'local' && r.pickup_code
+          ? <span className="font-mono font-black tracking-wider text-emerald-700">{r.pickup_code}</span>
+          : <span className="text-stone-300">—</span>,
+    },
     { key: 'status', header: 'Status', cell: (r: Order) => <Badge variant={STATUS_COLORS[r.status] ?? 'default'}>{r.status}</Badge> },
     { key: 'total', header: 'Total', cell: (r: Order) => fmt(r.total), className: 'text-right' },
     {
