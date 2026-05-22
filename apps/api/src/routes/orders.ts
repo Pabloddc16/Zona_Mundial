@@ -5,6 +5,21 @@ import Stripe from 'stripe'
 import QRCode from 'qrcode'
 
 const ordersRoutes: FastifyPluginAsync = async (fastify) => {
+  // GET /api/orders/mine — auth user's own orders. Mobile profile uses this.
+  fastify.get('/mine', { preHandler: fastify.authenticate }, async (req, reply) => {
+    const supabase = getClient()
+    const { data, error } = await supabase
+      .from('orders')
+      .select('order_number, status, total, delivery_type, pickup_code, date, order_items(name, qty, price)')
+      .eq('user_id', req.user!.id)
+      .eq('deleted', false)
+      .order('date', { ascending: false })
+      .limit(50)
+
+    if (error) return reply.internalServerError(error.message)
+    return { items: data ?? [] }
+  })
+
   // GET /api/orders
   fastify.get('/', { preHandler: fastify.authenticate }, async (req, reply) => {
     const query = req.query as Record<string, string>

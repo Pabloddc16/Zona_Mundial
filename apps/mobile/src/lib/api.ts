@@ -159,6 +159,7 @@ export const api = {
   orders: {
     create: (body: OrderPayload) => post<Order>('/api/orders', body),
     get: (n: string) => get<Order>(`/api/orders/${n}`),
+    mine: () => get<{ items: Order[] }>('/api/orders/mine'),
   },
   album: {
     fetch: () => get<{ album: Record<string, Record<number, StickerState>> }>('/api/album'),

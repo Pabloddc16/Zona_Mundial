@@ -133,7 +133,7 @@ export default function ProfileScreen() {
 
         {/* Quick links */}
         <View style={s.links}>
-          <Link icon="receipt-outline" label="Order history" onPress={() => Alert.alert('Coming soon', 'Order history is on the way.')} />
+          <Link icon="receipt-outline" label="Order history" onPress={() => router.push('/orden')} />
           <Link icon="location-outline" label="Saved addresses" onPress={() => Alert.alert('Coming soon', 'Save your delivery addresses for one-tap checkout.')} />
           <Link icon="notifications-outline" label="Notifications" onPress={() => router.push('/settings')} />
           <Link icon="help-circle-outline" label="Help & FAQ" onPress={() => Alert.alert('Help', 'Reach us at stulanik@gmail.com')} />
