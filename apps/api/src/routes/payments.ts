@@ -112,11 +112,14 @@ const paymentsRoutes: FastifyPluginAsync = async (fastify) => {
             email: data.user.email,
             phone: { number: data.user.phone },
           },
+          // MP requires HTTPS URLs (no custom schemes), so we proxy through
+          // /api/payments/mp/return → that endpoint deep-links into the app.
           back_urls: {
-            success: `${process.env['PUBLIC_APP_URL'] ?? 'cromos26://'}/order/${orderNumber}?status=success`,
-            failure: `${process.env['PUBLIC_APP_URL'] ?? 'cromos26://'}/order/${orderNumber}?status=failure`,
-            pending: `${process.env['PUBLIC_APP_URL'] ?? 'cromos26://'}/order/${orderNumber}?status=pending`,
+            success: `${process.env['PUBLIC_API_URL'] ?? 'https://zona-mundial.onrender.com'}/api/payments/mp/return?status=success&order=${orderNumber}`,
+            failure: `${process.env['PUBLIC_API_URL'] ?? 'https://zona-mundial.onrender.com'}/api/payments/mp/return?status=failure&order=${orderNumber}`,
+            pending: `${process.env['PUBLIC_API_URL'] ?? 'https://zona-mundial.onrender.com'}/api/payments/mp/return?status=pending&order=${orderNumber}`,
           },
+          auto_return: 'approved',
           notification_url: `${process.env['PUBLIC_API_URL'] ?? 'https://zona-mundial.onrender.com'}/api/webhooks/mercadopago`,
           shipments: { cost: shipping, mode: 'not_specified' },
         }),
@@ -137,6 +140,24 @@ const paymentsRoutes: FastifyPluginAsync = async (fastify) => {
       fastify.log.error({ err }, 'MP preference network error')
       return reply.code(502).send({ error: 'MP network error' })
     }
+  })
+
+  // GET /api/payments/mp/return — HTTPS bridge between MP back_urls and the
+  // mobile app's custom URL scheme. MP rejects custom schemes in back_urls.
+  fastify.get('/mp/return', async (req, reply) => {
+    const q = req.query as { status?: string; order?: string }
+    const status = String(q.status ?? 'pending')
+    const order = String(q.order ?? '')
+    const appScheme = process.env['PUBLIC_APP_URL'] ?? 'cromos26://'
+    const target = `${appScheme}order/${order}?status=${status}`
+
+    // Use a tiny HTML page that immediately redirects to the app scheme so
+    // iOS / Android open Cromos 26. Fallback link shown if the OS doesn't.
+    return reply.type('text/html').send(`<!doctype html>
+<meta charset="utf-8">
+<title>Returning to Cromos 26…</title>
+<script>window.location.href = ${JSON.stringify(target)}</script>
+<p style="font-family:system-ui;padding:24px">Opening Cromos 26… <a href="${target}">tap here</a> if nothing happens.</p>`)
   })
 
   // GET /api/payments/mp/orders/:orderNumber — polled by mobile after MP redirect
