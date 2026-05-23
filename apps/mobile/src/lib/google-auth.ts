@@ -39,6 +39,12 @@ export async function signInWithGoogle(): Promise<GoogleSignInResult> {
   configure()
   try {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
+
+    // GoogleSignin SDK v16 doesn't expose a nonce parameter, so we can't sign
+    // a nonce into Google's ID token. Supabase Auth dashboard must have
+    // "Skip nonce checks" enabled for the Google provider — otherwise
+    // signInWithIdToken errors with "passed nonce and nonce in id token
+    // should either both exist or not".
     const userInfo = await GoogleSignin.signIn()
     const idToken = userInfo.data?.idToken
     if (!idToken) return { ok: false, error: 'Google did not return ID token' }
