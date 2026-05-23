@@ -8,7 +8,9 @@ import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 export default function WelcomeScreen() {
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle)
+  const signInWithApple = useAuthStore((s) => s.signInWithApple)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [appleLoading, setAppleLoading] = useState(false)
 
   async function handleGoogle() {
     setGoogleLoading(true)
@@ -21,9 +23,15 @@ export default function WelcomeScreen() {
     }
   }
 
-  function comingSoon(provider: 'apple') {
-    // Apple still blocked on Pablo's .p8 + Services ID.
-    void provider
+  async function handleApple() {
+    setAppleLoading(true)
+    const r = await signInWithApple()
+    setAppleLoading(false)
+    if (r.ok) {
+      router.replace('/')
+    } else if (!r.cancelled && r.error) {
+      Alert.alert('Apple sign-in failed', r.error)
+    }
   }
 
   return (
@@ -73,14 +81,19 @@ export default function WelcomeScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[s.btn, s.btnSecondary, s.btnDisabled]}
-            onPress={() => comingSoon('apple')}
-            activeOpacity={1}
-            disabled
+            style={[s.btn, s.btnSecondary, appleLoading && s.btnDisabled]}
+            onPress={handleApple}
+            activeOpacity={0.85}
+            disabled={appleLoading}
           >
-            <Ionicons name="logo-apple" size={20} color={COLORS.textFaint} />
-            <Text style={s.btnSecondaryText}>Continue with Apple</Text>
-            <Text style={s.soon}>SOON</Text>
+            {appleLoading ? (
+              <ActivityIndicator color={COLORS.ink} />
+            ) : (
+              <>
+                <Ionicons name="logo-apple" size={20} color={COLORS.ink} />
+                <Text style={s.btnSecondaryText}>Continue with Apple</Text>
+              </>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
