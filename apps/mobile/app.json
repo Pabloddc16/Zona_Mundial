@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "scheme": "cromos26",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.pabloapp.mundial2026",
