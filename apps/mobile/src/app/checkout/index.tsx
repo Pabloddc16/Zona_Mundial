@@ -12,10 +12,11 @@ import {
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
+import * as WebBrowser from 'expo-web-browser'
 import { Ionicons } from '@expo/vector-icons'
 import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
-import { api, type OrderPayload } from '@/lib/api'
+import { api } from '@/lib/api'
 import { fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
 import { AddressForm, emptyAddress, type AddressValue } from '@/components/AddressForm'
@@ -65,22 +66,37 @@ export default function CheckoutScreen() {
     setLoading(true)
     setError('')
     try {
-      const notesVal = notes.trim()
-      const payload: OrderPayload = {
-        customer_name: name.trim(),
-        phone: phone.trim(),
-        address: address.formatted.trim(),
-        delivery_type: zone === 'pickup' ? 'local' : 'envio',
-        payment_method: payment === 'card' ? 'tarjeta' : 'efectivo',
-        shipping,
-        items: items.map((i) => ({ product_id: i!.id, name: i!.name, qty: i!.qty, price: i!.price })),
-        ...(notesVal ? { notes: notesVal } : {}),
-      }
-      const order = await api.orders.create(payload)
-      clear()
+      // Mercado Pago Checkout Pro — server creates preference + order placeholder,
+      // we open init_point in WebBrowser. On dismiss, navigate to order screen
+      // which polls /mp/orders/:n for status (pending → paid via webhook).
+      const pref = await api.payments.mpPreference({
+        items: items.map((i) => ({ title: i!.name, quantity: i!.qty, unit_price: i!.price })),
+        user: {
+          name: name.trim(),
+          phone: phone.trim(),
+          ...(address.formatted.trim() ? { address: address.formatted.trim() } : {}),
+        },
+        delivery: zone,
+        payment: 'card',
+        ...(useReferralCredit ? { referralCredit: refApplied } : {}),
+        ...(welcomeApplied ? { welcomeCredit: welcomeApplied } : {}),
+      })
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
-      // TODO Phase 7: if payment=card, redirect to Mercado Pago init_point here
-      router.replace(`/orden/${order.order_number}`)
+      clear()
+
+      // Hand off to Mercado Pago's hosted checkout. Returns when user
+      // dismisses or the back_urls fire (which our /payments/mp/return
+      // route bridges into cromos26:// scheme).
+      await WebBrowser.openBrowserAsync(pref.init_point, {
+        dismissButtonStyle: 'cancel',
+        toolbarColor: COLORS.green,
+        controlsColor: COLORS.paper,
+      })
+
+      // Whether user paid or backed out, take them to the order page which
+      // displays current status + pickup code if paid.
+      router.replace(`/orden/${pref.orderNumber}`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not place order')
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {})

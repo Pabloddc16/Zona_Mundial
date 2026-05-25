@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Image } from 'react-native'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -39,7 +39,11 @@ export default function WelcomeScreen() {
       <View style={s.content}>
         <View style={s.hero}>
           <View style={s.logoCircle}>
-            <Ionicons name="trophy" size={48} color={COLORS.gold} />
+            <Image
+              source={require('../../../assets/logo.webp')}
+              style={s.logoImg}
+              resizeMode="contain"
+            />
           </View>
           <Text style={s.brand}>CROMOS 26</Text>
           <Text style={s.headline}>The album that lives in your pocket.</Text>
@@ -120,13 +124,15 @@ const s = StyleSheet.create({
 
   hero: { alignItems: 'center', paddingTop: SPACING.xxxl },
   logoCircle: {
-    width: 96, height: 96, borderRadius: 48,
-    backgroundColor: COLORS.green,
+    width: 112, height: 112, borderRadius: 56,
+    backgroundColor: COLORS.paper,
     borderWidth: 3, borderColor: COLORS.gold,
     alignItems: 'center', justifyContent: 'center',
     marginBottom: SPACING.lg,
+    overflow: 'hidden',
     ...SHADOW.md,
   },
+  logoImg: { width: 96, height: 96 },
   brand: {
     fontSize: 14, fontWeight: FONT.weight.black,
     color: COLORS.green, letterSpacing: 4,

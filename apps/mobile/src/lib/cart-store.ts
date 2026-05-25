@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { Product } from './data'
+import { STAR_PLAYERS } from './star-players'
+import { STAR_PRICING, RARITY_DISPLAY, type StarRarity } from './pricing'
 
 interface CartStore {
   cart: Record<string, number>
@@ -30,10 +32,53 @@ export const useCartStore = create<CartStore>()(
   ),
 )
 
+/**
+ * Resolve a cart line item to its display + pricing data.
+ *
+ * Three SKU families exist:
+ *   • Static catalog products (ALBUM-*, SOBRE-*, etc) — live in `products`
+ *   • Dynamic Star SKUs (STAR-<slug>-<RARITY>) — derived from STAR_PLAYERS + STAR_PRICING
+ *   • Mi Panini customs (MI-PANINI-<orderId>) — TODO when feature ships
+ *
+ * Returns null for unknown IDs (caller filters them out — silent drop on the
+ * checkout summary is fine since the cart UI also relies on this resolver).
+ */
+function resolveCartItem(id: string, products: Product[]): Product | null {
+  // Static catalog lookup first — covers all DB-driven products.
+  const fromProducts = products.find((x) => x.id === id)
+  if (fromProducts) return fromProducts
+
+  // Dynamic Star SKU. Format: STAR-<slug>-<RARITY>
+  if (id.startsWith('STAR-')) {
+    const rest = id.slice('STAR-'.length)
+    const lastDash = rest.lastIndexOf('-')
+    if (lastDash > 0) {
+      const slug = rest.slice(0, lastDash)
+      const rarity = rest.slice(lastDash + 1) as StarRarity
+      const player = STAR_PLAYERS.find((p) => p.slug === slug)
+      const price = player ? STAR_PRICING[player.tier]?.[rarity] : 0
+      if (player && price && price > 0) {
+        const rd = RARITY_DISPLAY[rarity]
+        return {
+          id,
+          name: `${player.name} · ${rd?.label ?? rarity}`,
+          price,
+          category: 'estampas',
+          description: `${player.country} · ${player.tier}`,
+          emoji: '⭐',
+          gradient: ['#006341', '#FFD100'],
+        }
+      }
+    }
+  }
+
+  return null
+}
+
 export function cartItems(cart: Record<string, number>, products: Product[]) {
   return Object.entries(cart)
     .map(([id, qty]) => {
-      const p = products.find((x) => x.id === id)
+      const p = resolveCartItem(id, products)
       return p ? { ...p, qty } : null
     })
     .filter(Boolean) as Array<Product & { qty: number }>

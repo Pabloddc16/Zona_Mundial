@@ -161,6 +161,25 @@ export const api = {
     get: (n: string) => get<Order>(`/api/orders/${n}`),
     mine: () => get<{ items: Order[] }>('/api/orders/mine'),
   },
+  payments: {
+    mpPreference: (body: {
+      items: Array<{ title: string; quantity: number; unit_price: number }>
+      user: { name: string; phone: string; email?: string; address?: string; city?: string }
+      delivery: 'gdl' | 'nacional' | 'pickup'
+      payment?: 'card'
+      referralCode?: string
+      welcomeCredit?: number
+      referralCredit?: number
+    }) =>
+      post<{ init_point: string; preferenceId: string; orderNumber: string }>(
+        '/api/payments/mp/preference',
+        body,
+      ),
+    mpOrderStatus: (orderNumber: string) =>
+      get<{ orderNumber: string; status: 'pending' | 'paid' | 'failed'; total: number }>(
+        `/api/payments/mp/orders/${orderNumber}`,
+      ),
+  },
   album: {
     fetch: () => get<{ album: Record<string, Record<number, StickerState>> }>('/api/album'),
     upsertSticker: (body: { group_id: string; sticker_n: number; owned: number; needed: number }) =>

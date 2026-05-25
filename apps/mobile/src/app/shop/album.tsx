@@ -7,10 +7,12 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import * as Haptics from 'expo-haptics'
 import { useAlbumStore } from '@/lib/album-store'
 import { useProductsStore } from '@/lib/products-store'
+import { useCartStore } from '@/lib/cart-store'
 import { ALBUM, fmt } from '@/lib/data'
-import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 type Tab = 'missing' | 'recommended' | 'swap' | 'packs'
 const TABS: { id: Tab; label: string }[] = [
@@ -24,6 +26,23 @@ export default function AlbumFillScreen() {
   const [tab, setTab] = useState<Tab>('missing')
   const album = useAlbumStore((s) => s.album)
   const products = useProductsStore((s) => s.products)
+  const addToCart = useCartStore((s) => s.add)
+
+  function buyComplete() {
+    // Tap "Complete album" → drop the Complete Collection SKU into cart and
+    // jump to checkout. Pablo's store hand-picks the user's missing cards
+    // from the order's metadata.
+    addToCart('COLECCION', 1)
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
+    router.push('/checkout')
+  }
+
+  function buyPacks(count: number) {
+    // Tap "Buy N packs" → adds N x SOBRE-1 to cart, jumps to checkout.
+    addToCart('SOBRE-1', count)
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
+    router.push('/checkout')
+  }
 
   // Missing list (sorted by rarity: gold > foil > special > common)
   const missing = useMemo(() => {
@@ -80,7 +99,7 @@ export default function AlbumFillScreen() {
         ))}
       </View>
 
-      <ScrollView contentContainerStyle={s.scroll}>
+      <ScrollView contentContainerStyle={[s.scroll, tab === 'missing' && missing.length > 0 && { paddingBottom: 160 }]}>
         {tab === 'missing' && (
           missing.length === 0
             ? <Empty icon="checkmark-circle-outline" text="Album complete!" />
@@ -126,6 +145,32 @@ export default function AlbumFillScreen() {
           ))
         )}
       </ScrollView>
+
+      {/* Sticky buy bar — only on Missing tab when there's something to buy */}
+      {tab === 'missing' && missing.length > 0 && (() => {
+        // Suggest packs count: each pack has 7 stickers, average duplicates
+        // mean roughly 2x packs needed to draw the unique cards. Cap at 100.
+        const suggestedPacks = Math.min(100, Math.max(1, Math.ceil(missing.length * 2 / 7)))
+        const packsCost = suggestedPacks * 25
+        return (
+          <View style={s.buyBar}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.buyHint}>{missing.length} stickers missing</Text>
+              <Text style={s.buyHintSmall}>One-tap purchase to complete your album</Text>
+            </View>
+            <View style={s.buyBtnsCol}>
+              <TouchableOpacity onPress={buyComplete} style={[s.buyBtn, s.buyBtnPrimary]} activeOpacity={0.85}>
+                <Ionicons name="trophy" size={14} color={COLORS.paper} />
+                <Text style={s.buyBtnPrimaryText}>Complete · {fmt(3500)}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => buyPacks(suggestedPacks)} style={[s.buyBtn, s.buyBtnSecondary]} activeOpacity={0.85}>
+                <Ionicons name="mail-outline" size={14} color={COLORS.green} />
+                <Text style={s.buyBtnSecondaryText}>{suggestedPacks} packs · {fmt(packsCost)}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )
+      })()}
     </SafeAreaView>
   )
 }
@@ -158,4 +203,31 @@ const s = StyleSheet.create({
   rowPrice: { fontSize: 14, fontWeight: '900', color: COLORS.green },
   empty: { alignItems: 'center', paddingVertical: SPACING.xxxl, gap: SPACING.sm },
   emptyText: { fontSize: 13, color: COLORS.textMuted, textAlign: 'center', paddingHorizontal: SPACING.xl },
+
+  buyBar: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    flexDirection: 'row', alignItems: 'center', gap: SPACING.md,
+    paddingHorizontal: SPACING.lg, paddingTop: SPACING.md, paddingBottom: SPACING.xl,
+    backgroundColor: COLORS.paper,
+    borderTopWidth: 1, borderTopColor: COLORS.border,
+    ...SHADOW.md,
+  },
+  buyHint: { fontSize: 14, fontWeight: '900', color: COLORS.ink },
+  buyHintSmall: { fontSize: 11, color: COLORS.textMuted, marginTop: 2 },
+  buyBtnsCol: { gap: 6, alignItems: 'flex-end' },
+  buyBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 12, paddingVertical: 8,
+    borderRadius: RADIUS.full,
+  },
+  buyBtnPrimary: {
+    backgroundColor: COLORS.green,
+    borderWidth: 2, borderColor: COLORS.gold,
+  },
+  buyBtnPrimaryText: { color: COLORS.paper, fontWeight: '900', fontSize: 12 },
+  buyBtnSecondary: {
+    backgroundColor: COLORS.paper,
+    borderWidth: 1.5, borderColor: COLORS.green,
+  },
+  buyBtnSecondaryText: { color: COLORS.green, fontWeight: '900', fontSize: 12 },
 })
