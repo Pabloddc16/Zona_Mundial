@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { Product } from './data'
 import { STAR_PLAYERS } from './star-players'
 import { STAR_PRICING, RARITY_DISPLAY, type StarRarity } from './pricing'
+import { usePaniniDraftStore } from './panini-drafts'
+import { MI_PANINI_PRICE_MXN } from './mi-panini'
 
 interface CartStore {
   cart: Record<string, number>
@@ -47,6 +49,26 @@ function resolveCartItem(id: string, products: Product[]): Product | null {
   // Static catalog lookup first — covers all DB-driven products.
   const fromProducts = products.find((x) => x.id === id)
   if (fromProducts) return fromProducts
+
+  // Mi Panini custom card. Format: MI-PANINI-<draftId>
+  // Display data comes from the draft metadata persisted in panini-drafts.
+  if (id.startsWith('MI-PANINI-')) {
+    const draftId = id.slice('MI-PANINI-'.length)
+    const draft = usePaniniDraftStore.getState().drafts[draftId]
+    return {
+      id,
+      name: draft
+        ? `Mi Panini · ${draft.playerName || 'Sin nombre'} (${draft.cardType})`
+        : 'Mi Panini · Sticker custom',
+      price: MI_PANINI_PRICE_MXN,
+      category: 'mi-panini',
+      description: draft
+        ? `${draft.country} · PAC ${draft.stats.pace} TIR ${draft.stats.shooting} PAS ${draft.stats.passing} DEF ${draft.stats.defending}`
+        : '',
+      emoji: '📸',
+      gradient: ['#FFD100', '#806100'],
+    }
+  }
 
   // Dynamic Star SKU. Format: STAR-<slug>-<RARITY>
   if (id.startsWith('STAR-')) {

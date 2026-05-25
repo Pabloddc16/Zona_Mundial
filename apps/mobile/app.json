@@ -43,6 +43,15 @@
       "expo-asset",
       "expo-secure-store",
       "expo-apple-authentication",
+      "expo-web-browser",
+      "expo-crypto",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Cromos 26 to access your photos so you can create a custom Panini sticker.",
+          "cameraPermission": "Allow Cromos 26 to use your camera so you can take a selfie for your custom sticker."
+        }
+      ],
       [
         "@react-native-google-signin/google-signin",
         {

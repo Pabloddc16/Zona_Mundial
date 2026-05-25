@@ -16,6 +16,7 @@ import * as WebBrowser from 'expo-web-browser'
 import { Ionicons } from '@expo/vector-icons'
 import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
+import { usePaniniDraftStore } from '@/lib/panini-drafts'
 import { api } from '@/lib/api'
 import { fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
@@ -81,6 +82,33 @@ export default function CheckoutScreen() {
         ...(useReferralCredit ? { referralCredit: refApplied } : {}),
         ...(welcomeApplied ? { welcomeCredit: welcomeApplied } : {}),
       })
+
+      // Persist Mi Panini drafts to the server now that we have an order number.
+      // Failure here doesn't block payment — admin can ask for re-submit via support.
+      type DraftPayload = Parameters<typeof api.miPanini.submitDrafts>[0][number]
+      const paniniDrafts: DraftPayload[] = []
+      for (const i of items) {
+        if (!i!.id.startsWith('MI-PANINI-')) continue
+        const draftId = i!.id.slice('MI-PANINI-'.length)
+        const draft = usePaniniDraftStore.getState().drafts[draftId]
+        if (!draft) continue
+        const payload: DraftPayload = {
+          id: draftId,
+          order_number: pref.orderNumber,
+          card_type: draft.cardType,
+          player_name: draft.playerName,
+          country: draft.country,
+          stats: draft.stats,
+        }
+        if (draft.photoPublicUrl) payload.photo_public_url = draft.photoPublicUrl
+        paniniDrafts.push(payload)
+      }
+
+      if (paniniDrafts.length > 0) {
+        api.miPanini.submitDrafts(paniniDrafts).catch((e) => {
+          console.warn('[checkout] mi-panini draft submit failed', e)
+        })
+      }
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
       clear()

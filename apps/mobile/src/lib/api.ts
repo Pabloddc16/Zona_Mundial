@@ -190,6 +190,19 @@ export const api = {
   trades: {
     matches: () => get<{ matches: TradeMatch[] }>('/api/trades/matches'),
   },
+  miPanini: {
+    submitDrafts: (drafts: Array<{
+      id: string
+      order_number: string
+      card_type: 'BASE' | 'BRONCE' | 'PLATA' | 'ORO'
+      player_name: string
+      country: string
+      stats: { pace: number; shooting: number; passing: number; defending: number }
+      photo_storage_path?: string
+      photo_public_url?: string
+    }>) =>
+      post<{ ok: boolean; count: number }>('/api/mi-panini/drafts', { drafts }),
+  },
 }
 
 export { setAT, setRT, clearTokens }
