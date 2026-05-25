@@ -4,11 +4,14 @@ import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '@/lib/auth-store'
+import { useAlbumStore, albumStats } from '@/lib/album-store'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 export default function WelcomeScreen() {
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle)
   const signInWithApple = useAuthStore((s) => s.signInWithApple)
+  const album = useAlbumStore((s) => s.album)
+  const localProgress = albumStats(album).owned
   const [googleLoading, setGoogleLoading] = useState(false)
   const [appleLoading, setAppleLoading] = useState(false)
 
@@ -51,6 +54,17 @@ export default function WelcomeScreen() {
             Track stickers. Swap with friends. Complete your World Cup 2026 collection.
           </Text>
         </View>
+
+        {/* Local-progress banner — surfaces unsaved guest collection so users
+            know signing up preserves their work instead of starting over. */}
+        {localProgress > 0 && (
+          <View style={s.localBanner}>
+            <Ionicons name="cloud-upload-outline" size={18} color={COLORS.gold} />
+            <Text style={s.localBannerText}>
+              <Text style={s.localBannerBold}>{localProgress} stickers</Text> tracked on this device. Sign up to save them.
+            </Text>
+          </View>
+        )}
 
         <View style={s.actions}>
           <TouchableOpacity
@@ -193,4 +207,13 @@ const s = StyleSheet.create({
     textAlign: 'center', lineHeight: 16,
     paddingHorizontal: SPACING.lg, marginTop: SPACING.lg,
   },
+
+  localBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: SPACING.sm,
+    backgroundColor: COLORS.ink, borderWidth: 1, borderColor: COLORS.gold,
+    borderRadius: RADIUS.lg, padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  localBannerText: { flex: 1, color: COLORS.paper, fontSize: FONT.size.bodyS, lineHeight: 18 },
+  localBannerBold: { fontWeight: FONT.weight.black, color: COLORS.gold },
 })

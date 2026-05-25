@@ -289,6 +289,28 @@ export const api = {
     setStock: (slug: string, rarity: string, count: number) =>
       patch<{ player_slug: string; rarity: string; count: number }>(`/api/stars/stock/${slug}/${rarity}`, { count }),
   },
+
+  // ─── Mi Panini (custom sticker drafts for fulfillment) ──────────────────
+  miPanini: {
+    drafts: (orderNumber: string) =>
+      get<{ items: Array<MiPaniniDraft> }>(`/api/mi-panini/orders/${orderNumber}`),
+  },
+}
+
+export interface MiPaniniDraft {
+  id: string
+  order_number: string
+  card_type: 'BASE' | 'BRONCE' | 'PLATA' | 'ORO'
+  player_name: string
+  country: string
+  stat_pace: number
+  stat_shooting: number
+  stat_passing: number
+  stat_defending: number
+  photo_public_url: string | null
+  ai_processed_url: string | null
+  status: 'PENDING' | 'PROCESSING' | 'PRINTED' | 'SHIPPED' | 'CANCELLED'
+  created_at: string
 }
 
 // ─── Types (lightweight, for client use) ────────────────────────────────────

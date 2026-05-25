@@ -10,7 +10,11 @@ const ordersRoutes: FastifyPluginAsync = async (fastify) => {
     const supabase = getClient()
     const { data, error } = await supabase
       .from('orders')
-      .select('order_number, status, total, delivery_type, pickup_code, date, order_items(name, qty, price)')
+      .select(`
+        order_number, status, total, delivery_type, pickup_code, date,
+        order_items(name, qty, price),
+        mi_panini_drafts(id, card_type, player_name, country, stat_pace, stat_shooting, stat_passing, stat_defending, photo_public_url, ai_processed_url, status)
+      `)
       .eq('user_id', req.user!.id)
       .eq('deleted', false)
       .order('date', { ascending: false })

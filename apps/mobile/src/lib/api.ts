@@ -202,6 +202,26 @@ export const api = {
       photo_public_url?: string
     }>) =>
       post<{ ok: boolean; count: number }>('/api/mi-panini/drafts', { drafts }),
+    processPhoto: (draftId: string) =>
+      post<{ ok: boolean; processed_url: string | null; cached?: boolean; reason?: string }>(
+        `/api/mi-panini/drafts/${draftId}/process`,
+        {},
+      ),
+    orderDrafts: (orderNumber: string) =>
+      get<{ items: Array<{
+        id: string
+        order_number: string
+        card_type: 'BASE' | 'BRONCE' | 'PLATA' | 'ORO'
+        player_name: string
+        country: string
+        stat_pace: number
+        stat_shooting: number
+        stat_passing: number
+        stat_defending: number
+        photo_public_url: string | null
+        ai_processed_url: string | null
+        status: string
+      }> }>(`/api/mi-panini/orders/${orderNumber}`),
   },
 }
 

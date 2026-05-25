@@ -17,6 +17,7 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import { getClient } from '@pablo/db'
+import { removeBackground } from '../lib/replicate.js'
 
 const DraftSchema = z.object({
   id: z.string().min(4).max(32),
@@ -83,15 +84,64 @@ const miPaniniRoutes: FastifyPluginAsync = async (fastify) => {
     return data
   })
 
-  fastify.get('/orders/:n', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+  // Async AI background removal. Mobile fires this after upload — runs
+  // 3-8 sec, returns the bg-removed PNG URL. Stores on the draft row so
+  // future renders use it. If REPLICATE_API_TOKEN unset → returns ok+null
+  // and the wizard falls back to the raw selfie.
+  fastify.post('/drafts/:id/process', { preHandler: fastify.authenticate }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const sb = getClient()
+
+    const { data: draft, error: lookupErr } = await sb
+      .from('mi_panini_drafts')
+      .select('id, user_id, photo_public_url, ai_processed_url')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (lookupErr) return reply.internalServerError(lookupErr.message)
+    if (!draft) return reply.notFound('Draft not found')
+    if (draft.user_id !== req.user!.id && req.user!.role !== 'admin') {
+      return reply.forbidden('Not your draft')
+    }
+    if (draft.ai_processed_url) {
+      return { ok: true, processed_url: draft.ai_processed_url, cached: true }
+    }
+    if (!draft.photo_public_url) {
+      return reply.badRequest('Draft has no source photo')
+    }
+
+    const processed = await removeBackground(draft.photo_public_url)
+    if (!processed) {
+      // Replicate not configured or job failed — soft pass, caller falls back.
+      return { ok: true, processed_url: null, reason: 'replicate-skipped' }
+    }
+
+    const { error: updateErr } = await sb
+      .from('mi_panini_drafts')
+      .update({ ai_processed_url: processed, updated_at: new Date().toISOString() })
+      .eq('id', id)
+    if (updateErr) {
+      req.log.warn({ err: updateErr.message }, 'failed to persist ai_processed_url')
+    }
+
+    return { ok: true, processed_url: processed, cached: false }
+  })
+
+  fastify.get('/orders/:n', { preHandler: fastify.authenticate }, async (req, reply) => {
     const { n } = req.params as { n: string }
     const sb = getClient()
-    const { data, error } = await sb
+    let q = sb
       .from('mi_panini_drafts')
       .select('*')
       .eq('order_number', n)
       .order('created_at')
 
+    // Non-admin can only see their own drafts
+    if (req.user!.role !== 'admin') {
+      q = q.eq('user_id', req.user!.id)
+    }
+
+    const { data, error } = await q
     if (error) return reply.internalServerError(error.message)
     return { items: data ?? [] }
   })

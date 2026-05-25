@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api, type Order } from '@/lib/api'
+import { api, type Order, type MiPaniniDraft } from '@/lib/api'
 import { DataTable } from '@/components/shared/data-table'
 import { Pagination } from '@/components/shared/pagination'
 import { Button } from '@/components/ui/button'
@@ -99,12 +99,15 @@ export default function OrdersPage() {
       {/* Edit order dialog */}
       <Sheet open={!!selected} onClose={() => setSelected(null)} title={`Edit ${selected?.order_number}`}>
         {selected && (
-          <EditOrderForm
-            order={selected}
-            deliverers={deliverers ?? []}
-            onSave={(body) => updateMut.mutate({ n: selected.order_number, body })}
-            saving={updateMut.isPending}
-          />
+          <>
+            <EditOrderForm
+              order={selected}
+              deliverers={deliverers ?? []}
+              onSave={(body) => updateMut.mutate({ n: selected.order_number, body })}
+              saving={updateMut.isPending}
+            />
+            <MiPaniniDraftsPanel orderNumber={selected.order_number} />
+          </>
         )}
       </Sheet>
 
@@ -159,6 +162,69 @@ function EditOrderForm({ order, deliverers, onSave, saving }: {
       >
         {saving ? 'Saving...' : 'Save'}
       </Button>
+    </div>
+  )
+}
+
+function MiPaniniDraftsPanel({ orderNumber }: { orderNumber: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['mi-panini-drafts', orderNumber],
+    queryFn: () => api.miPanini.drafts(orderNumber),
+    refetchInterval: 5000, // pick up ai_processed_url as it lands
+  })
+
+  if (isLoading) return null
+  const drafts = data?.items ?? []
+  if (drafts.length === 0) return null
+
+  return (
+    <div className="mt-6 border-t border-white/10 pt-4 space-y-3">
+      <h3 className="text-[10px] font-bold uppercase tracking-[0.28em] text-[oklch(0.77_0.163_70)]">
+        Mi Panini · {drafts.length} sticker{drafts.length === 1 ? '' : 's'}
+      </h3>
+      {drafts.map((d: MiPaniniDraft) => (
+        <DraftCard key={d.id} draft={d} />
+      ))}
+    </div>
+  )
+}
+
+function DraftCard({ draft }: { draft: MiPaniniDraft }) {
+  const printUrl = draft.ai_processed_url ?? draft.photo_public_url
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/5 p-3 flex gap-3">
+      {printUrl ? (
+        <a href={printUrl} target="_blank" rel="noreferrer" className="block w-20 h-20 rounded overflow-hidden bg-white/5">
+          <img src={printUrl} alt={draft.player_name} className="w-full h-full object-cover" />
+        </a>
+      ) : (
+        <div className="w-20 h-20 rounded bg-white/5 flex items-center justify-center text-white/30 text-xs">
+          no photo
+        </div>
+      )}
+      <div className="flex-1 min-w-0 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-white">{draft.player_name}</span>
+          <span className="text-white/50 text-xs">· {draft.country}</span>
+          <span className={`ml-auto rounded px-1.5 py-0.5 text-[9px] font-black ${
+            draft.card_type === 'ORO' ? 'bg-[oklch(0.84_0.150_80)] text-[#0B1F15]'
+            : draft.card_type === 'PLATA' ? 'bg-white/80 text-[#0B1F15]'
+            : draft.card_type === 'BRONCE' ? 'bg-[oklch(0.55_0.10_50)] text-white'
+            : 'bg-white/10 text-white/70'
+          }`}>{draft.card_type}</span>
+        </div>
+        <div className="text-white/40 text-[11px] mt-1 font-mono">
+          PAC {draft.stat_pace} · TIR {draft.stat_shooting} · PAS {draft.stat_passing} · DEF {draft.stat_defending}
+        </div>
+        <div className="text-white/40 text-[10px] mt-1 flex items-center gap-2">
+          <span>Status: <span className="text-white/70 font-bold">{draft.status}</span></span>
+          {draft.ai_processed_url ? (
+            <span className="text-emerald-400">✓ AI processed</span>
+          ) : (
+            <span className="text-amber-400">pending AI</span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

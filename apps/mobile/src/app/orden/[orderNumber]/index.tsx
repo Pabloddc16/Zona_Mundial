@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet
 import { useLocalSearchParams, router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { api, type Order } from '@/lib/api'
+import { PaniniCardPreview } from '@/components/PaniniCardPreview'
 import { fmt } from '@/lib/data'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -32,15 +33,21 @@ const STATUS_COLOR: Record<string, [string, string]> = {
   cancelado: ['rgba(206,17,38,0.08)', '#CE1126'],
 }
 
+type PaniniDraft = Awaited<ReturnType<typeof api.miPanini.orderDrafts>>['items'][number]
+
 export default function OrdenScreen() {
   const { orderNumber } = useLocalSearchParams<{ orderNumber: string }>()
   const [order, setOrder] = useState<Order | null>(null)
+  const [drafts, setDrafts] = useState<PaniniDraft[]>([])
   const [error, setError] = useState('')
 
   useEffect(() => {
     api.orders.get(orderNumber)
       .then(setOrder)
       .catch((e: Error) => setError(e.message))
+    api.miPanini.orderDrafts(orderNumber)
+      .then((r) => setDrafts(r.items))
+      .catch(() => { /* no Mi Panini items on this order — ignore */ })
   }, [orderNumber])
 
   if (error) {
@@ -98,6 +105,35 @@ export default function OrdenScreen() {
               <Text style={s.pickupAddrLine}>Col. Americana, Lafayette · 44150 Guadalajara, Jal.</Text>
               <Text style={s.pickupAddrHours}>Mon–Sat · 10am – 7pm</Text>
             </View>
+          </View>
+        )}
+
+        {/* Mi Panini cards — show preview per custom sticker so user verifies what they ordered */}
+        {drafts.length > 0 && (
+          <View style={s.paniniSection}>
+            <Text style={s.sectionLabel}>
+              {drafts.length === 1 ? 'TU MI PANINI' : `TUS ${drafts.length} MI PANINI`}
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingVertical: 8 }}>
+              {drafts.map((d) => (
+                <View key={d.id} style={{ alignItems: 'center' }}>
+                  <PaniniCardPreview
+                    cardType={d.card_type}
+                    playerName={d.player_name}
+                    country={d.country}
+                    stats={{
+                      pace: d.stat_pace,
+                      shooting: d.stat_shooting,
+                      passing: d.stat_passing,
+                      defending: d.stat_defending,
+                    }}
+                    photoUri={d.ai_processed_url ?? d.photo_public_url ?? null}
+                    width={150}
+                  />
+                  <Text style={s.paniniStatus}>{d.status}</Text>
+                </View>
+              ))}
+            </ScrollView>
           </View>
         )}
 
@@ -193,4 +229,7 @@ const s = StyleSheet.create({
   },
   pickupAddrLine: { fontSize: 12, color: '#FAF6EE', fontWeight: '700', lineHeight: 16 },
   pickupAddrHours: { fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 6, fontWeight: '600' },
+
+  paniniSection: { marginBottom: 12 },
+  paniniStatus: { fontSize: 9, fontWeight: '900', color: '#FFD100', letterSpacing: 1.5, marginTop: 6 },
 })

@@ -86,7 +86,7 @@ const mercadopagoWebhook: FastifyPluginAsync = async (fastify) => {
     // Mark order paid (idempotent — if already PAID, no-op).
     const { data: order, error: lookupErr } = await sb
       .from('orders')
-      .select('order_number, status, user_id, total')
+      .select('order_number, status, user_id, total, order_items(product_id, qty)')
       .eq('order_number', orderNumber)
       .maybeSingle()
 
@@ -109,23 +109,51 @@ const mercadopagoWebhook: FastifyPluginAsync = async (fastify) => {
       return reply.internalServerError(updateErr.message)
     }
 
+    const ingestSecret = process.env['INGEST_SECRET']
+    const apiBase = process.env['PUBLIC_API_URL'] ?? 'https://zona-mundial.onrender.com'
+
     // Fire referral credit (fire-and-forget; failures don't break webhook).
-    if (order.user_id) {
-      const ingestSecret = process.env['INGEST_SECRET']
-      const apiBase = process.env['PUBLIC_API_URL'] ?? 'https://zona-mundial.onrender.com'
-      if (ingestSecret) {
-        fetch(`${apiBase}/api/referral/credit`, {
+    if (order.user_id && ingestSecret) {
+      fetch(`${apiBase}/api/referral/credit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${ingestSecret}`,
+        },
+        body: JSON.stringify({
+          orderNumber,
+          payerUserId: order.user_id,
+          amount: Number(payment.transaction_amount ?? order.total ?? 0),
+        }),
+      }).catch((err) => fastify.log.warn({ err }, 'referral credit call failed'))
+    }
+
+    // Decrement Star player stock for any STAR-<slug>-<RARITY> SKUs in the
+    // order. Skip silently if INGEST_SECRET missing or order has no items.
+    if (ingestSecret) {
+      const items = (order as unknown as { order_items?: Array<{ product_id?: string; qty?: number }> }).order_items ?? []
+      const starItems: Array<{ slug: string; rarity: string; qty: number }> = []
+      for (const it of items) {
+        const pid = String(it.product_id ?? '')
+        if (!pid.startsWith('STAR-')) continue
+        const rest = pid.slice('STAR-'.length)
+        const lastDash = rest.lastIndexOf('-')
+        if (lastDash <= 0) continue
+        starItems.push({
+          slug: rest.slice(0, lastDash),
+          rarity: rest.slice(lastDash + 1),
+          qty: Number(it.qty ?? 1),
+        })
+      }
+      if (starItems.length > 0) {
+        fetch(`${apiBase}/api/stars/stock/decrement`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${ingestSecret}`,
           },
-          body: JSON.stringify({
-            orderNumber,
-            payerUserId: order.user_id,
-            amount: Number(payment.transaction_amount ?? order.total ?? 0),
-          }),
-        }).catch((err) => fastify.log.warn({ err }, 'referral credit call failed'))
+          body: JSON.stringify({ items: starItems }),
+        }).catch((err) => fastify.log.warn({ err }, 'star stock decrement failed'))
       }
     }
 

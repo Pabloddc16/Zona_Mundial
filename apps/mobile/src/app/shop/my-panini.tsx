@@ -35,6 +35,7 @@ import { useCartStore } from '@/lib/cart-store'
 import { useAuthStore } from '@/lib/auth-store'
 import { usePaniniDraftStore } from '@/lib/panini-drafts'
 import { uploadPaniniPhoto } from '@/lib/mi-panini-storage'
+import { api } from '@/lib/api'
 import {
   MI_PANINI_PRICE_MXN, EMPTY_DRAFT, miPaniniSku, newDraftId,
   COUNTRY_OPTIONS, type MiPaniniDraft,
@@ -106,6 +107,35 @@ export default function MyPaniniWizard() {
         ...(photoPublicUrl ? { photoPublicUrl } : {}),
       }
       saveDraft(draftId, finalDraft)
+
+      // Persist the draft row server-side now so we can trigger AI bg-remove
+      // before checkout. order_number is filled in later by the MP webhook;
+      // we use a placeholder until then since the column is nullable in flow.
+      // Soft-fail: any error here just means AI won't run yet — the cart still
+      // contains the SKU and checkout will resubmit drafts after MP.
+      if (photoPublicUrl) {
+        try {
+          await api.miPanini.submitDrafts([{
+            id: draftId,
+            order_number: 'PENDING',
+            card_type: finalDraft.cardType,
+            player_name: finalDraft.playerName,
+            country: finalDraft.country,
+            stats: finalDraft.stats,
+            photo_public_url: photoPublicUrl,
+          }])
+
+          // Kick AI background removal — fire-and-forget. Result is stored on
+          // the draft row; the order detail screen picks up ai_processed_url
+          // on next refresh.
+          api.miPanini.processPhoto(draftId).catch((e) => {
+            console.warn('[mi-panini] AI process kick failed', e)
+          })
+        } catch (e) {
+          console.warn('[mi-panini] draft pre-submit failed', e)
+        }
+      }
+
       addToCart(sku, 1)
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
       router.replace('/checkout')

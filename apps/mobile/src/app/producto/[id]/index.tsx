@@ -14,7 +14,20 @@ export default function ProductoScreen() {
   const [added, setAdded] = useState(false)
   const add = useCartStore((s) => s.add)
 
-  if (!product) return <SafeAreaView><Text style={{ padding: 32 }}>Producto no encontrado</Text></SafeAreaView>
+  if (!product) {
+    return (
+      <SafeAreaView style={s.safe}>
+        <View style={s.notFound}>
+          <Text style={{ fontSize: 48 }}>🔍</Text>
+          <Text style={s.notFoundTitle}>Producto no encontrado</Text>
+          <Text style={s.notFoundSub}>Puede que esté agotado o se haya retirado del catálogo.</Text>
+          <TouchableOpacity onPress={() => router.replace('/tienda')} style={s.notFoundBtn} activeOpacity={0.85}>
+            <Text style={s.notFoundBtnText}>Volver a la tienda</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    )
+  }
 
   function handleAdd() {
     add(product!.id, qty)
@@ -41,7 +54,7 @@ export default function ProductoScreen() {
         <View style={s.body}>
           {product.badge && <Text style={s.badge}>{product.badge}</Text>}
           <Text style={s.name}>{product.name}</Text>
-          <Text style={s.desc}>{product.description}</Text>
+          {product.description ? <Text style={s.desc}>{product.description}</Text> : null}
           <Text style={s.price}>{fmt(product.price)}</Text>
 
           {/* Qty */}
@@ -94,4 +107,10 @@ const s = StyleSheet.create({
   addBtn: { backgroundColor: '#CE1126', borderRadius: 18, paddingVertical: 16, alignItems: 'center', marginTop: 24 },
   addBtnDone: { backgroundColor: '#006341' },
   addBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
+
+  notFound: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 },
+  notFoundTitle: { fontSize: 18, fontWeight: '900', color: '#1C1917' },
+  notFoundSub: { fontSize: 13, color: '#6B7280', textAlign: 'center' },
+  notFoundBtn: { marginTop: 12, backgroundColor: '#006341', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 99, borderWidth: 2, borderColor: '#FFD100' },
+  notFoundBtnText: { color: '#fff', fontWeight: '900', fontSize: 14 },
 })
