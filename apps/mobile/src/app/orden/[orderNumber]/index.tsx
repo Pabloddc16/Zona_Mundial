@@ -7,17 +7,17 @@ import { PaniniCardPreview } from '@/components/PaniniCardPreview'
 import { fmt } from '@/lib/data'
 
 const STATUS_LABEL: Record<string, string> = {
-  CREATED: 'Received',
-  ASSIGNED: 'Assigned',
-  IN_ROUTE: 'On the way',
-  DELIVERED: 'Delivered',
-  CANCELLED: 'Cancelled',
+  CREATED: 'Recibido',
+  ASSIGNED: 'Asignado',
+  IN_ROUTE: 'En camino',
+  DELIVERED: 'Entregado',
+  CANCELLED: 'Cancelado',
   // legacy
-  pendiente: 'Received',
-  confirmado: 'Assigned',
-  en_camino: 'On the way',
-  entregado: 'Delivered',
-  cancelado: 'Cancelled',
+  pendiente: 'Recibido',
+  confirmado: 'Asignado',
+  en_camino: 'En camino',
+  entregado: 'Entregado',
+  cancelado: 'Cancelado',
 }
 
 const STATUS_COLOR: Record<string, [string, string]> = {
@@ -83,23 +83,23 @@ export default function OrdenScreen() {
         {/* Success hero */}
         <View style={s.hero}>
           <Text style={{ fontSize: 64 }}>🎉</Text>
-          <Text style={s.heroTitle}>Order confirmed!</Text>
-          <Text style={s.heroSub}>You'll receive your order soon</Text>
+          <Text style={s.heroTitle}>¡Pedido confirmado!</Text>
+          <Text style={s.heroSub}>Recibirás tu pedido pronto</Text>
           <Text style={s.orderNum}>#{order.order_number}</Text>
         </View>
 
         {/* Status */}
         <View style={[s.statusCard, { backgroundColor: bg }]}>
-          <Text style={{ fontSize: 13, color: '#6B7280' }}>Status</Text>
+          <Text style={{ fontSize: 13, color: '#6B7280' }}>Estado</Text>
           <Text style={[s.statusText, { color: fg }]}>{STATUS_LABEL[order.status] ?? order.status}</Text>
         </View>
 
         {/* Pickup code — local-pickup orders */}
         {order.delivery_type === 'local' && (
           <View style={s.pickupCodeCard}>
-            <Text style={s.pickupCodeLabel}>Your pickup code</Text>
+            <Text style={s.pickupCodeLabel}>Tu código de recolección</Text>
             <Text style={s.pickupCode}>{order.pickup_code ?? order.order_number.slice(-6).toUpperCase()}</Text>
-            <Text style={s.pickupCodeSub}>Show this at the counter to grab your order.</Text>
+            <Text style={s.pickupCodeSub}>Muéstralo en el mostrador para recoger tu pedido.</Text>
             <View style={s.pickupAddrBox}>
               <Text style={s.pickupAddrLine}>Miguel Lerdo de Tejada 2081 — casa Anomalistyc</Text>
               <Text style={s.pickupAddrLine}>Col. Americana, Lafayette · 44150 Guadalajara, Jal.</Text>
@@ -139,17 +139,17 @@ export default function OrdenScreen() {
 
         {/* Details */}
         <View style={s.card}>
-          <Row label="Customer" value={order.customer_name} />
-          <Row label="Phone" value={order.phone} />
-          {order.address ? <Row label="Address" value={order.address} /> : null}
-          <Row label="Delivery" value={order.delivery_type === 'envio' ? 'Home delivery' : 'Store pickup'} />
-          <Row label="Payment" value={order.payment_method} />
+          <Row label="Cliente" value={order.customer_name} />
+          <Row label="Teléfono" value={order.phone} />
+          {order.address ? <Row label="Dirección" value={order.address} /> : null}
+          <Row label="Entrega" value={order.delivery_type === 'envio' ? 'Envío a domicilio' : 'Recolección en tienda'} />
+          <Row label="Pago" value={order.payment_method} />
         </View>
 
         {/* Items */}
         {order.order_items && order.order_items.length > 0 && (
           <View style={s.card}>
-            <Text style={s.sectionLabel}>Items</Text>
+            <Text style={s.sectionLabel}>Artículos</Text>
             {order.order_items.map((item, i) => (
               <View key={i} style={s.itemRow}>
                 <Text style={{ fontSize: 13, color: '#6B7280', flex: 1 }}>{item.name} × {item.qty}</Text>
@@ -158,7 +158,7 @@ export default function OrdenScreen() {
             ))}
             {order.shipping > 0 && (
               <View style={s.itemRow}>
-                <Text style={{ fontSize: 13, color: '#9CA3AF' }}>Shipping</Text>
+                <Text style={{ fontSize: 13, color: '#9CA3AF' }}>Envío</Text>
                 <Text style={{ fontSize: 13, color: '#9CA3AF' }}>{fmt(order.shipping)}</Text>
               </View>
             )}
@@ -170,7 +170,7 @@ export default function OrdenScreen() {
         )}
 
         <TouchableOpacity style={s.btn} onPress={() => router.push('/')}>
-          <Text style={s.btnText}>Back to album</Text>
+          <Text style={s.btnText}>Volver al álbum</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/tienda')} style={{ alignItems: 'center', marginTop: 12 }}>
           <Text style={{ color: '#006341', fontWeight: '600', fontSize: 14 }}>Seguir comprando</Text>

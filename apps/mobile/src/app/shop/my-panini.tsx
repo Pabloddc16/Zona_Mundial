@@ -56,11 +56,21 @@ const STEP_LABEL: Record<Step, string> = {
 
 export default function MyPaniniWizard() {
   const [step, setStep] = useState<Step>('card-type')
-  const [draft, setDraft] = useState<MiPaniniDraft>(EMPTY_DRAFT)
+  // Hydrate from inProgress slot so going back + reopening the wizard restores
+  // whatever the user had filled in. Cleared on successful add-to-cart below.
+  const inProgress = usePaniniDraftStore((s) => s.inProgress)
+  const [draft, setDraftState] = useState<MiPaniniDraft>(inProgress ?? EMPTY_DRAFT)
   const [submitting, setSubmitting] = useState(false)
   const user = useAuthStore((s) => s.user)
   const addToCart = useCartStore((s) => s.add)
   const saveDraft = usePaniniDraftStore((s) => s.save)
+  const setInProgress = usePaniniDraftStore((s) => s.setInProgress)
+
+  // Mirror every edit into the inProgress slot so a back-navigate keeps state.
+  function setDraft(next: MiPaniniDraft) {
+    setDraftState(next)
+    setInProgress(next)
+  }
 
   const stepIdx = STEPS.indexOf(step)
   const canNext = isStepValid(step, draft)
@@ -137,6 +147,8 @@ export default function MyPaniniWizard() {
       }
 
       addToCart(sku, 1)
+      // Wizard finished cleanly — wipe in-progress slot so next entry starts fresh.
+      setInProgress(null)
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
       router.replace('/checkout')
     } catch (err) {

@@ -127,6 +127,42 @@ const miPaniniRoutes: FastifyPluginAsync = async (fastify) => {
     return { ok: true, processed_url: processed, cached: false }
   })
 
+  // GET /api/mi-panini/queue — admin print fulfillment list.
+  // Returns drafts that aren't yet PRINTED so Pablo can batch-process them.
+  fastify.get('/queue', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const sb = getClient()
+    const status = String((req.query as { status?: string }).status ?? 'PENDING,PROCESSING')
+    const statuses = status.split(',').map((s) => s.trim().toUpperCase())
+    const { data, error } = await sb
+      .from('mi_panini_drafts')
+      .select('*')
+      .in('status', statuses)
+      .order('created_at', { ascending: true })
+      .limit(200)
+
+    if (error) return reply.internalServerError(error.message)
+    return { items: data ?? [] }
+  })
+
+  // PATCH /api/mi-panini/drafts/:id — admin status update during fulfillment.
+  fastify.patch('/drafts/:id', { preHandler: fastify.requireRole('admin') }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const body = req.body as { status?: string }
+    const status = String(body.status ?? '').toUpperCase()
+    if (!['PENDING', 'PROCESSING', 'PRINTED', 'SHIPPED', 'CANCELLED'].includes(status)) {
+      return reply.badRequest('Invalid status')
+    }
+    const sb = getClient()
+    const { data, error } = await sb
+      .from('mi_panini_drafts')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select().single()
+
+    if (error) return reply.internalServerError(error.message)
+    return data
+  })
+
   fastify.get('/orders/:n', { preHandler: fastify.authenticate }, async (req, reply) => {
     const { n } = req.params as { n: string }
     const sb = getClient()

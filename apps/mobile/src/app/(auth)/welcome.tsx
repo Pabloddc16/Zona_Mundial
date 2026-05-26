@@ -49,9 +49,9 @@ export default function WelcomeScreen() {
             />
           </View>
           <Text style={s.brand}>CROMOS 26</Text>
-          <Text style={s.headline}>The album that lives in your pocket.</Text>
+          <Text style={s.headline}>Tu álbum vive en tu bolsillo.</Text>
           <Text style={s.sub}>
-            Track stickers. Swap with friends. Complete your World Cup 2026 collection.
+            Marca estampas. Intercambia con amigos. Completa tu colección del Mundial 2026.
           </Text>
         </View>
 
@@ -61,7 +61,7 @@ export default function WelcomeScreen() {
           <View style={s.localBanner}>
             <Ionicons name="cloud-upload-outline" size={18} color={COLORS.gold} />
             <Text style={s.localBannerText}>
-              <Text style={s.localBannerBold}>{localProgress} stickers</Text> tracked on this device. Sign up to save them.
+              <Text style={s.localBannerBold}>{localProgress} estampas</Text> guardadas en este dispositivo. Crea cuenta para no perderlas.
             </Text>
           </View>
         )}
@@ -73,12 +73,12 @@ export default function WelcomeScreen() {
             activeOpacity={0.85}
           >
             <Ionicons name="mail-outline" size={18} color={COLORS.paper} />
-            <Text style={s.btnPrimaryText}>Create account with email</Text>
+            <Text style={s.btnPrimaryText}>Crear cuenta con email</Text>
           </TouchableOpacity>
 
           <View style={s.divider}>
             <View style={s.dividerLine} />
-            <Text style={s.dividerText}>or</Text>
+            <Text style={s.dividerText}>o</Text>
             <View style={s.dividerLine} />
           </View>
 
@@ -93,7 +93,7 @@ export default function WelcomeScreen() {
             ) : (
               <>
                 <Ionicons name="logo-google" size={18} color={COLORS.ink} />
-                <Text style={s.btnSecondaryText}>Continue with Google</Text>
+                <Text style={s.btnSecondaryText}>Continuar con Google</Text>
               </>
             )}
           </TouchableOpacity>
@@ -109,7 +109,7 @@ export default function WelcomeScreen() {
             ) : (
               <>
                 <Ionicons name="logo-apple" size={20} color={COLORS.ink} />
-                <Text style={s.btnSecondaryText}>Continue with Apple</Text>
+                <Text style={s.btnSecondaryText}>Continuar con Apple</Text>
               </>
             )}
           </TouchableOpacity>
@@ -119,13 +119,13 @@ export default function WelcomeScreen() {
             style={s.signinRow}
             activeOpacity={0.7}
           >
-            <Text style={s.signinText}>Already have an account? </Text>
-            <Text style={s.signinLink}>Sign in</Text>
+            <Text style={s.signinText}>¿Ya tienes cuenta? </Text>
+            <Text style={s.signinLink}>Iniciar sesión</Text>
           </TouchableOpacity>
         </View>
 
         <Text style={s.disclaimer}>
-          Not affiliated with FIFA or Panini. By continuing you agree to our Terms and Privacy Policy.
+          No afiliado con FIFA o Panini. Al continuar aceptas nuestros Términos y Política de Privacidad.
         </Text>
       </View>
     </SafeAreaView>

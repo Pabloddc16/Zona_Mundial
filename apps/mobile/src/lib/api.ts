@@ -190,6 +190,17 @@ export const api = {
   trades: {
     matches: () => get<{ matches: TradeMatch[] }>('/api/trades/matches'),
   },
+  referral: {
+    me: () => get<{
+      referralCode: string | null
+      referredById: string | null
+      welcomeCreditUsed: boolean
+      invitedCount: number
+      balance: number
+      totalEarned: number
+      shareUrl: string
+    }>('/api/referral/me'),
+  },
   miPanini: {
     submitDrafts: (drafts: Array<{
       id: string

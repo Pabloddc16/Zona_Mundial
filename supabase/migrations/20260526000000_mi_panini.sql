@@ -9,7 +9,7 @@
 
 CREATE TABLE IF NOT EXISTS public.mi_panini_drafts (
   id TEXT PRIMARY KEY,                                 -- the <draftId> portion of SKU
-  user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  user_id TEXT REFERENCES public.users(id) ON DELETE SET NULL,
   order_number TEXT REFERENCES public.orders(order_number) ON DELETE CASCADE,
   card_type TEXT NOT NULL CHECK (card_type IN ('BASE', 'BRONCE', 'PLATA', 'ORO')),
   player_name TEXT NOT NULL,
@@ -35,9 +35,10 @@ CREATE INDEX IF NOT EXISTS mi_panini_drafts_user_idx
 
 ALTER TABLE public.mi_panini_drafts ENABLE ROW LEVEL SECURITY;
 
+-- auth.uid() returns uuid; users.id is text. Cast for the policy comparison.
 DROP POLICY IF EXISTS "Users read own drafts" ON public.mi_panini_drafts;
 CREATE POLICY "Users read own drafts" ON public.mi_panini_drafts
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (auth.uid()::text = user_id);
 
 -- Note: service_role bypasses RLS so the API can write drafts on behalf
 -- of authenticated users without needing per-user policies.

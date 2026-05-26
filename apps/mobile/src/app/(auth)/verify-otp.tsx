@@ -67,7 +67,7 @@ export default function VerifyOtpScreen() {
   }
 
   async function handleVerify(token: string) {
-    if (!email) return setError('Missing email')
+    if (!email) return setError('Falta el email')
     setError('')
     setLoading(true)
     try {
@@ -76,7 +76,7 @@ export default function VerifyOtpScreen() {
         token,
         type: 'signup',
       })
-      if (vErr || !data.session) throw new Error(vErr?.message ?? 'Invalid code')
+      if (vErr || !data.session) throw new Error(vErr?.message ?? 'Código inválido')
       await setAT(data.session.access_token)
       await setRT(data.session.refresh_token)
       router.replace('/')
@@ -96,7 +96,7 @@ export default function VerifyOtpScreen() {
       await supabase.auth.resend({ type: 'signup', email: String(email) })
       setResendIn(RESEND_SECONDS)
     } catch (e) {
-      setError((e as Error).message || 'Could not resend code')
+      setError((e as Error).message || 'No se pudo reenviar el código')
     }
   }
 
@@ -107,9 +107,9 @@ export default function VerifyOtpScreen() {
           <View style={s.iconCircle}>
             <Ionicons name="mail-unread" size={36} color={COLORS.green} />
           </View>
-          <Text style={s.title}>Check your email</Text>
+          <Text style={s.title}>Revisa tu correo</Text>
           <Text style={s.subtitle}>
-            We sent a 6-digit code to{'\n'}<Text style={s.emailText}>{email}</Text>
+            Te enviamos un código de 6 dígitos a{'\n'}<Text style={s.emailText}>{email}</Text>
           </Text>
 
           <View style={s.boxes}>
@@ -144,13 +144,13 @@ export default function VerifyOtpScreen() {
             style={s.resend}
           >
             <Text style={[s.resendText, resendIn > 0 && s.resendDisabled]}>
-              {resendIn > 0 ? `Resend code in ${resendIn}s` : 'Resend code'}
+              {resendIn > 0 ? `Reenviar código en ${resendIn}s` : 'Reenviar código'}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => router.replace('/welcome')} style={s.backRow} activeOpacity={0.7}>
             <Ionicons name="arrow-back" size={14} color={COLORS.textMuted} />
-            <Text style={s.backText}>Use a different email</Text>
+            <Text style={s.backText}>Usar otro email</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

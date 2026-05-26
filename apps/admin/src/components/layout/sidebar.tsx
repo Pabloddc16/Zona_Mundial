@@ -8,6 +8,7 @@ import {
   LayoutDashboard, ShoppingBag, ShoppingCart, Package, Users, Truck,
   Building2, Receipt, RotateCcw, UserCog, LogOut, Trophy,
   ArrowLeftRight, GitMerge, FlaskConical, MapPin, TrendingUp, ChevronRight, Landmark, BookOpen,
+  Printer,
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -16,6 +17,7 @@ const NAV_SECTIONS = [
     items: [
       { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
       { label: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+      { label: 'Print queue', href: '/admin/print-queue', icon: Printer },
       { label: 'POS', href: '/admin/pos', icon: ShoppingCart },
       { label: 'Products', href: '/admin/products', icon: Package },
       { label: 'Customers', href: '/admin/customers', icon: Users },

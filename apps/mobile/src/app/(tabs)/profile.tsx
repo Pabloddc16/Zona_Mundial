@@ -3,7 +3,7 @@
  * and a sign-out button. Replaces standalone /referral page entry (kept
  * routable for deep links) and consolidates settings shortcuts.
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -21,10 +21,13 @@ import QRCode from 'react-native-qrcode-svg'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '@/lib/auth-store'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
-import { TOTAL_STICKERS } from '@/lib/data'
+import { TOTAL_STICKERS, fmt } from '@/lib/data'
+import { api } from '@/lib/api'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 const APP_URL = 'https://zona-mundial.vercel.app'
+
+type ReferralData = Awaited<ReturnType<typeof api.referral.me>>
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user)
@@ -34,10 +37,23 @@ export default function ProfileScreen() {
   const pct = Math.round((stats.owned / TOTAL_STICKERS) * 100)
 
   const [copied, setCopied] = useState(false)
+  const [referral, setReferral] = useState<ReferralData | null>(null)
+
+  // Pull live referral data — code, invited count, earned + available balance.
+  // Falls back to a username-derived code so guest-state still shows something
+  // useful before signing in.
+  useEffect(() => {
+    if (!user) { setReferral(null); return }
+    api.referral.me()
+      .then(setReferral)
+      .catch(() => { /* network — leave null, fallback below */ })
+  }, [user])
 
   const username = user?.username ?? 'guest'
-  const referralCode = username.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'CROMOS26'
-  const referralLink = `${APP_URL}/?ref=${referralCode}`
+  const fallbackCode = username.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'CROMOS26'
+  const referralCode = referral?.referralCode ?? fallbackCode
+  // Server returns full URL; falls back to web with ?ref for shareability.
+  const referralLink = referral?.shareUrl ?? `${APP_URL}/?ref=${referralCode}`
 
   async function copy(text: string) {
     await Clipboard.setStringAsync(text)
@@ -123,11 +139,11 @@ export default function ProfileScreen() {
           </View>
 
           <View style={s.statRow}>
-            <Stat label="Invited" value="0" />
+            <Stat label="Invited" value={String(referral?.invitedCount ?? 0)} />
             <View style={s.statDivider} />
-            <Stat label="Earned" value="$0" />
+            <Stat label="Earned" value={fmt(referral?.totalEarned ?? 0)} />
             <View style={s.statDivider} />
-            <Stat label="Available" value="$0" />
+            <Stat label="Available" value={fmt(referral?.balance ?? 0)} />
           </View>
         </View>
 

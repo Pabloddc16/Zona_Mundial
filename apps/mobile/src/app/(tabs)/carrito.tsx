@@ -3,6 +3,8 @@ import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
+import { usePaniniDraftStore } from '@/lib/panini-drafts'
+import { PaniniCardPreview } from '@/components/PaniniCardPreview'
 import { fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
@@ -12,9 +14,17 @@ export default function CarritoScreen() {
   const cart = useCartStore((s) => s.cart)
   const { add, sub, remove } = useCartStore()
   const products = useProductsStore((s) => s.products)
+  const drafts = usePaniniDraftStore((s) => s.drafts)
   const items = cartItems(cart, products)
   const subtotal = cartSubtotal(cart, products)
   const total = subtotal + SHIPPING
+
+  // Resolve a cart line item to its corresponding Mi Panini draft so the
+  // thumbnail can render the actual card the user designed.
+  function paniniDraftFor(id: string) {
+    if (!id.startsWith('MI-PANINI-')) return null
+    return drafts[id.slice('MI-PANINI-'.length)] ?? null
+  }
 
   if (items.length === 0) {
     return (
@@ -38,11 +48,26 @@ export default function CarritoScreen() {
         keyExtractor={(i) => i!.id}
         contentContainerStyle={s.list}
         ListHeaderComponent={<Text style={s.title}>Cart</Text>}
-        renderItem={({ item }) => (
+        renderItem={({ item }) => {
+          const paniniDraft = paniniDraftFor(item!.id)
+          return (
           <View style={s.card}>
-            <View style={[s.cardImg, { backgroundColor: item!.gradient[0] }]}>
-              <Text style={{ fontSize: 28 }}>{item!.emoji}</Text>
-            </View>
+            {paniniDraft ? (
+              // Mini Panini card preview so user remembers exactly which custom
+              // sticker they designed when reviewing the cart.
+              <PaniniCardPreview
+                cardType={paniniDraft.cardType}
+                playerName={paniniDraft.playerName}
+                country={paniniDraft.country}
+                stats={paniniDraft.stats}
+                photoUri={paniniDraft.photoPublicUrl ?? paniniDraft.photoUri ?? null}
+                width={60}
+              />
+            ) : (
+              <View style={[s.cardImg, { backgroundColor: item!.gradient[0] }]}>
+                <Text style={{ fontSize: 28 }}>{item!.emoji}</Text>
+              </View>
+            )}
             <View style={s.cardBody}>
               <Text style={s.itemName} numberOfLines={2}>{item!.name}</Text>
               <Text style={s.itemPrice}>{fmt(item!.price)}</Text>
@@ -57,7 +82,8 @@ export default function CarritoScreen() {
               <TouchableOpacity onPress={() => remove(item!.id)}><Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>Remove</Text></TouchableOpacity>
             </View>
           </View>
-        )}
+          )
+        }}
         ListFooterComponent={
           <View style={{ marginTop: 8 }}>
             <View style={s.summary}>

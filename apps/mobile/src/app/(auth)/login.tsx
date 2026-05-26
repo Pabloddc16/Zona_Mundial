@@ -19,7 +19,7 @@ export default function LoginScreen() {
       await signIn(email.trim().toLowerCase(), password)
       router.replace('/')
     } catch (e) {
-      setError((e as Error).message || 'Login failed')
+      setError((e as Error).message || 'Error al iniciar sesión')
     } finally {
       setLoading(false)
     }
@@ -30,8 +30,8 @@ export default function LoginScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={s.content}>
           <Text style={s.brand}>Cromos 26</Text>
-          <Text style={s.title}>Sign in</Text>
-          <Text style={s.subtitle}>Continue your album</Text>
+          <Text style={s.title}>Iniciar sesión</Text>
+          <Text style={s.subtitle}>Continúa con tu álbum</Text>
 
           <View style={s.form}>
             <Text style={s.label}>Email</Text>
@@ -42,11 +42,11 @@ export default function LoginScreen() {
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
-              placeholder="you@example.com"
+              placeholder="tu@email.com"
               placeholderTextColor={COLORS.textFaint}
             />
 
-            <Text style={s.label}>Password</Text>
+            <Text style={s.label}>Contraseña</Text>
             <TextInput
               style={s.input}
               value={password}
@@ -59,7 +59,7 @@ export default function LoginScreen() {
 
             {error ? <Text style={s.error}>{error}</Text> : null}
 
-            <Link href="/forgot-password" style={s.forgotLink}>Forgot password?</Link>
+            <Link href="/forgot-password" style={s.forgotLink}>¿Olvidaste tu contraseña?</Link>
 
             <TouchableOpacity
               style={[s.cta, (!email || !password || loading) && s.ctaDisabled]}
@@ -67,17 +67,17 @@ export default function LoginScreen() {
               disabled={!email || !password || loading}
               activeOpacity={0.85}
             >
-              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Sign in</Text>}
+              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Iniciar sesión</Text>}
             </TouchableOpacity>
 
             <View style={s.footer}>
-              <Text style={s.footerText}>New here? </Text>
-              <Link href="/register" style={s.link}>Create account</Link>
+              <Text style={s.footerText}>¿Nuevo aquí? </Text>
+              <Link href="/register" style={s.link}>Crear cuenta</Link>
             </View>
 
             <Text style={s.disclaimer}>
-              Not affiliated with FIFA or Panini. By continuing you agree to our Terms and
-              Privacy Policy.
+              No afiliado con FIFA o Panini. Al continuar aceptas nuestros Términos y
+              Política de Privacidad.
             </Text>
           </View>
         </View>

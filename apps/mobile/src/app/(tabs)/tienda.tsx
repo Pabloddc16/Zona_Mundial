@@ -9,8 +9,8 @@
  * Everything related to delivery / payment lives in /checkout now —
  * Tienda is for discovery + cart only.
  */
-import { useCallback, useMemo } from 'react'
-import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
+import { useCallback, useMemo, useState } from 'react'
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, TextInput } from 'react-native'
 import { router, useFocusEffect } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -43,6 +43,19 @@ export default function TiendaScreen() {
   const fetchProducts = useProductsStore((s) => s.fetch)
   const album = useAlbumStore((s) => s.album)
   const stats = albumStats(album)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Live-filter the product grid by search query. Case-insensitive partial
+  // match on name + description. Empty query = show everything.
+  const filteredProducts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return products
+    return products.filter((p) =>
+      p.name.toLowerCase().includes(q) ||
+      (p.description?.toLowerCase().includes(q) ?? false) ||
+      (p.category?.toLowerCase().includes(q) ?? false),
+    )
+  }, [products, searchQuery])
 
   // Refetch products every time Tienda gains focus so admin-uploaded
   // image_url changes propagate without an app restart.
@@ -83,6 +96,26 @@ export default function TiendaScreen() {
             </View>
           )}
         </TouchableOpacity>
+      </View>
+
+      {/* Search bar — filters product grid live by name/description/category */}
+      <View style={s.searchWrap}>
+        <Ionicons name="search" size={16} color={COLORS.textMuted} />
+        <TextInput
+          style={s.searchInput}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Buscar productos…"
+          placeholderTextColor={COLORS.textFaint}
+          autoCorrect={false}
+          autoCapitalize="none"
+          returnKeyType="search"
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={8}>
+            <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView contentContainerStyle={s.scroll}>
@@ -241,7 +274,7 @@ export default function TiendaScreen() {
         {/* 4b — 2-col grid of all products */}
         <View style={s.gridWrap}>
           <View style={s.grid}>
-            {products.map((p) => (
+            {filteredProducts.map((p) => (
               <TouchableOpacity
                 key={p.id}
                 style={s.productCard}
@@ -307,6 +340,20 @@ const s = StyleSheet.create({
     paddingHorizontal: 4,
   },
   cartBadgeText: { color: COLORS.paper, fontWeight: '800', fontSize: 10 },
+
+  searchWrap: {
+    flexDirection: 'row', alignItems: 'center', gap: SPACING.sm,
+    backgroundColor: COLORS.paper,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
+    borderWidth: 1, borderColor: COLORS.border,
+  },
+  searchInput: {
+    flex: 1, fontSize: FONT.size.bodyM, color: COLORS.ink,
+    paddingVertical: 4,
+  },
 
   scroll: { paddingBottom: SPACING.lg },
 

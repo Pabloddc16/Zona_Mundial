@@ -22,7 +22,7 @@ export default function ForgotPasswordScreen() {
       await api.auth.requestReset(email.trim().toLowerCase())
       setSent(true)
     } catch (e) {
-      setError((e as Error).message || 'Could not send reset email')
+      setError((e as Error).message || 'No se pudo enviar el correo')
     } finally {
       setLoading(false)
     }
@@ -35,12 +35,12 @@ export default function ForgotPasswordScreen() {
           <View style={s.successIcon}>
             <Ionicons name="mail" size={48} color={COLORS.green} />
           </View>
-          <Text style={s.title}>Check your inbox</Text>
+          <Text style={s.title}>Revisa tu correo</Text>
           <Text style={s.subtitle}>
-            If an account exists for {email}, we sent a reset link. It expires in 60 minutes.
+            Si existe una cuenta para {email}, te enviamos un enlace para restablecer tu contraseña. Expira en 60 minutos.
           </Text>
           <TouchableOpacity style={s.cta} onPress={() => router.replace('/login')} activeOpacity={0.85}>
-            <Text style={s.ctaText}>Back to sign in</Text>
+            <Text style={s.ctaText}>Volver a iniciar sesión</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -52,8 +52,8 @@ export default function ForgotPasswordScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={s.content}>
           <Text style={s.brand}>Cromos 26</Text>
-          <Text style={s.title}>Forgot password?</Text>
-          <Text style={s.subtitle}>Enter your email — we'll send you a reset link.</Text>
+          <Text style={s.title}>¿Olvidaste tu contraseña?</Text>
+          <Text style={s.subtitle}>Escribe tu email y te enviamos un enlace para restablecerla.</Text>
 
           <View style={s.form}>
             <Text style={s.label}>Email</Text>
@@ -64,7 +64,7 @@ export default function ForgotPasswordScreen() {
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
-              placeholder="you@example.com"
+              placeholder="tu@email.com"
               placeholderTextColor={COLORS.textFaint}
             />
 
@@ -76,11 +76,11 @@ export default function ForgotPasswordScreen() {
               disabled={!email || loading}
               activeOpacity={0.85}
             >
-              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Send reset link</Text>}
+              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Enviar enlace</Text>}
             </TouchableOpacity>
 
             <View style={s.footer}>
-              <Link href="/login" style={s.link}>Back to sign in</Link>
+              <Link href="/login" style={s.link}>Volver a iniciar sesión</Link>
             </View>
           </View>
         </View>

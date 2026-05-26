@@ -29,14 +29,14 @@ export default function ResetPasswordScreen() {
 
   async function handleSubmit() {
     setError('')
-    if (password.length < 8) return setError('Password must be at least 8 characters')
-    if (password !== confirm) return setError('Passwords don\'t match')
+    if (password.length < 8) return setError('La contraseña debe tener al menos 8 caracteres')
+    if (password !== confirm) return setError('Las contraseñas no coinciden')
     setLoading(true)
     try {
       await api.auth.reset(password)
       setDone(true)
     } catch (e) {
-      setError((e as Error).message || 'Could not reset password')
+      setError((e as Error).message || 'No se pudo restablecer la contraseña')
     } finally {
       setLoading(false)
     }
@@ -49,10 +49,10 @@ export default function ResetPasswordScreen() {
           <View style={s.successIcon}>
             <Ionicons name="checkmark-circle" size={48} color={COLORS.green} />
           </View>
-          <Text style={s.title}>Password updated</Text>
-          <Text style={s.subtitle}>Sign in with your new password.</Text>
+          <Text style={s.title}>Contraseña actualizada</Text>
+          <Text style={s.subtitle}>Inicia sesión con tu nueva contraseña.</Text>
           <TouchableOpacity style={s.cta} onPress={() => router.replace('/login')} activeOpacity={0.85}>
-            <Text style={s.ctaText}>Sign in</Text>
+            <Text style={s.ctaText}>Iniciar sesión</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -64,11 +64,11 @@ export default function ResetPasswordScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={s.content}>
           <Text style={s.brand}>Cromos 26</Text>
-          <Text style={s.title}>Choose a new password</Text>
-          <Text style={s.subtitle}>At least 8 characters.</Text>
+          <Text style={s.title}>Elige una nueva contraseña</Text>
+          <Text style={s.subtitle}>Al menos 8 caracteres.</Text>
 
           <View style={s.form}>
-            <Text style={s.label}>New password</Text>
+            <Text style={s.label}>Nueva contraseña</Text>
             <TextInput
               style={s.input}
               value={password}
@@ -78,7 +78,7 @@ export default function ResetPasswordScreen() {
               placeholderTextColor={COLORS.textFaint}
             />
 
-            <Text style={s.label}>Confirm password</Text>
+            <Text style={s.label}>Confirmar contraseña</Text>
             <TextInput
               style={s.input}
               value={confirm}
@@ -96,7 +96,7 @@ export default function ResetPasswordScreen() {
               disabled={!password || !confirm || loading}
               activeOpacity={0.85}
             >
-              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Update password</Text>}
+              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Actualizar contraseña</Text>}
             </TouchableOpacity>
           </View>
         </View>

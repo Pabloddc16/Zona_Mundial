@@ -5,7 +5,8 @@
 --
 -- user_id is nullable for legacy / guest orders.
 
+-- public.users.id is TEXT (not UUID) — match FK type so constraint creates.
 ALTER TABLE public.orders
-  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES public.users(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS user_id TEXT REFERENCES public.users(id) ON DELETE SET NULL;
 
 CREATE INDEX IF NOT EXISTS orders_user_id_idx ON public.orders (user_id) WHERE user_id IS NOT NULL;

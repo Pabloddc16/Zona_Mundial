@@ -294,6 +294,10 @@ export const api = {
   miPanini: {
     drafts: (orderNumber: string) =>
       get<{ items: Array<MiPaniniDraft> }>(`/api/mi-panini/orders/${orderNumber}`),
+    queue: (status?: string) =>
+      get<{ items: Array<MiPaniniDraft> }>(`/api/mi-panini/queue${status ? `?status=${status}` : ''}`),
+    setStatus: (id: string, status: 'PENDING' | 'PROCESSING' | 'PRINTED' | 'SHIPPED' | 'CANCELLED') =>
+      patch<MiPaniniDraft>(`/api/mi-panini/drafts/${id}`, { status }),
   },
 }
 

@@ -14,12 +14,12 @@ import { fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 const STATUS_COPY: Record<string, { label: string; color: string }> = {
-  CREATED:   { label: 'Awaiting payment', color: COLORS.goldDark },
-  PAID:      { label: 'Paid',             color: COLORS.green },
-  ASSIGNED:  { label: 'Preparing',        color: COLORS.goldDark },
-  IN_ROUTE:  { label: 'On the way',       color: COLORS.green },
-  DELIVERED: { label: 'Delivered',        color: COLORS.green },
-  CANCELLED: { label: 'Cancelled',        color: COLORS.red },
+  CREATED:   { label: 'Esperando pago',  color: COLORS.goldDark },
+  PAID:      { label: 'Pagado',          color: COLORS.green },
+  ASSIGNED:  { label: 'Preparando',      color: COLORS.goldDark },
+  IN_ROUTE:  { label: 'En camino',       color: COLORS.green },
+  DELIVERED: { label: 'Entregado',       color: COLORS.green },
+  CANCELLED: { label: 'Cancelado',       color: COLORS.red },
 }
 
 export default function OrderHistoryScreen() {
@@ -33,7 +33,7 @@ export default function OrderHistoryScreen() {
       const r = await api.orders.mine()
       setOrders(r.items)
     } catch (e) {
-      setError((e as Error).message || 'Could not load orders')
+      setError((e as Error).message || 'No se pudieron cargar tus pedidos')
     }
   }
 
@@ -51,7 +51,7 @@ export default function OrderHistoryScreen() {
         <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
           <Ionicons name="arrow-back" size={24} color={COLORS.ink} />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>My orders</Text>
+        <Text style={s.headerTitle}>Mis pedidos</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -63,16 +63,16 @@ export default function OrderHistoryScreen() {
         <View style={s.center}>
           <Text style={s.errorText}>{error}</Text>
           <TouchableOpacity onPress={load} style={s.retryBtn}>
-            <Text style={s.retryText}>Retry</Text>
+            <Text style={s.retryText}>Reintentar</Text>
           </TouchableOpacity>
         </View>
       ) : orders && orders.length === 0 ? (
         <View style={s.center}>
           <Ionicons name="receipt-outline" size={48} color={COLORS.textFaint} />
-          <Text style={s.emptyTitle}>No orders yet</Text>
-          <Text style={s.emptySub}>Your purchases will appear here.</Text>
+          <Text style={s.emptyTitle}>Aún no tienes pedidos</Text>
+          <Text style={s.emptySub}>Tus compras aparecerán aquí.</Text>
           <TouchableOpacity onPress={() => router.push('/tienda')} style={s.shopBtn}>
-            <Text style={s.shopText}>Go to store</Text>
+            <Text style={s.shopText}>Ir a la tienda</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -101,14 +101,14 @@ export default function OrderHistoryScreen() {
                 {isPickup && o.pickup_code ? (
                   <View style={s.codeRow}>
                     <Ionicons name="key" size={14} color={COLORS.gold} />
-                    <Text style={s.codeLabel}>Pickup code</Text>
+                    <Text style={s.codeLabel}>Código de recolección</Text>
                     <Text style={s.codeValue}>{o.pickup_code}</Text>
                   </View>
                 ) : null}
 
                 <View style={[s.row, { marginTop: SPACING.sm }]}>
                   <Text style={s.itemsCount}>
-                    {(o.order_items?.length ?? 0)} {o.order_items?.length === 1 ? 'item' : 'items'}
+                    {(o.order_items?.length ?? 0)} {o.order_items?.length === 1 ? 'artículo' : 'artículos'}
                   </Text>
                   <Text style={s.total}>{fmt(o.total)}</Text>
                 </View>

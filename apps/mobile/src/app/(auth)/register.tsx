@@ -16,7 +16,7 @@ export default function RegisterScreen() {
   async function handleSubmit() {
     setError('')
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError('La contraseña debe tener al menos 8 caracteres')
       return
     }
     setLoading(true)
@@ -30,7 +30,7 @@ export default function RegisterScreen() {
       await signUp(body)
       router.replace('/')
     } catch (e) {
-      setError((e as Error).message || 'Sign up failed')
+      setError((e as Error).message || 'Error al crear la cuenta')
     } finally {
       setLoading(false)
     }
@@ -41,17 +41,17 @@ export default function RegisterScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={s.content}>
           <Text style={s.brand}>Cromos 26</Text>
-          <Text style={s.title}>Create account</Text>
-          <Text style={s.subtitle}>Track stickers, swap with friends</Text>
+          <Text style={s.title}>Crear cuenta</Text>
+          <Text style={s.subtitle}>Marca estampas, intercambia con amigos</Text>
 
           <View style={s.form}>
-            <Text style={s.label}>Username</Text>
+            <Text style={s.label}>Usuario</Text>
             <TextInput
               style={s.input}
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
-              placeholder="optional"
+              placeholder="opcional"
               placeholderTextColor={COLORS.textFaint}
             />
 
@@ -63,17 +63,17 @@ export default function RegisterScreen() {
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
-              placeholder="you@example.com"
+              placeholder="tu@email.com"
               placeholderTextColor={COLORS.textFaint}
             />
 
-            <Text style={s.label}>Password</Text>
+            <Text style={s.label}>Contraseña</Text>
             <TextInput
               style={s.input}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              placeholder="at least 8 characters"
+              placeholder="al menos 8 caracteres"
               placeholderTextColor={COLORS.textFaint}
             />
 
@@ -85,17 +85,17 @@ export default function RegisterScreen() {
               disabled={!email || !password || loading}
               activeOpacity={0.85}
             >
-              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Create account</Text>}
+              {loading ? <ActivityIndicator color={COLORS.paper} /> : <Text style={s.ctaText}>Crear cuenta</Text>}
             </TouchableOpacity>
 
             <View style={s.footer}>
-              <Text style={s.footerText}>Already have an account? </Text>
-              <Link href="/login" style={s.link}>Sign in</Link>
+              <Text style={s.footerText}>¿Ya tienes cuenta? </Text>
+              <Link href="/login" style={s.link}>Iniciar sesión</Link>
             </View>
 
             <Text style={s.disclaimer}>
-              Not affiliated with FIFA or Panini. By creating an account you agree to our
-              Terms and Privacy Policy.
+              No afiliado con FIFA o Panini. Al crear una cuenta aceptas nuestros
+              Términos y Política de Privacidad.
             </Text>
           </View>
         </View>
