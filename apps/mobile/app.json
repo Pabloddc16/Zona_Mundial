@@ -14,7 +14,9 @@
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["com.googleusercontent.apps.101210295525-acth5d6aubeg2sqotr8m4l08bk62b4mb"]
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.101210295525-acth5d6aubeg2sqotr8m4l08bk62b4mb"
+            ]
           }
         ]
       }
@@ -55,7 +57,8 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.101210295525-acth5d6aubeg2sqotr8m4l08bk62b4mb"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
