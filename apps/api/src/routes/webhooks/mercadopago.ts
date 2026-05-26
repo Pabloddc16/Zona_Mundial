@@ -13,6 +13,7 @@
 import type { FastifyPluginAsync } from 'fastify'
 import crypto from 'crypto'
 import { getClient } from '@pablo/db'
+import { sendPickupCodeEmail } from '../../lib/email.js'
 
 const mercadopagoWebhook: FastifyPluginAsync = async (fastify) => {
   fastify.addContentTypeParser(
@@ -86,7 +87,7 @@ const mercadopagoWebhook: FastifyPluginAsync = async (fastify) => {
     // Mark order paid (idempotent — if already PAID, no-op).
     const { data: order, error: lookupErr } = await sb
       .from('orders')
-      .select('order_number, status, user_id, total, order_items(product_id, qty)')
+      .select('order_number, status, user_id, total, customer_name, phone, address, delivery_type, pickup_code, order_items(product_id, qty)')
       .eq('order_number', orderNumber)
       .maybeSingle()
 
@@ -155,6 +156,37 @@ const mercadopagoWebhook: FastifyPluginAsync = async (fastify) => {
           body: JSON.stringify({ items: starItems }),
         }).catch((err) => fastify.log.warn({ err }, 'star stock decrement failed'))
       }
+    }
+
+    // Pickup-code confirmation email (fire-and-forget; never blocks webhook).
+    // Looks up the user's email via auth.users since orders table doesn't
+    // store it directly. Skips silently when no user_id, no pickup code,
+    // no email, or RESEND_API_KEY missing.
+    if (order.pickup_code && order.user_id) {
+      ;(async () => {
+        try {
+          const { data: userRow } = await sb
+            .from('users')
+            .select('email')
+            .eq('id', order.user_id)
+            .maybeSingle()
+          const email = userRow?.email
+          if (!email) {
+            fastify.log.warn({ orderNumber, userId: order.user_id }, 'no email for pickup notification')
+            return
+          }
+          const result = await sendPickupCodeEmail({
+            to: email,
+            customerName: order.customer_name ?? 'cliente',
+            orderNumber,
+            pickupCode: order.pickup_code!,
+            total: Number(payment.transaction_amount ?? order.total ?? 0),
+          })
+          if (!result.ok) fastify.log.warn({ orderNumber, err: result.error }, 'pickup email send failed')
+        } catch (err) {
+          fastify.log.warn({ err, orderNumber }, 'pickup email pipeline failed')
+        }
+      })()
     }
 
     return { received: true, status: 'paid', orderNumber }

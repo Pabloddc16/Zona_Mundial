@@ -57,6 +57,24 @@ await app.register(auditPlugin)
 // Health check (no auth — for uptime monitors)
 app.get('/health', async () => ({ ok: true, ts: new Date().toISOString() }))
 
+// Diagnostic — verifies Replicate token + Resend key are wired without using
+// real budget. Returns env presence flags + a Replicate auth ping result.
+app.get('/health/deps', async () => {
+  const { pingReplicate } = await import('./lib/replicate.js')
+  const replicateToken = !!process.env['REPLICATE_API_TOKEN']
+  const resendKey = !!process.env['RESEND_API_KEY']
+  const mpTest = !!process.env['MP_ACCESS_TOKEN_TEST']
+  const mpProd = !!process.env['MP_ACCESS_TOKEN_PROD']
+  const mpWebhookSecret = !!process.env['MP_WEBHOOK_SECRET']
+  const ingestSecret = !!process.env['INGEST_SECRET']
+  const replicate = replicateToken ? await pingReplicate() : { ok: false, error: 'not set' }
+  return {
+    env: { replicateToken, resendKey, mpTest, mpProd, mpWebhookSecret, ingestSecret },
+    replicate,
+    ts: new Date().toISOString(),
+  }
+})
+
 // Webhook routes (raw body needed for signature verification — register before body parser)
 await app.register(stripeWebhook, { prefix: '/api/webhooks' })
 await app.register(mercadopagoWebhook, { prefix: '/api/webhooks' })

@@ -25,6 +25,23 @@ interface PredictionResp {
 
 /** Kick off + poll a background-removal job. Returns the resulting PNG URL
  *  on success, or null on failure or missing token (graceful degrade). */
+/** Cheap auth check — hits /v1/account (no credit consumed). Returns the
+ *  authenticated account info or null on failure / missing token. */
+export async function pingReplicate(): Promise<{ ok: boolean; account?: string; error?: string }> {
+  const token = process.env['REPLICATE_API_TOKEN']
+  if (!token) return { ok: false, error: 'REPLICATE_API_TOKEN not set' }
+  try {
+    const r = await fetch(`${REPLICATE_API}/account`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+    if (!r.ok) return { ok: false, error: `HTTP ${r.status} ${await r.text()}` }
+    const data = (await r.json()) as { username?: string; name?: string }
+    return { ok: true, account: data.username ?? data.name ?? 'unknown' }
+  } catch (e) {
+    return { ok: false, error: (e as Error).message }
+  }
+}
+
 export async function removeBackground(imageUrl: string): Promise<string | null> {
   const token = process.env['REPLICATE_API_TOKEN']
   if (!token) return null
