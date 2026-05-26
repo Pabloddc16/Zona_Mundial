@@ -27,9 +27,31 @@ import {
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
-import * as ImagePicker from 'expo-image-picker'
-import * as ImageManipulator from 'expo-image-manipulator'
 import * as Haptics from 'expo-haptics'
+
+/* Lazy-load native modules — keeps the screen from crashing on older
+ * TestFlight binaries that predate the plugin entries in app.json
+ * (Builds 10-12). Try/catch around each call surfaces a friendly
+ * "update from TestFlight" Alert instead of a hard exit. */
+type ImagePickerModule = typeof import('expo-image-picker')
+type ImageManipulatorModule = typeof import('expo-image-manipulator')
+let _ImagePicker: ImagePickerModule | null = null
+let _ImageManipulator: ImageManipulatorModule | null = null
+let _nativeAvailable: boolean | null = null
+
+function loadImageModules(): boolean {
+  if (_nativeAvailable !== null) return _nativeAvailable
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    _ImagePicker = require('expo-image-picker') as ImagePickerModule
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    _ImageManipulator = require('expo-image-manipulator') as ImageManipulatorModule
+    _nativeAvailable = true
+  } catch {
+    _nativeAvailable = false
+  }
+  return _nativeAvailable
+}
 import { PaniniCardPreview } from '@/components/PaniniCardPreview'
 import { useCartStore } from '@/lib/cart-store'
 import { useAuthStore } from '@/lib/auth-store'
@@ -350,26 +372,36 @@ function PhotoStep({
   const [busy, setBusy] = useState(false)
 
   async function pick(fromCamera: boolean) {
+    // Gate: older TestFlight binaries lack the native modules entirely.
+    if (!loadImageModules() || !_ImagePicker || !_ImageManipulator) {
+      Alert.alert(
+        'Versión desactualizada',
+        'Mi Panini necesita la última versión. Actualiza desde TestFlight (Build 13 o superior).',
+      )
+      return
+    }
+    const IP = _ImagePicker
+    const IM = _ImageManipulator
+
     setBusy(true)
     try {
-      // Ask permission first — Expo handles iOS prompt automatically.
       const perm = fromCamera
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync()
+        ? await IP.requestCameraPermissionsAsync()
+        : await IP.requestMediaLibraryPermissionsAsync()
       if (!perm.granted) {
         Alert.alert('Permiso requerido', 'Activa el permiso en Ajustes para continuar.')
         return
       }
 
       const result = fromCamera
-        ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        ? await IP.launchCameraAsync({
+            mediaTypes: IP.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.85,
           })
-        : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        : await IP.launchImageLibraryAsync({
+            mediaTypes: IP.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.85,
@@ -379,12 +411,17 @@ function PhotoStep({
 
       // Force-resize down to 1024x1024 JPEG so the upload stays small + the
       // print render gets predictable input. EXIF orientation auto-applied.
-      const manipulated = await ImageManipulator.manipulateAsync(
+      const manipulated = await IM.manipulateAsync(
         result.assets[0].uri,
         [{ resize: { width: 1024, height: 1024 } }],
-        { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG },
+        { compress: 0.85, format: IM.SaveFormat.JPEG },
       )
       onChange(manipulated.uri)
+    } catch (e) {
+      Alert.alert(
+        'No pudimos tomar la foto',
+        `${(e as Error).message ?? 'Error desconocido'}. Actualiza la app desde TestFlight si el problema persiste.`,
+      )
     } finally {
       setBusy(false)
     }
