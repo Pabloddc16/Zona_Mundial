@@ -36,6 +36,26 @@ export async function signInWithApple(): Promise<AppleSignInResult> {
   if (Platform.OS !== 'ios') {
     return { ok: false, error: 'Apple Sign-In is only available on iOS' }
   }
+
+  // Pre-check — if the native module isn't compiled into the running binary
+  // (older TestFlight build predates the plugin), signInAsync would throw a
+  // confusing platform error. Surface a clear "update your app" message
+  // instead. This call is fast (sync-ish) and won't trigger any UI.
+  try {
+    const available = await AppleAuthentication.isAvailableAsync()
+    if (!available) {
+      return {
+        ok: false,
+        error: 'Sign in with Apple no está disponible en esta versión. Actualiza la app desde TestFlight.',
+      }
+    }
+  } catch {
+    return {
+      ok: false,
+      error: 'Esta versión de la app no soporta Sign in with Apple. Actualiza desde TestFlight.',
+    }
+  }
+
   try {
     const credential = await AppleAuthentication.signInAsync({
       requestedScopes: [
