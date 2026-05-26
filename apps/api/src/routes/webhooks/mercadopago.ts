@@ -13,7 +13,7 @@
 import type { FastifyPluginAsync } from 'fastify'
 import crypto from 'crypto'
 import { getClient } from '@pablo/db'
-import { sendPickupCodeEmail } from '../../lib/email.js'
+import { sendPickupCodeEmail, sendOrderConfirmationEmail } from '../../lib/email.js'
 
 const mercadopagoWebhook: FastifyPluginAsync = async (fastify) => {
   fastify.addContentTypeParser(
@@ -162,7 +162,11 @@ const mercadopagoWebhook: FastifyPluginAsync = async (fastify) => {
     // Looks up the user's email via auth.users since orders table doesn't
     // store it directly. Skips silently when no user_id, no pickup code,
     // no email, or RESEND_API_KEY missing.
-    if (order.pickup_code && order.user_id) {
+    // Post-payment email: pickup-code for in-store orders, order
+    // confirmation for delivery orders. Fire-and-forget — failures never
+    // break the webhook. Email lookup needs auth user since the orders
+    // row only stores customer_name + phone, not email.
+    if (order.user_id) {
       ;(async () => {
         try {
           const { data: userRow } = await sb
@@ -172,19 +176,35 @@ const mercadopagoWebhook: FastifyPluginAsync = async (fastify) => {
             .maybeSingle()
           const email = userRow?.email
           if (!email) {
-            fastify.log.warn({ orderNumber, userId: order.user_id }, 'no email for pickup notification')
+            fastify.log.warn({ orderNumber, userId: order.user_id }, 'no email on file — skipping notification')
             return
           }
-          const result = await sendPickupCodeEmail({
-            to: email,
-            customerName: order.customer_name ?? 'cliente',
-            orderNumber,
-            pickupCode: order.pickup_code!,
-            total: Number(payment.transaction_amount ?? order.total ?? 0),
-          })
-          if (!result.ok) fastify.log.warn({ orderNumber, err: result.error }, 'pickup email send failed')
+
+          const totalPaid = Number(payment.transaction_amount ?? order.total ?? 0)
+          const isPickup = order.delivery_type === 'local'
+
+          const result = isPickup && order.pickup_code
+            ? await sendPickupCodeEmail({
+                to: email,
+                customerName: order.customer_name ?? 'cliente',
+                orderNumber,
+                pickupCode: order.pickup_code,
+                total: totalPaid,
+              })
+            : await sendOrderConfirmationEmail({
+                to: email,
+                customerName: order.customer_name ?? 'cliente',
+                orderNumber,
+                total: totalPaid,
+                deliveryType: isPickup ? 'local' : 'envio',
+                ...(order.address ? { address: order.address } : {}),
+              })
+
+          if (!result.ok) {
+            fastify.log.warn({ orderNumber, email, err: result.error }, 'post-payment email send failed')
+          }
         } catch (err) {
-          fastify.log.warn({ err, orderNumber }, 'pickup email pipeline failed')
+          fastify.log.warn({ err, orderNumber }, 'post-payment email pipeline failed')
         }
       })()
     }
