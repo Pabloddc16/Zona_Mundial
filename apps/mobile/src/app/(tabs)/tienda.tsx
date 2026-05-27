@@ -85,8 +85,8 @@ export default function TiendaScreen() {
       {/* Header — Tienda / Mundial 26 Shop, cart top-right, NO settings */}
       <View style={s.header}>
         <View>
-          <Text style={s.titleSmall}>Store</Text>
-          <Text style={s.titleBig}>Mundial 26 Shop</Text>
+          <Text style={s.titleSmall}>Tienda</Text>
+          <Text style={s.titleBig}>Cromos 26</Text>
         </View>
         <TouchableOpacity onPress={() => router.push('/carrito')} style={s.cartBtn} hitSlop={8}>
           <Ionicons name="cart-outline" size={22} color={COLORS.paper} />
@@ -167,37 +167,39 @@ export default function TiendaScreen() {
           <View style={s.heroBody}>
             <View style={s.heroText}>
               <Text style={s.heroEyebrow}>GOAT · CRACK · STAR</Text>
-              <Text style={s.heroTitle}>Buy the stars{'\n'}you're missing.</Text>
-              <Text style={s.heroSub}>Messi, Cristiano, Yamal and 17 more — Base, Bronze, Silver or Gold.</Text>
+              <Text style={s.heroTitle}>Compra las estrellas{'\n'}que te faltan.</Text>
+              <Text style={s.heroSub}>20 jugadores estrella en 4 rarezas: Base, Bronce, Plata u Oro.</Text>
               <View style={[s.heroCta, { backgroundColor: COLORS.gold }]}>
-                <Text style={[s.heroCtaText, { color: COLORS.red }]}>Explore extras</Text>
+                <Text style={[s.heroCtaText, { color: COLORS.red }]}>Ver extras</Text>
                 <Ionicons name="arrow-forward" size={14} color={COLORS.red} />
               </View>
             </View>
-            {/* Mini sticker stack — Messi front, Cristiano peeking behind */}
+            {/* Mini sticker stack — generic placeholder tiers (no real player
+                names/likeness in marketing screenshots; the actual catalog
+                still uses real names per Pablo's spec). */}
             <View style={s.starMockWrap}>
               <View style={[s.starMock, s.starMockBack]}>
                 <View style={s.starMockShine} />
                 <Text style={s.starMockNum}>2</Text>
                 <View style={s.starMockAvatar}>
-                  <Text style={s.starMockInitial}>CR</Text>
+                  <Text style={s.starMockInitial}>★</Text>
                 </View>
-                <Text style={s.starMockName}>RONALDO</Text>
-                <Text style={s.starMockCountry}>POR</Text>
+                <Text style={s.starMockName}>GOAT</Text>
+                <Text style={s.starMockCountry}>MX</Text>
                 <View style={s.starMockRarity}>
-                  <Text style={s.starMockRarityText}>GOLD</Text>
+                  <Text style={s.starMockRarityText}>ORO</Text>
                 </View>
               </View>
               <View style={[s.starMock, s.starMockFront]}>
                 <View style={s.starMockShine} />
                 <Text style={s.starMockNum}>1</Text>
                 <View style={s.starMockAvatar}>
-                  <Text style={s.starMockInitial}>M</Text>
+                  <Text style={s.starMockInitial}>★</Text>
                 </View>
-                <Text style={s.starMockName}>MESSI</Text>
-                <Text style={s.starMockCountry}>ARG</Text>
+                <Text style={s.starMockName}>CRACK</Text>
+                <Text style={s.starMockCountry}>MX</Text>
                 <View style={s.starMockRarity}>
-                  <Text style={s.starMockRarityText}>GOLD</Text>
+                  <Text style={s.starMockRarityText}>ORO</Text>
                 </View>
               </View>
             </View>
@@ -215,24 +217,24 @@ export default function TiendaScreen() {
           </View>
           {missing > 0 ? (
             <>
-              <Text style={s.heroEyebrow}>YOUR ALBUM · {completionPct}%</Text>
-              <Text style={s.heroTitle}>You're missing {missing} stickers</Text>
+              <Text style={s.heroEyebrow}>TU ÁLBUM · {completionPct}%</Text>
+              <Text style={s.heroTitle}>Te faltan {missing} estampas</Text>
               <View style={s.albumProgressBar}>
                 <View style={[s.albumProgressFill, { width: `${completionPct}%` }]} />
               </View>
-              <Text style={s.heroSub}>Estimated total: {fmt(estCostToFinish)} MXN</Text>
+              <Text style={s.heroSub}>Total estimado: {fmt(estCostToFinish)} MXN</Text>
               <View style={s.heroCta}>
-                <Text style={s.heroCtaText}>Complete album</Text>
+                <Text style={s.heroCtaText}>Completar álbum</Text>
                 <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
               </View>
             </>
           ) : (
             <>
-              <Text style={s.heroEyebrow}>CONGRATULATIONS!</Text>
-              <Text style={s.heroTitle}>Album complete! 🏆</Text>
-              <Text style={s.heroSub}>Reserve your spot for World Cup 2030.</Text>
+              <Text style={s.heroEyebrow}>¡FELICIDADES!</Text>
+              <Text style={s.heroTitle}>¡Álbum completo! 🏆</Text>
+              <Text style={s.heroSub}>Reserva tu lugar para el Mundial 2030.</Text>
               <View style={s.heroCta}>
-                <Text style={s.heroCtaText}>Reserve for 2030</Text>
+                <Text style={s.heroCtaText}>Reservar 2030</Text>
                 <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
               </View>
             </>
@@ -242,7 +244,7 @@ export default function TiendaScreen() {
         {/* 4. PRODUCTOS DEL MUNDIAL */}
         <View style={s.productsHeader}>
           <Ionicons name="trophy" size={20} color={COLORS.ink} />
-          <Text style={s.productsTitle}>World Cup products</Text>
+          <Text style={s.productsTitle}>Productos coleccionables</Text>
         </View>
 
         {/* 4a — category carousel */}
