@@ -1,15 +1,41 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, type Product, type Sale } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Minus, Trash2, Receipt, History, ShoppingCart } from 'lucide-react'
+import { Sheet } from '@/components/ui/sheet'
+import { Plus, Minus, Trash2, Receipt, History, ShoppingCart, Star, Calculator } from 'lucide-react'
 import { format } from 'date-fns'
+import {
+  STAR_PLAYERS, STAR_RARITIES, STAR_PRICING,
+  type StarRarity,
+} from '@/lib/star-inventory'
 
-interface CartItem { product: Product; quantity: number; unit_price: number }
+// Local helpers — admin lib doesn't export these; keep them colocated so the
+// POS picker stays self-contained.
+const RARITY_LABEL: Record<StarRarity, string> = {
+  BASE: 'Base', BRONCE: 'Bronce', PLATA: 'Plata', ORO: 'Oro',
+}
+const RARITY_TINT: Record<StarRarity, string> = {
+  BASE:  'oklch(0.55 0.06 240)',
+  BRONCE:'oklch(0.55 0.10 50)',
+  PLATA: 'oklch(0.85 0.02 0)',
+  ORO:   'oklch(0.84 0.15 80)',
+}
+
+interface CartItem {
+  product: Product
+  quantity: number
+  unit_price: number
+  // Bulk mode: staff enters total cash collected for N cards. Unit price
+  // becomes the average (total / qty). Used for loose-sticker batches +
+  // Star bundles where each card was priced differently in real life.
+  bulkMode?: boolean
+  bulkTotal?: number
+}
 
 const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 
@@ -26,6 +52,8 @@ export default function POSPage() {
   const [discountPct, setDiscountPct] = useState(0)
   const [success, setSuccess] = useState(false)
   const [historyPage, setHistoryPage] = useState(1)
+  // Star picker sheet — opens when staff taps the "Estrellas" tile.
+  const [starPickerOpen, setStarPickerOpen] = useState(false)
 
   const { data: products } = useQuery({
     queryKey: ['pos-products', search],
@@ -65,9 +93,69 @@ export default function POSPage() {
     })
   }
 
+  // Add a Star player + rarity to the ticket. Uses a synthetic Product shape
+  // since Stars aren't in the products table — sales API accepts the
+  // STAR-<slug>-<RARITY> SKU as a free-form product_id (no stock movement
+  // recorded against products.stock; separate star_player_stock decrement).
+  function addStarToCart(playerSlug: string, rarity: StarRarity) {
+    const player = STAR_PLAYERS.find((p) => p.slug === playerSlug)
+    if (!player) return
+    const price = STAR_PRICING[player.tier][rarity]
+    if (!price || price <= 0) return  // STAR-tier players have no ORO SKU
+
+    const id = `STAR-${player.slug}-${rarity}`
+    const synthetic: Product = {
+      id,
+      name: `${player.name} · ${RARITY_LABEL[rarity]} (${player.tier})`,
+      price,
+      emoji: '⭐',
+      stock: 999, // not tracked in products.stock
+      updated_at: new Date().toISOString(),
+    }
+    setCart((prev) => {
+      const existing = prev.find((i) => i.product.id === id)
+      if (existing) return prev.map((i) => i.product.id === id ? { ...i, quantity: i.quantity + 1 } : i)
+      return [...prev, { product: synthetic, quantity: 1, unit_price: price }]
+    })
+  }
+
+  // Bulk-total mode: when enabled, staff enters total cash + qty separately.
+  // Unit price stays = total / qty so sale_items carry the per-card average.
+  function toggleBulk(id: string) {
+    setCart((prev) => prev.map((i) => {
+      if (i.product.id !== id) return i
+      if (i.bulkMode) {
+        // Leaving bulk mode — keep current unit_price + qty, drop bulk fields.
+        const { bulkMode, bulkTotal, ...rest } = i
+        return rest
+      }
+      // Entering bulk mode — seed bulkTotal from current line subtotal.
+      const seedTotal = Math.round(i.quantity * i.unit_price * 100) / 100
+      return { ...i, bulkMode: true, bulkTotal: seedTotal }
+    }))
+  }
+
+  function setBulkTotal(id: string, total: number) {
+    setCart((prev) => prev.map((i) => {
+      if (i.product.id !== id || !i.bulkMode) return i
+      const safeQty = Math.max(1, i.quantity)
+      return { ...i, bulkTotal: total, unit_price: Math.round((total / safeQty) * 100) / 100 }
+    }))
+  }
+
   function setQty(id: string, qty: number) {
-    if (qty <= 0) setCart((prev) => prev.filter((i) => i.product.id !== id))
-    else setCart((prev) => prev.map((i) => i.product.id === id ? { ...i, quantity: qty } : i))
+    if (qty <= 0) {
+      setCart((prev) => prev.filter((i) => i.product.id !== id))
+      return
+    }
+    setCart((prev) => prev.map((i) => {
+      if (i.product.id !== id) return i
+      // In bulk mode, qty change rederives unit_price from the locked total.
+      if (i.bulkMode && i.bulkTotal != null) {
+        return { ...i, quantity: qty, unit_price: Math.round((i.bulkTotal / qty) * 100) / 100 }
+      }
+      return { ...i, quantity: qty }
+    }))
   }
 
   function setPrice(id: string, price: number) {
@@ -131,6 +219,24 @@ export default function POSPage() {
               </div>
             )}
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+              {/* Star players virtual tile — opens the picker sheet so staff
+                  can sell GOAT/CRACK/STAR cards from the in-app catalog. */}
+              <button
+                onClick={() => setStarPickerOpen(true)}
+                className="text-left rounded-lg border-2 p-3 transition-colors hover:bg-brand-50/5"
+                style={{ borderColor: 'oklch(0.84 0.15 80)', background: 'linear-gradient(135deg, oklch(0.20 0.05 250) 0%, oklch(0.30 0.10 80) 100%)' }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="h-5 w-5 text-[oklch(0.84_0.15_80)]" />
+                  <span className="text-[10px] font-black tracking-widest text-[oklch(0.84_0.15_80)]">EXTRAS</span>
+                </div>
+                <div className="text-sm font-bold text-white">Estrellas</div>
+                <div className="text-xs text-white/60 mt-0.5">20 jugadores × 4 rarezas</div>
+                <div className="mt-1">
+                  <Badge variant="default" className="text-xs">Tap para abrir</Badge>
+                </div>
+              </button>
+
               {products?.items.map((p) => (
                 <button
                   key={p.id}
@@ -178,32 +284,76 @@ export default function POSPage() {
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setQty(item.product.id, item.quantity - 1)} className="rounded border border-white/8 p-0.5 hover:bg-white/8 text-white/70">
-                      <Minus className="h-3 w-3" />
+
+                  {item.bulkMode ? (
+                    /* Bulk mode — staff enters total cash + qty, unit price
+                       is the live-computed average. Used for loose cards
+                       and Star bundles where each card priced differently. */
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-white/50 w-16">Cantidad</span>
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => setQty(item.product.id, Number(e.target.value))}
+                          className="flex-1 rounded border border-white/8 bg-transparent px-1.5 py-0.5 text-right text-sm text-white/90"
+                          min={1}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-white/50 w-16">Total</span>
+                        <input
+                          type="number"
+                          value={item.bulkTotal ?? 0}
+                          onChange={(e) => setBulkTotal(item.product.id, Number(e.target.value))}
+                          className="flex-1 rounded border border-[oklch(0.84_0.15_80)] bg-transparent px-1.5 py-0.5 text-right text-sm text-white font-bold"
+                          step="0.01"
+                          min={0}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-white/50 w-16">Promedio</span>
+                        <span className="flex-1 text-right text-xs text-white/70 font-mono">{fmt(item.unit_price)} / unidad</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setQty(item.product.id, item.quantity - 1)} className="rounded border border-white/8 p-0.5 hover:bg-white/8 text-white/70">
+                        <Minus className="h-3 w-3" />
+                      </button>
+                      <input
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => setQty(item.product.id, Number(e.target.value))}
+                        className="w-12 rounded border border-white/8 bg-transparent px-1.5 py-0.5 text-center text-sm text-white/90"
+                        min={1}
+                      />
+                      <button onClick={() => setQty(item.product.id, item.quantity + 1)} className="rounded border border-white/8 p-0.5 hover:bg-white/8 text-white/70">
+                        <Plus className="h-3 w-3" />
+                      </button>
+                      <span className="text-xs text-white/50">×</span>
+                      <input
+                        type="number"
+                        value={item.unit_price}
+                        onChange={(e) => setPrice(item.product.id, Number(e.target.value))}
+                        className="w-20 rounded border border-white/8 bg-transparent px-1.5 py-0.5 text-right text-sm text-white/90"
+                        step="0.01"
+                        min={0}
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => toggleBulk(item.product.id)}
+                      className={`flex items-center gap-1 text-[10px] font-medium transition-colors ${item.bulkMode ? 'text-[oklch(0.84_0.15_80)]' : 'text-white/40 hover:text-white/60'}`}
+                    >
+                      <Calculator className="h-3 w-3" />
+                      {item.bulkMode ? 'Granel ON' : 'Granel'}
                     </button>
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => setQty(item.product.id, Number(e.target.value))}
-                      className="w-12 rounded border border-white/8 bg-transparent px-1.5 py-0.5 text-center text-sm text-white/90"
-                      min={1}
-                    />
-                    <button onClick={() => setQty(item.product.id, item.quantity + 1)} className="rounded border border-white/8 p-0.5 hover:bg-white/8 text-white/70">
-                      <Plus className="h-3 w-3" />
-                    </button>
-                    <span className="text-xs text-white/50">×</span>
-                    <input
-                      type="number"
-                      value={item.unit_price}
-                      onChange={(e) => setPrice(item.product.id, Number(e.target.value))}
-                      className="w-20 rounded border border-white/8 bg-transparent px-1.5 py-0.5 text-right text-sm text-white/90"
-                      step="0.01"
-                      min={0}
-                    />
-                  </div>
-                  <div className="text-right text-xs font-medium text-white/60">
-                    {fmt(item.quantity * item.unit_price)}
+                    <span className="text-xs font-medium text-white/70">
+                      {fmt(item.quantity * item.unit_price)}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -272,7 +422,7 @@ export default function POSPage() {
             </div>
           </div>
         </div>
-      ) : (
+      ) : tab === 'history' ? (
         /* History tab */
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           <h2 className="text-lg font-semibold text-white/90">POS Sales History</h2>
@@ -295,7 +445,56 @@ export default function POSPage() {
             </div>
           )}
         </div>
-      )}
+      ) : null}
+
+      {/* Star players picker sheet — opens from Estrellas tile in POS grid */}
+      <Sheet open={starPickerOpen} onClose={() => setStarPickerOpen(false)} title="Estrellas">
+        <div className="space-y-3">
+          <p className="text-xs text-white/50">
+            Toca un jugador y rareza para añadir al ticket. Se carga al
+            precio del catálogo; usa modo Granel en el ticket para ajustar.
+          </p>
+          <div className="space-y-2">
+            {STAR_PLAYERS.map((p) => (
+              <div key={p.slug} className="rounded-lg border border-white/8 p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="font-bold text-white">{p.name}</span>
+                    <span className="text-white/40 text-xs ml-2">{p.country}</span>
+                  </div>
+                  <span className="text-[9px] font-black tracking-widest text-white/50">{p.tier}</span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {STAR_RARITIES.map((r) => {
+                    const price = STAR_PRICING[p.tier][r]
+                    const available = price > 0
+                    return (
+                      <button
+                        key={r}
+                        onClick={() => available && (addStarToCart(p.slug, r), setStarPickerOpen(false))}
+                        disabled={!available}
+                        className={`rounded p-1.5 text-center transition-colors ${
+                          available
+                            ? 'border border-white/10 hover:border-[oklch(0.84_0.15_80)] hover:bg-white/5'
+                            : 'border border-white/5 opacity-30 cursor-not-allowed'
+                        }`}
+                        style={{ borderColor: available ? RARITY_TINT[r] : undefined }}
+                      >
+                        <div className="text-[9px] font-black tracking-widest" style={{ color: RARITY_TINT[r] }}>
+                          {RARITY_LABEL[r]}
+                        </div>
+                        <div className="text-[11px] font-bold text-white mt-0.5">
+                          {available ? fmt(price) : '—'}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Sheet>
     </div>
   )
 }

@@ -63,18 +63,22 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     const supabase = getClient()
-    const productIds = items.map((i) => i.product_id).filter(Boolean) as string[]
+    // Strip dynamic SKUs (Stars, Mi Panini customs) before hitting products
+    // table — they're not real product rows. STAR-* prices come from the
+    // catalog code; MI-PANINI-* are ad-hoc customer customs.
+    const dynamicPrefix = (id: string) => id.startsWith('STAR-') || id.startsWith('MI-PANINI-')
+    const productIds = items
+      .map((i) => i.product_id)
+      .filter((id): id is string => !!id && !dynamicPrefix(id))
     const { data: products } = productIds.length
       ? await supabase.from('products').select('id, cost, name, emoji').in('id', productIds)
       : { data: [] }
 
-    // Build enriched items. Stock is validated inside recordMovements against the
-    // movements-backed stock view — the legacy products.stock column is always 0
-    // since we moved to the ledger model.
     const enrichedItems = []
     for (const raw of items) {
-      const product = products?.find((p) => p.id === raw.product_id)
-      if (raw.product_id && !product) return reply.badRequest(`Product not found: ${raw.product_id}`)
+      const isDynamic = raw.product_id && dynamicPrefix(raw.product_id)
+      const product = isDynamic ? null : products?.find((p) => p.id === raw.product_id)
+      if (raw.product_id && !isDynamic && !product) return reply.badRequest(`Product not found: ${raw.product_id}`)
       const cost = Number(product?.cost ?? 0)
       enrichedItems.push({
         ...raw,
@@ -95,9 +99,10 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
 
     const saleId = randomUUID()
 
-    // Deduct stock by recording movements (movements ledger is the single source of truth)
+    // Deduct stock for real catalog SKUs via the ledger.
+    // Skip STAR-* / MI-PANINI-* — they live in their own tables.
     const saleMovements = enrichedItems
-      .filter((i) => i.product_id)
+      .filter((i) => i.product_id && !dynamicPrefix(i.product_id))
       .map((i) => ({
         sku_id: i.product_id as string,
         qty: Math.ceil(i.quantity),
@@ -114,6 +119,23 @@ const salesRoutes: FastifyPluginAsync = async (fastify) => {
       } catch (err) {
         return reply.badRequest((err as Error).message)
       }
+    }
+
+    // STAR-* sales decrement star_player_stock via SQL function. Fire-and-
+    // forget per row — losing a decrement is recoverable from sale_items
+    // history, but blocking the sale on a stock RPC error isn't worth it.
+    for (const item of enrichedItems) {
+      if (!item.product_id?.startsWith('STAR-')) continue
+      const rest = item.product_id.slice('STAR-'.length)
+      const lastDash = rest.lastIndexOf('-')
+      if (lastDash <= 0) continue
+      const slug = rest.slice(0, lastDash)
+      const rarity = rest.slice(lastDash + 1)
+      supabase
+        .rpc('decrement_star_stock', { p_slug: slug, p_rarity: rarity, p_qty: Math.ceil(item.quantity) })
+        .then(({ error }) => {
+          if (error) fastify.log.warn({ err: error, slug, rarity }, 'star stock decrement (POS) failed')
+        })
     }
 
     const { data: sale, error } = await supabase.from('sales').insert({
