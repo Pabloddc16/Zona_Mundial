@@ -33,7 +33,19 @@ const CATEGORY_GRADIENTS: Record<string, [string, string]> = {
   cartas: ['#006341', '#FFD100'],
 }
 
+/**
+ * Map API product → Product type rendered in the UI.
+ *
+ * IMAGES TEMPORARILY DROPPED for App Store IP review (Guideline 5.2.1).
+ * The uploaded photos show FIFA / Panini / Coca-Cola branded packaging
+ * which is exactly what Apple rejected on. Falling back to the emoji per
+ * category lets the catalog still render without IP risk in screenshots.
+ *
+ * Flip the env flag EXPO_PUBLIC_SHOW_PRODUCT_IMAGES=1 to restore real
+ * photos once Pablo re-shoots clean (or once we own the rights).
+ */
 function apiToProduct(p: ApiProduct): Product {
+  const showImages = process.env['EXPO_PUBLIC_SHOW_PRODUCT_IMAGES'] === '1'
   return {
     id: p.id,
     name: p.name,
@@ -41,7 +53,7 @@ function apiToProduct(p: ApiProduct): Product {
     category: p.category ?? 'otros',
     description: '',
     emoji: p.emoji ?? '📦',
-    image: p.image_url ?? undefined,
+    ...(showImages && p.image_url ? { image: p.image_url } : {}),
     gradient: CATEGORY_GRADIENTS[p.category ?? ''] ?? ['#374151', '#1C1917'],
     badge: undefined,
   }

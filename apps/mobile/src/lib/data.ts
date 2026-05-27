@@ -18,13 +18,13 @@ export interface Product {
 //   1. Álbum pasta blanda   2. Sobre   3. Álbum pasta dura
 //   4. Caja   5. Set completo   6. Sobre Coca-Cola   7. Set completo Coca-Cola
 export const PRODUCTS: Product[] = [
-  { id: 'ALBUM-SOFT', name: 'Soft album', price: 99, category: 'albumes', description: 'Official Mundial 26 sticker album, soft cover.', emoji: '📘', image: '/products/album-soft.webp', gradient: ['#006341', '#00815a'], badge: 'OFFICIAL' },
-  { id: 'SOBRE-1', name: 'Pack (1 unit)', price: 25, category: 'sobres', description: 'One sealed pack with 7 random stickers.', emoji: '✉️', image: '/products/pack-single.webp', gradient: ['#006341', '#004a30'], badge: 'BEST SELLER' },
-  { id: 'ALBUM-HARD', name: 'Hard album', price: 349, category: 'albumes', description: 'Collector edition hardcover album.', emoji: '📗', image: '/products/album-hard.webp', gradient: ['#006341', '#FFD100'], badge: 'COLLECTOR' },
-  { id: 'CAJA-100', name: 'Box of packs', price: 2500, category: 'sobres', description: 'Sealed box of 100 packs × 7 stickers each.', emoji: '📦', image: '/products/box-100.webp', gradient: ['#CE1126', '#8B0B1C'], badge: 'BEST VALUE' },
-  { id: 'SET-COMPLETO', name: 'Complete set', price: 3500, category: 'packs', description: 'Hardcover album + every pack you need to finish it.', emoji: '🏆', image: '/products/set-complete.webp', gradient: ['#FFD100', '#006341'], badge: 'COMPLETE THE ALBUM' },
-  { id: 'SOBRE-COCA', name: 'Coca-Cola pack', price: 40, category: 'coca', description: '2 Panini stickers + 1 exclusive Coca-Cola sticker.', emoji: '🥤', image: '/products/coca-pack.webp', gradient: ['#CE1126', '#FFD100'], badge: 'LIMITED' },
-  { id: 'SET-COCA', name: 'Coca-Cola complete set', price: 490, category: 'coca', description: 'Complete Coca-Cola promo set in one bundle.', emoji: '🎁', image: '/products/coca-set.webp', gradient: ['#CE1126', '#FFD100'], badge: 'SPECIAL EDITION' },
+  { id: 'ALBUM-SOFT', name: 'Álbum pasta blanda', price: 99, category: 'albumes', description: 'Álbum de estampas Mundial 26, pasta blanda.', emoji: '📘', gradient: ['#006341', '#00815a'] },
+  { id: 'SOBRE-1', name: 'Sobre (1 unidad)', price: 25, category: 'sobres', description: 'Un sobre sellado con 7 estampas al azar.', emoji: '✉️', gradient: ['#006341', '#004a30'], badge: 'MÁS VENDIDO' },
+  { id: 'ALBUM-HARD', name: 'Álbum pasta dura', price: 349, category: 'albumes', description: 'Edición coleccionista, pasta dura.', emoji: '📗', gradient: ['#006341', '#FFD100'], badge: 'COLECCIONISTA' },
+  { id: 'CAJA-100', name: 'Caja 100 sobres', price: 2500, category: 'sobres', description: 'Caja sellada de 100 sobres × 7 estampas.', emoji: '📦', gradient: ['#CE1126', '#8B0B1C'], badge: 'MEJOR VALOR' },
+  { id: 'SET-COMPLETO', name: 'Set completo', price: 3500, category: 'packs', description: 'Álbum pasta dura + todos los sobres para completarlo.', emoji: '🏆', gradient: ['#FFD100', '#006341'], badge: 'COMPLETO' },
+  { id: 'SOBRE-COCA', name: 'Sobre promo Cola', price: 40, category: 'coca', description: '2 estampas regulares + 1 estampa promo exclusiva.', emoji: '🥤', gradient: ['#CE1126', '#FFD100'], badge: 'LIMITADO' },
+  { id: 'SET-COCA', name: 'Set promo Cola completo', price: 490, category: 'coca', description: 'Set promocional completo en un paquete.', emoji: '🎁', gradient: ['#CE1126', '#FFD100'], badge: 'ESPECIAL' },
   // Carry-overs (kept for catalog completeness, shown after the main 7)
   { id: 'CARTA-COCA', name: 'Coca-Cola card', price: 40, category: 'coca', description: 'Single Coca-Cola holographic card.', emoji: '✨', gradient: ['#FFD100', '#CE1126'], badge: 'HOLOGRAPHIC' },
   { id: 'CARTA-SUELTA', name: 'Single sticker', price: 5, category: 'cartas', description: 'Single sticker to complete your album.', emoji: '🃏', gradient: ['#006341', '#FFD100'] },
