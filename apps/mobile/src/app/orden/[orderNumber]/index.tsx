@@ -41,13 +41,39 @@ export default function OrdenScreen() {
   const [drafts, setDrafts] = useState<PaniniDraft[]>([])
   const [error, setError] = useState('')
 
+  // Poll for status updates while the order is still CREATED (waiting for
+  // MP webhook to mark it PAID). Stops once status flips or after a cap so
+  // we don't burn battery on abandoned tabs.
   useEffect(() => {
-    api.orders.get(orderNumber)
-      .then(setOrder)
-      .catch((e: Error) => setError(e.message))
-    api.miPanini.orderDrafts(orderNumber)
-      .then((r) => setDrafts(r.items))
-      .catch(() => { /* no Mi Panini items on this order — ignore */ })
+    let cancelled = false
+    let attempts = 0
+    const MAX_ATTEMPTS = 40 // ~2 min @ 3s
+
+    async function fetchAll() {
+      try {
+        const o = await api.orders.get(orderNumber)
+        if (cancelled) return
+        setOrder(o)
+        api.miPanini.orderDrafts(orderNumber)
+          .then((r) => !cancelled && setDrafts(r.items))
+          .catch(() => { /* no Mi Panini items — ignore */ })
+        return o
+      } catch (e) {
+        if (!cancelled) setError((e as Error).message)
+      }
+    }
+
+    async function loop() {
+      const o = await fetchAll()
+      if (cancelled || !o) return
+      // Keep polling only while we're still waiting for payment confirmation.
+      if (o.status === 'CREATED' && attempts < MAX_ATTEMPTS) {
+        attempts++
+        setTimeout(loop, 3000)
+      }
+    }
+    loop()
+    return () => { cancelled = true }
   }, [orderNumber])
 
   if (error) {
@@ -76,16 +102,45 @@ export default function OrdenScreen() {
   }
 
   const [bg, fg] = STATUS_COLOR[order.status] ?? ['#F3F4F6', '#374151']
+  // Three buckets that change the entire hero + which sections we show:
+  //   waiting  — MP webhook hasn't fired yet (most common right after WebBrowser closes)
+  //   paid     — webhook fired, order moved to PAID/ASSIGNED/IN_ROUTE/DELIVERED
+  //   failed   — explicitly CANCELLED (manual or post-MP timeout)
+  const phase: 'waiting' | 'paid' | 'failed' =
+    order.status === 'CREATED' ? 'waiting'
+    : order.status === 'CANCELLED' ? 'failed'
+    : 'paid'
 
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.scroll}>
-        {/* Success hero */}
+        {/* Hero — varies by payment phase so users on unpaid orders don't
+            see a "confirmed" headline that contradicts reality. */}
         <View style={s.hero}>
-          <Text style={{ fontSize: 64 }}>🎉</Text>
-          <Text style={s.heroTitle}>¡Pedido confirmado!</Text>
-          <Text style={s.heroSub}>Recibirás tu pedido pronto</Text>
-          <Text style={s.orderNum}>#{order.order_number}</Text>
+          {phase === 'waiting' ? (
+            <>
+              <ActivityIndicator size="large" color="#006341" />
+              <Text style={s.heroTitle}>Esperando tu pago</Text>
+              <Text style={s.heroSub}>
+                Si terminaste de pagar en Mercado Pago, esta pantalla se actualizará en unos segundos.
+              </Text>
+              <Text style={s.orderNum}>#{order.order_number}</Text>
+            </>
+          ) : phase === 'failed' ? (
+            <>
+              <Text style={{ fontSize: 64 }}>😕</Text>
+              <Text style={s.heroTitle}>Pedido cancelado</Text>
+              <Text style={s.heroSub}>Tu pedido no se completó. Intenta de nuevo desde la tienda.</Text>
+              <Text style={s.orderNum}>#{order.order_number}</Text>
+            </>
+          ) : (
+            <>
+              <Text style={{ fontSize: 64 }}>🎉</Text>
+              <Text style={s.heroTitle}>¡Pedido confirmado!</Text>
+              <Text style={s.heroSub}>Recibirás tu pedido pronto</Text>
+              <Text style={s.orderNum}>#{order.order_number}</Text>
+            </>
+          )}
         </View>
 
         {/* Status */}
@@ -94,8 +149,21 @@ export default function OrdenScreen() {
           <Text style={[s.statusText, { color: fg }]}>{STATUS_LABEL[order.status] ?? order.status}</Text>
         </View>
 
-        {/* Pickup code — local-pickup orders */}
-        {order.delivery_type === 'local' && (
+        {/* Waiting state — give user something to do instead of staring at a spinner */}
+        {phase === 'waiting' && (
+          <View style={s.waitingActions}>
+            <TouchableOpacity onPress={() => router.replace('/checkout')} style={s.waitingRetryBtn} activeOpacity={0.85}>
+              <Text style={s.waitingRetryText}>Reintentar pago</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/tienda')} style={s.waitingCancelBtn} activeOpacity={0.85}>
+              <Text style={s.waitingCancelText}>Volver a la tienda</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Pickup code — ONLY when paid. Showing before payment misleads
+            customers into thinking they can already pick up. */}
+        {phase === 'paid' && order.delivery_type === 'local' && (
           <View style={s.pickupCodeCard}>
             <Text style={s.pickupCodeLabel}>Tu código de recolección</Text>
             <Text style={s.pickupCode}>{order.pickup_code ?? order.order_number.slice(-6).toUpperCase()}</Text>
@@ -108,8 +176,8 @@ export default function OrdenScreen() {
           </View>
         )}
 
-        {/* Mi Panini cards — show preview per custom sticker so user verifies what they ordered */}
-        {drafts.length > 0 && (
+        {/* Mi Panini cards — same gate: only show after payment confirms */}
+        {phase === 'paid' && drafts.length > 0 && (
           <View style={s.paniniSection}>
             <Text style={s.sectionLabel}>
               {drafts.length === 1 ? 'TU MI PANINI' : `TUS ${drafts.length} MI PANINI`}
@@ -232,4 +300,10 @@ const s = StyleSheet.create({
 
   paniniSection: { marginBottom: 12 },
   paniniStatus: { fontSize: 9, fontWeight: '900', color: '#FFD100', letterSpacing: 1.5, marginTop: 6 },
+
+  waitingActions: { gap: 10, marginBottom: 12 },
+  waitingRetryBtn: { backgroundColor: '#006341', borderRadius: 16, paddingVertical: 14, alignItems: 'center', borderWidth: 2, borderColor: '#FFD100' },
+  waitingRetryText: { color: '#fff', fontWeight: '900', fontSize: 14 },
+  waitingCancelBtn: { backgroundColor: 'transparent', borderRadius: 16, paddingVertical: 12, alignItems: 'center' },
+  waitingCancelText: { color: '#6B7280', fontWeight: '700', fontSize: 13 },
 })
