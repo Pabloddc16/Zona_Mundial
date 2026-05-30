@@ -2,7 +2,7 @@ import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-nati
 import { useLocalSearchParams, router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
-import { groupById, fmt } from '@/lib/data'
+import { groupById, fmt, groupDisplayName, groupDisplayEmoji } from '@/lib/data'
 import { useAlbumStore } from '@/lib/album-store'
 import { useCartStore } from '@/lib/cart-store'
 
@@ -46,8 +46,8 @@ export default function GroupScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Text style={{ fontSize: 24 }}>{group.emoji}</Text>
-            <Text style={s.headerTitle} numberOfLines={1}>{group.name}</Text>
+            <Text style={{ fontSize: 24 }}>{groupDisplayEmoji(group)}</Text>
+            <Text style={s.headerTitle} numberOfLines={1}>{groupDisplayName(group)}</Text>
           </View>
           <Text style={s.headerSub}>{group.subtitle} · {group.stickers.length} stickers</Text>
         </View>

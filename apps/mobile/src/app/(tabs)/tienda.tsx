@@ -232,7 +232,7 @@ export default function TiendaScreen() {
             <>
               <Text style={s.heroEyebrow}>¡FELICIDADES!</Text>
               <Text style={s.heroTitle}>¡Álbum completo! 🏆</Text>
-              <Text style={s.heroSub}>Reserva tu lugar para el Mundial 2030.</Text>
+              <Text style={s.heroSub}>Reserva tu lugar para la próxima edición.</Text>
               <View style={s.heroCta}>
                 <Text style={s.heroCtaText}>Reservar 2030</Text>
                 <Ionicons name="arrow-forward" size={14} color={COLORS.green} />

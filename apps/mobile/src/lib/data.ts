@@ -1,4 +1,5 @@
 import { STAR_PLAYERS } from './star-players'
+import { isGenericMode, genericSectionLabel, genericSectionGlyph, genericPlayerLabel, genericCountryLabel } from './generic-mode'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -302,5 +303,42 @@ export const PREFIX_MAP = ALBUM.reduce<Record<string, string>>((m, g) => { m[g.p
 
 export function productById(id: string) { return PRODUCTS.find((p) => p.id === id) }
 export function groupById(id: string) { return ALBUM.find((g) => g.id === id) }
+
+/**
+ * Display helpers — route through generic-mode so iOS production build
+ * (App Store IP review) shows numbered "Equipo NN" + unicode glyph
+ * instead of country names + flags. Real data stays intact in ALBUM[].
+ */
+export function groupDisplayName(group: { id: string; name: string }): string {
+  if (!isGenericMode()) return group.name
+  const idx = ALBUM.findIndex((g) => g.id === group.id)
+  return idx >= 0 ? genericSectionLabel(idx) : group.name
+}
+
+export function groupDisplayEmoji(group: { id: string; emoji: string }): string {
+  if (!isGenericMode()) return group.emoji
+  const idx = ALBUM.findIndex((g) => g.id === group.id)
+  return idx >= 0 ? genericSectionGlyph(idx) : group.emoji
+}
+
+/**
+ * Display helpers for Star players — same generic-mode pattern as sections.
+ * Reads STAR_PLAYERS imported up top; we don't take a slug index because the
+ * caller already has the slug.
+ */
+export function playerDisplayName(player: { slug: string; name: string }): string {
+  if (!isGenericMode()) return player.name
+  const idx = STAR_PLAYERS.findIndex((p) => p.slug === player.slug)
+  return idx >= 0 ? genericPlayerLabel(idx) : player.name
+}
+
+export function playerDisplayCountry(player: { country: string }): string {
+  return isGenericMode() ? genericCountryLabel() : player.country
+}
+
+/** Initial / glyph rendered inside the Star avatar circle. */
+export function playerDisplayInitial(player: { name: string }): string {
+  return isGenericMode() ? '★' : (player.name[0] ?? '?')
+}
 
 export const fmt = (n: number) => '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })

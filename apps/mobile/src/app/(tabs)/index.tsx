@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics'
 import { Ionicons } from '@expo/vector-icons'
 import * as Clipboard from 'expo-clipboard'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
-import { ALBUM, TOTAL_STICKERS, type AlbumGroup } from '@/lib/data'
+import { ALBUM, TOTAL_STICKERS, type AlbumGroup, groupDisplayName, groupDisplayEmoji } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
 import { generateRepetidasShareText } from '@/lib/share'
 
@@ -235,8 +235,8 @@ export default function AlbumScreen() {
                   style={[s.pickerItem, selectedGroupId === g.id && s.pickerItemActive]}
                   onPress={() => { setSelectedGroupId(g.id); setPickerOpen(false) }}
                 >
-                  <Text style={{ fontSize: 22, marginRight: SPACING.md }}>{g.emoji}</Text>
-                  <Text style={s.pickerLabel}>{g.name}</Text>
+                  <Text style={{ fontSize: 22, marginRight: SPACING.md }}>{groupDisplayEmoji(g)}</Text>
+                  <Text style={s.pickerLabel}>{groupDisplayName(g)}</Text>
                   <Text style={s.pickerSub}>{g.stickers.length}</Text>
                 </TouchableOpacity>
               ))}
@@ -266,7 +266,7 @@ function Section({
   return (
     <View style={s.section}>
       <View style={s.sectionHeader}>
-        <Text style={s.sectionTitle}>{group.name} {group.emoji}</Text>
+        <Text style={s.sectionTitle}>{groupDisplayName(group)} {groupDisplayEmoji(group)}</Text>
         <TouchableOpacity onPress={onToggle} hitSlop={{ top: 12, right: 12, bottom: 12, left: 12 }} style={s.chevronBtn}>
           <Text style={s.sectionToggle}>{collapsed ? '▼' : '▲'}</Text>
         </TouchableOpacity>

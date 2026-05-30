@@ -8,7 +8,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, FlatList } from '
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { ALBUM, fmt, type Rarity } from '@/lib/data'
+import { ALBUM, fmt, type Rarity, groupDisplayName, groupDisplayEmoji } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 type Filter = 'all' | 'foil' | 'special' | 'gold'
@@ -32,8 +32,8 @@ export default function ExtrasScreen() {
         if (filter !== 'all' && r !== filter) continue
         out.push({
           groupId: g.id,
-          groupName: g.name,
-          emoji: g.emoji,
+          groupName: groupDisplayName(g),
+          emoji: groupDisplayEmoji(g),
           code: st.code,
           label: st.label,
           price: st.price,

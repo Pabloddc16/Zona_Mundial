@@ -49,6 +49,15 @@
         "buildType": "app-bundle"
       },
       "channel": "production"
+    },
+    "production-ios": {
+      "extends": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://zona-mundial.onrender.com",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY_ANDROID": "AIzaSyCB9Qi-DFPCBoEcY8kZx6XcnO7rWSvQ97A",
+        "EXPO_PUBLIC_GOOGLE_PLACES_KEY_IOS": "AIzaSyBJInzfbHjWvSPjK4n4WkwkiUQOldiYeqw",
+        "EXPO_PUBLIC_GENERIC_LABELS": "1"
+      }
     }
   },
   "submit": {

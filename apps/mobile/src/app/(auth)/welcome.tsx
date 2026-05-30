@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
           <Text style={s.brand}>CROMOS 26</Text>
           <Text style={s.headline}>Tu álbum vive en tu bolsillo.</Text>
           <Text style={s.sub}>
-            Marca estampas. Intercambia con amigos. Completa tu colección del Mundial 2026.
+            Marca estampas. Intercambia con amigos. Completa tu colección.
           </Text>
         </View>
 

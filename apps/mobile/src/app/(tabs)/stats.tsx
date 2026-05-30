@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
-import { ALBUM, TOTAL_STICKERS } from '@/lib/data'
+import { ALBUM, TOTAL_STICKERS, groupDisplayName, groupDisplayEmoji } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 export default function StatsScreen() {
@@ -85,9 +85,9 @@ function Section({ title, groups }: { title: string; groups: { id: string; emoji
       <View style={s.sectionCard}>
         {groups.map((g, i) => (
           <View key={g.id} style={[s.groupRow, i > 0 && s.groupRowBorder]}>
-            <Text style={{ fontSize: 20 }}>{g.emoji}</Text>
+            <Text style={{ fontSize: 20 }}>{groupDisplayEmoji(g)}</Text>
             <View style={{ flex: 1, marginHorizontal: 10 }}>
-              <Text style={s.groupName} numberOfLines={1}>{g.name}</Text>
+              <Text style={s.groupName} numberOfLines={1}>{groupDisplayName(g)}</Text>
               <View style={s.barBg}>
                 <View style={[s.barFill, { width: `${g.pct}%` }]} />
               </View>

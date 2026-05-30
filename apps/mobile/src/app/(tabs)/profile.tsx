@@ -64,7 +64,7 @@ export default function ProfileScreen() {
 
   async function share() {
     await Share.share({
-      message: `Join me on Mundial 26 — track your sticker album and trade with collectors. Use my code ${referralCode}: ${referralLink}`,
+      message: `Join me on Cromos 26 — track your sticker album and trade with collectors. Use my code ${referralCode}: ${referralLink}`,
     }).catch(() => {})
   }
 

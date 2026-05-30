@@ -50,7 +50,7 @@ export default function SwapScreen() {
     const decoded = decodePayload(data)
     if (!decoded || decoded.t !== 'o') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {})
-      Alert.alert('Invalid code', 'This QR is not a Mundial 26 swap offer.')
+      Alert.alert('Invalid code', 'This QR is not a Cromos 26 swap offer.')
       setTimeout(() => setScanLock(false), 1500)
       return
     }
@@ -149,7 +149,7 @@ export default function SwapScreen() {
                   barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
                   onBarcodeScanned={handleScan}
                 />
-                <Text style={s.cameraHint}>Point at a Mundial 26 swap QR code</Text>
+                <Text style={s.cameraHint}>Point at a Cromos 26 swap QR code</Text>
               </View>
             )}
           </View>

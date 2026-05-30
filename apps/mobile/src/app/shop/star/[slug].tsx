@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import { STAR_PLAYERS, type StarTier } from '@/lib/star-players'
 import { STAR_RARITIES, STAR_PRICING, RARITY_DISPLAY, isAvailable, type StarRarity } from '@/lib/pricing'
-import { fmt } from '@/lib/data'
+import { fmt, playerDisplayName, playerDisplayCountry, playerDisplayInitial } from '@/lib/data'
 import { useCartStore } from '@/lib/cart-store'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
@@ -63,13 +63,13 @@ export default function StarDetailScreen() {
         {/* Player hero */}
         <View style={s.hero}>
           <View style={s.avatarBig}>
-            <Text style={s.avatarText}>{player.name[0]}</Text>
+            <Text style={s.avatarText}>{playerDisplayInitial(player)}</Text>
           </View>
           <View style={[s.tierBadge, { backgroundColor: tt.bg }]}>
             <Text style={[s.tierBadgeText, { color: tt.color }]}>{player.tier}</Text>
           </View>
-          <Text style={s.playerName}>{player.name}</Text>
-          <Text style={s.country}>{player.country}</Text>
+          <Text style={s.playerName}>{playerDisplayName(player)}</Text>
+          <Text style={s.country}>{playerDisplayCountry(player)}</Text>
         </View>
 
         {/* Rarity options */}

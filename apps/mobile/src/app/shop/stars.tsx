@@ -10,7 +10,7 @@ import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { STAR_PLAYERS, type StarTier } from '@/lib/star-players'
 import { STAR_PRICING } from '@/lib/pricing'
-import { fmt } from '@/lib/data'
+import { fmt, playerDisplayName, playerDisplayCountry, playerDisplayInitial } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 type TierFilter = 'all' | StarTier
@@ -71,10 +71,10 @@ export default function StarsShopScreen() {
                   <Text style={[s.tierBadgeText, { color: tt.color }]}>{p.tier}</Text>
                 </View>
                 <View style={s.avatar}>
-                  <Text style={s.avatarText}>{p.name[0]}</Text>
+                  <Text style={s.avatarText}>{playerDisplayInitial(p)}</Text>
                 </View>
-                <Text style={s.playerName} numberOfLines={1}>{p.name}</Text>
-                <Text style={s.country}>{p.country}</Text>
+                <Text style={s.playerName} numberOfLines={1}>{playerDisplayName(p)}</Text>
+                <Text style={s.country}>{playerDisplayCountry(p)}</Text>
                 <Text style={s.fromPrice}>from {fmt(basePrice)}</Text>
                 <View style={s.rarities}>
                   <View style={[s.rarityDot, { backgroundColor: '#FAF6EE', borderColor: '#0B1F15' }]} />

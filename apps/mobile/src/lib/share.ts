@@ -27,7 +27,7 @@ const FWC_DISPLAY_PREFIX: Record<string, string> = {
 }
 
 export function generateRepetidasShareText(album: AlbumState): string {
-  const lines: string[] = ['Mi Álbum Mundial 26 - Lista', 'USA · Méx · Can 26', '', 'Repetidas']
+  const lines: string[] = ['Mi Álbum Cromos 26 - Lista', '', 'Repetidas']
 
   let anyRepetidas = false
   for (const group of ALBUM) {

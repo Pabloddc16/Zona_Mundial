@@ -11,7 +11,7 @@ import * as Haptics from 'expo-haptics'
 import { useAlbumStore } from '@/lib/album-store'
 import { useProductsStore } from '@/lib/products-store'
 import { useCartStore } from '@/lib/cart-store'
-import { ALBUM, fmt } from '@/lib/data'
+import { ALBUM, fmt, groupDisplayName, groupDisplayEmoji } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 
 type Tab = 'missing' | 'recommended' | 'swap' | 'packs'
@@ -54,8 +54,8 @@ export default function AlbumFillScreen() {
         if ((gs[st.n]?.owned ?? 0) > 0) continue
         out.push({
           groupId: g.id,
-          groupName: g.name,
-          emoji: g.emoji,
+          groupName: groupDisplayName(g),
+          emoji: groupDisplayEmoji(g),
           code: st.code,
           label: st.label,
           price: st.price,
@@ -120,9 +120,9 @@ export default function AlbumFillScreen() {
             ? <Empty icon="trending-up-outline" text="Keep marking — almost-complete sections will appear here." />
             : almostDone.map((g) => (
                 <View key={g.id} style={s.row}>
-                  <Text style={{ fontSize: 28, marginRight: SPACING.md }}>{g.emoji}</Text>
+                  <Text style={{ fontSize: 28, marginRight: SPACING.md }}>{groupDisplayEmoji(g)}</Text>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.rowLabel}>{g.name}</Text>
+                    <Text style={s.rowLabel}>{groupDisplayName(g)}</Text>
                     <Text style={s.rowSub}>{g.owned}/{g.total} stickers</Text>
                   </View>
                   <Text style={s.rowPrice}>{Math.round(g.pct * 100)}%</Text>
