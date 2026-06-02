@@ -109,7 +109,7 @@ export default function MyPaniniWizard() {
 
   async function addAndCheckout() {
     if (!user) {
-      Alert.alert('Sign in first', 'You need an account to order Mi Panini.')
+      Alert.alert('Inicia sesión', 'Necesitas una cuenta para pedir tu cromo personalizado.')
       return
     }
     if (!draft.photoUri) {
@@ -187,7 +187,7 @@ export default function MyPaniniWizard() {
           <Ionicons name="chevron-back" size={22} color={COLORS.ink} />
         </TouchableOpacity>
         <View style={{ alignItems: 'center' }}>
-          <Text style={s.title}>Mi Panini</Text>
+          <Text style={s.title}>Mi cromo</Text>
           <Text style={s.subtitle}>Paso {stepIdx + 1} de {STEPS.length}: {STEP_LABEL[step]}</Text>
         </View>
         <View style={{ width: 40 }} />
@@ -376,7 +376,7 @@ function PhotoStep({
     if (!loadImageModules() || !_ImagePicker || !_ImageManipulator) {
       Alert.alert(
         'Versión desactualizada',
-        'Mi Panini necesita la última versión. Actualiza desde TestFlight (Build 13 o superior).',
+        'Necesitas la última versión. Actualiza desde TestFlight (Build 13 o superior).',
       )
       return
     }

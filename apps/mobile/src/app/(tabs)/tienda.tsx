@@ -130,10 +130,10 @@ export default function TiendaScreen() {
               <Text style={s.heroEyebrow}>NEW · $200</Text>
               <Text style={s.heroTitle}>Your face,{'\n'}your sticker.</Text>
               <Text style={s.heroSub}>
-                Snap a selfie. We turn it into an official-style Panini card in 5 seconds.
+                Toma una selfie. La convertimos en tu propio cromo personalizado en 5 segundos.
               </Text>
               <View style={s.heroCta}>
-                <Text style={s.heroCtaText}>Create my Panini</Text>
+                <Text style={s.heroCtaText}>Crear mi cromo</Text>
                 <Ionicons name="arrow-forward" size={14} color={COLORS.green} />
               </View>
             </View>

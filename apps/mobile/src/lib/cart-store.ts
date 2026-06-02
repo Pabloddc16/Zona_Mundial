@@ -58,8 +58,8 @@ function resolveCartItem(id: string, products: Product[]): Product | null {
     return {
       id,
       name: draft
-        ? `Mi Panini · ${draft.playerName || 'Sin nombre'} (${draft.cardType})`
-        : 'Mi Panini · Sticker custom',
+        ? `Cromo personal · ${draft.playerName || 'Sin nombre'} (${draft.cardType})`
+        : 'Cromo personal · Sticker custom',
       price: MI_PANINI_PRICE_MXN,
       category: 'mi-panini',
       description: draft

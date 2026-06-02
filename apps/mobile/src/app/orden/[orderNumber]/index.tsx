@@ -180,7 +180,7 @@ export default function OrdenScreen() {
         {phase === 'paid' && drafts.length > 0 && (
           <View style={s.paniniSection}>
             <Text style={s.sectionLabel}>
-              {drafts.length === 1 ? 'TU MI PANINI' : `TUS ${drafts.length} MI PANINI`}
+              {drafts.length === 1 ? 'TU CROMO PERSONAL' : `TUS ${drafts.length} CROMOS PERSONALES`}
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingVertical: 8 }}>
               {drafts.map((d) => (
