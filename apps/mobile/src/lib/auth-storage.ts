@@ -3,6 +3,15 @@ import * as SecureStore from 'expo-secure-store'
 const AT_KEY = 'pablo-at'
 const RT_KEY = 'pablo-rt'
 const USER_KEY = 'pablo-user'
+const GUEST_KEY = 'pablo-guest'
+
+export async function getGuestMode(): Promise<boolean> {
+  try { return (await SecureStore.getItemAsync(GUEST_KEY)) === '1' } catch { return false }
+}
+export async function setGuestMode(on: boolean): Promise<void> {
+  if (on) await SecureStore.setItemAsync(GUEST_KEY, '1')
+  else await SecureStore.deleteItemAsync(GUEST_KEY).catch(() => {})
+}
 
 export async function getCachedUser<T>(): Promise<T | null> {
   try {

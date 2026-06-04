@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="2796" viewBox="0 0 1290 2796">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9B2226"/><stop offset="100%" stop-color="#5C1417"/></linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#AE5F00"/><stop offset="100%" stop-color="#6B3A00"/></linearGradient>
+    <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7B7A00"/><stop offset="100%" stop-color="#494900"/></linearGradient>
+    <linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2E7A00"/><stop offset="100%" stop-color="#1A4900"/></linearGradient>
+    <linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#007A4D"/><stop offset="100%" stop-color="#00492E"/></linearGradient>
+    <linearGradient id="g6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#007A7A"/><stop offset="100%" stop-color="#004A4A"/></linearGradient>
+    <linearGradient id="header" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#006341"/><stop offset="100%" stop-color="#004a30"/></linearGradient>
+  </defs>
+
+  <rect width="1290" height="2796" fill="#FAF6EE"/>
+
+  <!-- Status bar -->
+  <text x="120" y="120" font-family="-apple-system, Helvetica" font-size="34" font-weight="600" fill="#0B1F15">9:41</text>
+  <g transform="translate(1050, 95)">
+    <rect width="120" height="40" rx="4" fill="none" stroke="#0B1F15" stroke-width="3"/>
+    <rect x="5" y="5" width="100" height="30" fill="#0B1F15"/>
+  </g>
+
+  <!-- Header -->
+  <text x="80" y="240" font-family="-apple-system, Helvetica" font-size="34" font-weight="700" fill="#5E6E66">Álbum</text>
+  <text x="80" y="320" font-family="-apple-system, Helvetica" font-size="64" font-weight="900" fill="#0B1F15">Cromos 26</text>
+
+  <!-- Progress hero -->
+  <g transform="translate(80, 380)">
+    <rect width="1130" height="260" rx="40" fill="url(#header)" stroke="#FFD100" stroke-width="6"/>
+    <text x="50" y="80" font-family="-apple-system, Helvetica" font-size="26" font-weight="900" letter-spacing="4" fill="#FFD100">TU PROGRESO · 47%</text>
+    <text x="50" y="160" font-family="-apple-system, Helvetica" font-size="62" font-weight="900" fill="#FFFFFF">490 / 1044</text>
+    <text x="50" y="210" font-family="-apple-system, Helvetica" font-size="32" fill="rgba(255,255,255,0.85)">estampas obtenidas</text>
+    <rect x="50" y="225" width="1030" height="12" rx="6" fill="rgba(0,0,0,0.25)"/>
+    <rect x="50" y="225" width="480" height="12" rx="6" fill="#FFD100"/>
+  </g>
+
+  <!-- Section heading -->
+  <text x="80" y="760" font-family="-apple-system, Helvetica" font-size="42" font-weight="900" fill="#0B1F15">Secciones</text>
+  <text x="1210" y="760" text-anchor="end" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">48 equipos</text>
+
+  <!-- Section grid 3x4 -->
+  <g transform="translate(80, 820)">
+    <!-- Row 1 -->
+    <g transform="translate(0,0)">
+      <rect width="350" height="380" rx="32" fill="url(#g1)"/>
+      <text x="175" y="80" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="120" fill="#FFFFFF" opacity="0.4">◆</text>
+      <text x="175" y="225" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="40" font-weight="900" fill="#FFFFFF">Equipo 01</text>
+      <text x="175" y="280" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFD100">18/20</text>
+      <text x="175" y="330" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="26" fill="rgba(255,255,255,0.7)">2 faltantes</text>
+    </g>
+    <g transform="translate(390,0)">
+      <rect width="350" height="380" rx="32" fill="url(#g2)"/>
+      <text x="175" y="80" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="120" fill="#FFFFFF" opacity="0.4">▲</text>
+      <text x="175" y="225" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="40" font-weight="900" fill="#FFFFFF">Equipo 02</text>
+      <text x="175" y="280" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFD100">20/20</text>
+      <text x="175" y="330" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="26" fill="rgba(255,255,255,0.7)">✓ completo</text>
+    </g>
+    <g transform="translate(780,0)">
+      <rect width="350" height="380" rx="32" fill="url(#g3)"/>
+      <text x="175" y="80" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="120" fill="#FFFFFF" opacity="0.4">●</text>
+      <text x="175" y="225" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="40" font-weight="900" fill="#FFFFFF">Equipo 03</text>
+      <text x="175" y="280" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFD100">12/20</text>
+      <text x="175" y="330" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="26" fill="rgba(255,255,255,0.7)">8 faltantes</text>
+    </g>
+    <!-- Row 2 -->
+    <g transform="translate(0,420)">
+      <rect width="350" height="380" rx="32" fill="url(#g4)"/>
+      <text x="175" y="80" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="120" fill="#FFFFFF" opacity="0.4">★</text>
+      <text x="175" y="225" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="40" font-weight="900" fill="#FFFFFF">Equipo 04</text>
+      <text x="175" y="280" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFD100">5/20</text>
+    </g>
+    <g transform="translate(390,420)">
+      <rect width="350" height="380" rx="32" fill="url(#g5)"/>
+      <text x="175" y="80" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="120" fill="#FFFFFF" opacity="0.4">✦</text>
+      <text x="175" y="225" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="40" font-weight="900" fill="#FFFFFF">Equipo 05</text>
+      <text x="175" y="280" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFD100">15/20</text>
+    </g>
+    <g transform="translate(780,420)">
+      <rect width="350" height="380" rx="32" fill="url(#g6)"/>
+      <text x="175" y="80" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="120" fill="#FFFFFF" opacity="0.4">◇</text>
+      <text x="175" y="225" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="40" font-weight="900" fill="#FFFFFF">Equipo 06</text>
+      <text x="175" y="280" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFD100">19/20</text>
+    </g>
+  </g>
+
+  <!-- Tab bar -->
+  <rect x="0" y="2640" width="1290" height="156" fill="#FFFFFF" stroke="#E4DDCB" stroke-width="2"/>
+  <text x="129" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" font-weight="900" fill="#006341">📒</text>
+  <text x="129" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" font-weight="900" fill="#006341">Álbum</text>
+  <text x="387" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">🏪</text>
+  <text x="387" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" fill="#7A8B82">Tienda</text>
+  <text x="645" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">📊</text>
+  <text x="645" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" fill="#7A8B82">Stats</text>
+  <text x="903" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">🔄</text>
+  <text x="903" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" fill="#7A8B82">Intercambio</text>
+  <text x="1161" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">👤</text>
+  <text x="1161" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" fill="#7A8B82">Perfil</text>
+</svg>

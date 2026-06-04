@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="2796" viewBox="0 0 1290 2796">
+  <defs>
+    <linearGradient id="codecard" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#006341"/><stop offset="100%" stop-color="#004a30"/></linearGradient>
+  </defs>
+
+  <rect width="1290" height="2796" fill="#FAF6EE"/>
+
+  <!-- Status bar -->
+  <text x="120" y="120" font-family="-apple-system, Helvetica" font-size="34" font-weight="600" fill="#0B1F15">9:41</text>
+  <g transform="translate(1050, 95)">
+    <rect width="120" height="40" rx="4" fill="none" stroke="#0B1F15" stroke-width="3"/>
+    <rect x="5" y="5" width="100" height="30" fill="#0B1F15"/>
+  </g>
+
+  <!-- Confirmation hero -->
+  <text x="645" y="380" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="180">🎉</text>
+  <text x="645" y="540" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="68" font-weight="900" fill="#0B1F15">¡Pedido confirmado!</text>
+  <text x="645" y="610" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="34" fill="#5E6E66">Recibirás tu pedido pronto</text>
+  <text x="645" y="680" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="32" font-weight="700" fill="#374151">#MP-CR26A8X</text>
+
+  <!-- Status badge -->
+  <g transform="translate(80, 740)">
+    <rect width="1130" height="100" rx="20" fill="rgba(0,99,65,0.10)"/>
+    <text x="40" y="62" font-family="-apple-system, Helvetica" font-size="28" fill="#5E6E66">Estado</text>
+    <text x="1090" y="62" text-anchor="end" font-family="-apple-system, Helvetica" font-size="32" font-weight="900" fill="#006341">PAGADO</text>
+  </g>
+
+  <!-- Pickup code card -->
+  <g transform="translate(80, 880)">
+    <rect width="1130" height="540" rx="40" fill="url(#codecard)" stroke="#FFD100" stroke-width="6"/>
+    <text x="565" y="100" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" font-weight="900" letter-spacing="4" fill="#FFD100">TU CÓDIGO DE RECOLECCIÓN</text>
+
+    <text x="565" y="280" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="180" font-weight="900" letter-spacing="20" fill="#FAF6EE">384217</text>
+
+    <text x="565" y="340" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="rgba(255,255,255,0.85)">Muéstralo en el mostrador</text>
+    <text x="565" y="380" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="rgba(255,255,255,0.85)">para recoger tu pedido.</text>
+
+    <!-- Store address box -->
+    <rect x="40" y="410" width="1050" height="110" rx="14" fill="rgba(0,0,0,0.20)"/>
+    <text x="60" y="450" font-family="-apple-system, Helvetica" font-size="26" font-weight="800" fill="#FAF6EE">Miguel Lerdo de Tejada 2081</text>
+    <text x="60" y="486" font-family="-apple-system, Helvetica" font-size="22" fill="#FAF6EE">Col. Americana, Lafayette · 44150 Guadalajara, Jal.</text>
+    <text x="60" y="513" font-family="-apple-system, Helvetica" font-size="20" fill="rgba(255,255,255,0.7)">Lun–Sáb · 10am – 7pm</text>
+  </g>
+
+  <!-- Details card -->
+  <g transform="translate(80, 1460)">
+    <rect width="1130" height="380" rx="32" fill="#FFFFFF" stroke="#E4DDCB" stroke-width="2"/>
+    <g transform="translate(40, 60)">
+      <text x="0" y="0" font-family="-apple-system, Helvetica" font-size="26" fill="#9CA3AF">Cliente</text>
+      <text x="1050" y="0" text-anchor="end" font-family="-apple-system, Helvetica" font-size="26" font-weight="700" fill="#1C1917">Pablo R.</text>
+      <line x1="0" y1="22" x2="1050" y2="22" stroke="#E4DDCB" stroke-width="1"/>
+    </g>
+    <g transform="translate(40, 140)">
+      <text x="0" y="0" font-family="-apple-system, Helvetica" font-size="26" fill="#9CA3AF">Teléfono</text>
+      <text x="1050" y="0" text-anchor="end" font-family="-apple-system, Helvetica" font-size="26" font-weight="700" fill="#1C1917">+52 33 1234 5678</text>
+      <line x1="0" y1="22" x2="1050" y2="22" stroke="#E4DDCB" stroke-width="1"/>
+    </g>
+    <g transform="translate(40, 220)">
+      <text x="0" y="0" font-family="-apple-system, Helvetica" font-size="26" fill="#9CA3AF">Entrega</text>
+      <text x="1050" y="0" text-anchor="end" font-family="-apple-system, Helvetica" font-size="26" font-weight="700" fill="#1C1917">Recolección en tienda</text>
+      <line x1="0" y1="22" x2="1050" y2="22" stroke="#E4DDCB" stroke-width="1"/>
+    </g>
+    <g transform="translate(40, 300)">
+      <text x="0" y="0" font-family="-apple-system, Helvetica" font-size="26" fill="#9CA3AF">Total</text>
+      <text x="1050" y="0" text-anchor="end" font-family="-apple-system, Helvetica" font-size="34" font-weight="900" fill="#006341">$590 MXN</text>
+    </g>
+  </g>
+
+  <!-- Bottom CTA -->
+  <g transform="translate(80, 2400)">
+    <rect width="1130" height="140" rx="28" fill="#0B1F15"/>
+    <text x="565" y="92" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="38" font-weight="900" fill="#FFFFFF">Volver al álbum</text>
+  </g>
+
+  <!-- Headline ribbon -->
+  <text x="645" y="2620" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="32" font-weight="700" fill="#5E6E66">Pago seguro · Recolección gratis</text>
+</svg>

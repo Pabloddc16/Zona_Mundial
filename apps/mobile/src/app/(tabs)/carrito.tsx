@@ -2,6 +2,8 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
+import { useAuthStore } from '@/lib/auth-store'
+import { GuestPrompt } from '@/components/GuestPrompt'
 import { useProductsStore } from '@/lib/products-store'
 import { usePaniniDraftStore } from '@/lib/panini-drafts'
 import { PaniniCardPreview } from '@/components/PaniniCardPreview'
@@ -11,6 +13,18 @@ import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 const SHIPPING = 120
 
 export default function CarritoScreen() {
+  const user = useAuthStore((s) => s.user)
+  const guest = useAuthStore((s) => s.guest)
+  if (!user && guest) {
+    return (
+      <GuestPrompt
+        title="Carrito"
+        body="Necesitas una cuenta para guardar productos y hacer compras. Es gratis y solo toma 30 segundos."
+        iconName="cart-outline"
+      />
+    )
+  }
+
   const cart = useCartStore((s) => s.cart)
   const { add, sub, remove } = useCartStore()
   const products = useProductsStore((s) => s.products)

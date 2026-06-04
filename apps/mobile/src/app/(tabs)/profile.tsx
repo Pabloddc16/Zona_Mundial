@@ -20,6 +20,7 @@ import { router } from 'expo-router'
 import QRCode from 'react-native-qrcode-svg'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '@/lib/auth-store'
+import { GuestPrompt } from '@/components/GuestPrompt'
 import { useAlbumStore, albumStats } from '@/lib/album-store'
 import { TOTAL_STICKERS, fmt } from '@/lib/data'
 import { api } from '@/lib/api'
@@ -31,10 +32,23 @@ type ReferralData = Awaited<ReturnType<typeof api.referral.me>>
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user)
+  const guest = useAuthStore((s) => s.guest)
   const signOut = useAuthStore((s) => s.signOut)
   const album = useAlbumStore((s) => s.album)
   const stats = albumStats(album)
   const pct = Math.round((stats.owned / TOTAL_STICKERS) * 100)
+
+  // Guideline 5.1.1(v): profile is account-based. Guest sees a friendly
+  // prompt instead of the dashboard.
+  if (!user && guest) {
+    return (
+      <GuestPrompt
+        title="Crea tu cuenta"
+        body="Tu perfil guarda tu progreso del álbum, código de referidos y pedidos. Crea una cuenta gratis para empezar."
+        iconName="person-circle-outline"
+      />
+    )
+  }
 
   const [copied, setCopied] = useState(false)
   const [referral, setReferral] = useState<ReferralData | null>(null)

@@ -10,6 +10,7 @@ import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '@/lib/theme'
 export default function WelcomeScreen() {
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle)
   const signInWithApple = useAuthStore((s) => s.signInWithApple)
+  const setGuest = useAuthStore((s) => s.setGuest)
   const album = useAlbumStore((s) => s.album)
   const localProgress = albumStats(album).owned
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -122,10 +123,19 @@ export default function WelcomeScreen() {
             <Text style={s.signinText}>¿Ya tienes cuenta? </Text>
             <Text style={s.signinLink}>Iniciar sesión</Text>
           </TouchableOpacity>
+
+          {/* Guideline 5.1.1(v): browse the album + store without an account. */}
+          <TouchableOpacity
+            onPress={async () => { await setGuest(true); router.replace('/') }}
+            style={s.guestRow}
+            activeOpacity={0.7}
+          >
+            <Text style={s.guestText}>Continuar como invitado</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={s.disclaimer}>
-          No afiliado con FIFA o Panini. Al continuar aceptas nuestros Términos y Política de Privacidad.
+          App independiente. No afiliada con marcas o eventos. Al continuar aceptas nuestros Términos y Política de Privacidad.
         </Text>
       </View>
     </SafeAreaView>
@@ -201,6 +211,8 @@ const s = StyleSheet.create({
   signinRow: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.md },
   signinText: { color: COLORS.textMuted, fontSize: FONT.size.bodyM },
   signinLink: { color: COLORS.green, fontSize: FONT.size.bodyM, fontWeight: FONT.weight.black },
+  guestRow: { alignItems: 'center', marginTop: SPACING.sm, paddingVertical: 4 },
+  guestText: { color: COLORS.textMuted, fontSize: FONT.size.bodyS, textDecorationLine: 'underline' },
 
   disclaimer: {
     fontSize: FONT.size.bodyS, color: COLORS.textFaint,

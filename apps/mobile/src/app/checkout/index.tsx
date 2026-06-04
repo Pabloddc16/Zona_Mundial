@@ -18,6 +18,8 @@ import { useCartStore, cartItems, cartSubtotal } from '@/lib/cart-store'
 import { useProductsStore } from '@/lib/products-store'
 import { usePaniniDraftStore } from '@/lib/panini-drafts'
 import { api } from '@/lib/api'
+import { useAuthStore } from '@/lib/auth-store'
+import { GuestPrompt } from '@/components/GuestPrompt'
 import { fmt } from '@/lib/data'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
 import { AddressForm, emptyAddress, type AddressValue } from '@/components/AddressForm'
@@ -34,6 +36,18 @@ import {
 } from '@/lib/delivery'
 
 export default function CheckoutScreen() {
+  const user = useAuthStore((s) => s.user)
+  const guest = useAuthStore((s) => s.guest)
+  if (!user && guest) {
+    return (
+      <GuestPrompt
+        title="Checkout"
+        body="Necesitas una cuenta para finalizar la compra. Crea una en 30 segundos para continuar."
+        iconName="card-outline"
+      />
+    )
+  }
+
   const cart = useCartStore((s) => s.cart)
   const clear = useCartStore((s) => s.clear)
   const products = useProductsStore((s) => s.products)

@@ -19,6 +19,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const segments = useSegments()
   const user = useAuthStore((s) => s.user)
+  const guest = useAuthStore((s) => s.guest)
   const hydrated = useAuthStore((s) => s.hydrated)
   const loadFromToken = useAuthStore((s) => s.loadFromToken)
 
@@ -27,9 +28,14 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hydrated) return
     const inAuth = segments[0] === '(auth)'
-    if (!user && !inAuth) router.replace('/welcome')
+    // Apple Guideline 5.1.1(v): browse without signing in. Welcome screen
+    // exposes a "Continuar como invitado" button that sets guest=true; from
+    // that point the user lands on the main tabs (album + tienda are fully
+    // browsable). Account-gated screens (cart, checkout, profile) render
+    // their own sign-in prompts.
+    if (!user && !guest && !inAuth) router.replace('/welcome')
     else if (user && inAuth) router.replace('/')
-  }, [hydrated, user, segments, router])
+  }, [hydrated, user, guest, segments, router])
 
   if (!hydrated) {
     return (

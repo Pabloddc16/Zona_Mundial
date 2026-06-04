@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { AuthUser } from './api'
 import { api, clearTokens, setAT, setRT } from './api'
-import { getAT, getCachedUser, setCachedUser } from './auth-storage'
+import { getAT, getCachedUser, setCachedUser, getGuestMode, setGuestMode } from './auth-storage'
 import { useAlbumStore } from './album-store'
 import { signInWithGoogle, signOutGoogle } from './google-auth'
 import { signInWithApple } from './apple-auth'
@@ -10,6 +10,12 @@ import { supabase } from './supabase'
 interface AuthStore {
   user: AuthUser | null
   hydrated: boolean
+  // Apple Guideline 5.1.1(v): users must be able to browse non-account-based
+  // features (album, store) without registering. When `guest` is true, the
+  // AuthGate lets the user into the main tabs without a session. Cart and
+  // checkout still prompt for sign-in because those are account-based.
+  guest: boolean
+  setGuest: (on: boolean) => Promise<void>
   setUser: (u: AuthUser | null) => void
   setHydrated: (b: boolean) => void
   signIn: (email: string, password: string) => Promise<void>
@@ -24,8 +30,10 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   hydrated: false,
+  guest: false,
   setUser: (u) => set({ user: u }),
   setHydrated: (b) => set({ hydrated: b }),
+  setGuest: async (on) => { await setGuestMode(on); set({ guest: on }) },
 
   signIn: async (email, password) => {
     const r = await api.auth.login(email, password)
@@ -122,7 +130,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
     await api.auth.logout().catch(() => {})
     await clearTokens()
     await setCachedUser(null)
-    set({ user: null })
+    await setGuestMode(false)
+    set({ user: null, guest: false })
   },
 
   deleteAccount: async () => {
@@ -135,12 +144,17 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   loadFromToken: async () => {
-    const [token, cachedUser] = await Promise.all([getAT(), getCachedUser<AuthUser>()])
+    const [token, cachedUser, guest] = await Promise.all([
+      getAT(),
+      getCachedUser<AuthUser>(),
+      getGuestMode(),
+    ])
 
-    // 1. No token at all → skip the network entirely. Show login screen
-    //    immediately. Render's cold-start (~30-60s) shouldn't block here.
+    // 1. No token at all → skip the network entirely. Show welcome or guest
+    //    home depending on persisted guest-mode flag. Render's cold-start
+    //    (~30-60s) shouldn't block here.
     if (!token) {
-      set({ user: null, hydrated: true })
+      set({ user: null, guest, hydrated: true })
       return
     }
 

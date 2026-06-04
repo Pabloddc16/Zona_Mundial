@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="2796" viewBox="0 0 1290 2796">
+  <defs>
+    <linearGradient id="hero1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#006341"/><stop offset="100%" stop-color="#004a30"/></linearGradient>
+    <linearGradient id="hero2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#CE1126"/><stop offset="100%" stop-color="#8B0B1C"/></linearGradient>
+    <linearGradient id="hero3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#006341"/><stop offset="100%" stop-color="#004a30"/></linearGradient>
+  </defs>
+
+  <rect width="1290" height="2796" fill="#FAF6EE"/>
+
+  <!-- Status bar -->
+  <text x="120" y="120" font-family="-apple-system, Helvetica" font-size="34" font-weight="600" fill="#0B1F15">9:41</text>
+  <g transform="translate(1050, 95)">
+    <rect width="120" height="40" rx="4" fill="none" stroke="#0B1F15" stroke-width="3"/>
+    <rect x="5" y="5" width="100" height="30" fill="#0B1F15"/>
+  </g>
+
+  <!-- Header -->
+  <text x="80" y="240" font-family="-apple-system, Helvetica" font-size="34" font-weight="700" fill="#5E6E66">Tienda</text>
+  <text x="80" y="320" font-family="-apple-system, Helvetica" font-size="64" font-weight="900" fill="#0B1F15">Cromos 26</text>
+  <circle cx="1180" cy="280" r="55" fill="#0B1F15"/>
+  <text x="1180" y="295" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="44" fill="#FFFFFF">🛒</text>
+
+  <!-- Hero 1: Mi cromo personal -->
+  <g transform="translate(80, 400)">
+    <rect width="1130" height="500" rx="40" fill="url(#hero1)" stroke="#FFD100" stroke-width="6"/>
+
+    <!-- Text block -->
+    <text x="50" y="100" font-family="-apple-system, Helvetica" font-size="26" font-weight="900" letter-spacing="4" fill="#FFD100">NUEVO · $200</text>
+    <text x="50" y="200" font-family="-apple-system, Helvetica" font-size="68" font-weight="900" fill="#FFFFFF">Tu cara,</text>
+    <text x="50" y="280" font-family="-apple-system, Helvetica" font-size="68" font-weight="900" fill="#FFFFFF">tu cromo.</text>
+    <text x="50" y="350" font-family="-apple-system, Helvetica" font-size="30" fill="rgba(255,255,255,0.85)">Toma una selfie. La convertimos en</text>
+    <text x="50" y="390" font-family="-apple-system, Helvetica" font-size="30" fill="rgba(255,255,255,0.85)">tu propio cromo en 5 segundos.</text>
+
+    <!-- CTA -->
+    <rect x="50" y="420" width="450" height="60" rx="30" fill="#FAF6EE"/>
+    <text x="275" y="462" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" font-weight="900" fill="#006341">Crear mi cromo →</text>
+
+    <!-- Card mockup right -->
+    <g transform="translate(820, 60) rotate(4)">
+      <rect width="220" height="380" rx="14" fill="#FFFFFF" stroke="#FFD100" stroke-width="6" stroke-dasharray="14,6"/>
+      <rect x="0" y="0" width="73" height="18" fill="#006341"/>
+      <rect x="73" y="0" width="74" height="18" fill="#FFD100"/>
+      <rect x="147" y="0" width="73" height="18" fill="#CE1126"/>
+      <circle cx="110" cy="160" r="55" fill="#FAF6EE" stroke="#006341" stroke-width="5"/>
+      <text x="110" y="178" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="60">📷</text>
+      <text x="110" y="260" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="20" font-weight="900" letter-spacing="2" fill="#006341">TU CARA</text>
+      <text x="110" y="285" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="20" font-weight="900" letter-spacing="2" fill="#006341">AQUÍ</text>
+      <rect x="20" y="330" width="180" height="8" fill="rgba(0,0,0,0.08)"/>
+      <rect x="20" y="346" width="110" height="8" fill="rgba(0,0,0,0.08)"/>
+    </g>
+  </g>
+
+  <!-- Hero 2: Extras -->
+  <g transform="translate(80, 940)">
+    <rect width="1130" height="500" rx="40" fill="url(#hero2)"/>
+
+    <text x="50" y="100" font-family="-apple-system, Helvetica" font-size="26" font-weight="900" letter-spacing="4" fill="#FFD100">GOAT · CRACK · ESTRELLA</text>
+    <text x="50" y="200" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFFFFF">Compra las estrellas</text>
+    <text x="50" y="270" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFFFFF">que te faltan.</text>
+    <text x="50" y="340" font-family="-apple-system, Helvetica" font-size="30" fill="rgba(255,255,255,0.85)">20 estrellas en 4 rarezas:</text>
+    <text x="50" y="380" font-family="-apple-system, Helvetica" font-size="30" fill="rgba(255,255,255,0.85)">Base, Bronce, Plata u Oro.</text>
+
+    <!-- CTA -->
+    <rect x="50" y="420" width="380" height="60" rx="30" fill="#FFD100"/>
+    <text x="240" y="462" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" font-weight="900" fill="#CE1126">Ver extras →</text>
+
+    <!-- Star cards stack -->
+    <g transform="translate(820, 80)">
+      <g transform="translate(50, 0) rotate(12)">
+        <rect width="180" height="260" rx="16" fill="#FFF8DC" stroke="#FFD100" stroke-width="5"/>
+        <text x="10" y="34" font-family="-apple-system, Helvetica" font-size="22" font-weight="900" fill="#806100">2</text>
+        <circle cx="90" cy="100" r="40" fill="#006341" stroke="#FFD100" stroke-width="4"/>
+        <text x="90" y="120" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="44" font-weight="900" fill="#FAF6EE">★</text>
+        <text x="90" y="180" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" font-weight="900" fill="#0B1F15">GOAT</text>
+        <text x="90" y="208" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="14" font-weight="900" letter-spacing="2" fill="#5E6E66">★</text>
+        <rect x="125" y="225" width="48" height="22" rx="4" fill="#FFD100"/>
+        <text x="149" y="241" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="14" font-weight="900" fill="#CE1126">ORO</text>
+      </g>
+      <g transform="translate(-30, 30) rotate(-8)">
+        <rect width="180" height="260" rx="16" fill="#FFF8DC" stroke="#FFD100" stroke-width="5"/>
+        <text x="10" y="34" font-family="-apple-system, Helvetica" font-size="22" font-weight="900" fill="#806100">1</text>
+        <circle cx="90" cy="100" r="40" fill="#006341" stroke="#FFD100" stroke-width="4"/>
+        <text x="90" y="120" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="44" font-weight="900" fill="#FAF6EE">★</text>
+        <text x="90" y="180" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" font-weight="900" fill="#0B1F15">CRACK</text>
+        <text x="90" y="208" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="14" font-weight="900" letter-spacing="2" fill="#5E6E66">★</text>
+        <rect x="125" y="225" width="48" height="22" rx="4" fill="#FFD100"/>
+        <text x="149" y="241" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="14" font-weight="900" fill="#CE1126">ORO</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Hero 3: Album -->
+  <g transform="translate(80, 1480)">
+    <rect width="1130" height="500" rx="40" fill="url(#hero3)"/>
+
+    <circle cx="120" cy="120" r="60" fill="rgba(255,209,0,0.18)"/>
+    <text x="120" y="140" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="50">📒</text>
+
+    <text x="50" y="240" font-family="-apple-system, Helvetica" font-size="26" font-weight="900" letter-spacing="4" fill="#FFD100">TU ÁLBUM · 47%</text>
+    <text x="50" y="320" font-family="-apple-system, Helvetica" font-size="60" font-weight="900" fill="#FFFFFF">Te faltan 554 estampas</text>
+
+    <rect x="50" y="345" width="1030" height="14" rx="7" fill="rgba(255,255,255,0.2)"/>
+    <rect x="50" y="345" width="484" height="14" rx="7" fill="#FFD100"/>
+
+    <text x="50" y="410" font-family="-apple-system, Helvetica" font-size="30" fill="rgba(255,255,255,0.85)">Total estimado: $8,880 MXN</text>
+
+    <rect x="50" y="430" width="370" height="60" rx="30" fill="#FAF6EE"/>
+    <text x="235" y="472" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" font-weight="900" fill="#006341">Completar álbum →</text>
+  </g>
+
+  <!-- Tab bar -->
+  <rect x="0" y="2640" width="1290" height="156" fill="#FFFFFF" stroke="#E4DDCB" stroke-width="2"/>
+  <text x="129" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">📒</text>
+  <text x="129" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" fill="#7A8B82">Álbum</text>
+  <text x="387" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#006341">🏪</text>
+  <text x="387" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" font-weight="900" fill="#006341">Tienda</text>
+  <text x="645" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">📊</text>
+  <text x="645" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" fill="#7A8B82">Stats</text>
+  <text x="903" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">🔄</text>
+  <text x="903" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" fill="#7A8B82">Intercambio</text>
+  <text x="1161" y="2725" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="28" fill="#7A8B82">👤</text>
+  <text x="1161" y="2770" text-anchor="middle" font-family="-apple-system, Helvetica" font-size="22" fill="#7A8B82">Perfil</text>
+</svg>
