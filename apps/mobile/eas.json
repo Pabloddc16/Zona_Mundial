@@ -71,6 +71,13 @@
         "serviceAccountKeyPath": "./google-service-account.json",
         "track": "internal"
       }
+    },
+    "production-ios": {
+      "ios": {
+        "appleId": "stulanik@gmail.com",
+        "ascAppId": "6769002053",
+        "appleTeamId": "7D7NLMWLYL"
+      }
     }
   }
 }
