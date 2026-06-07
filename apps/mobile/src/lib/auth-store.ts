@@ -40,7 +40,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
     await setAT(r.accessToken)
     await setRT(r.refreshToken)
     await setCachedUser(r.user)
-    set({ user: r.user })
+    await setGuestMode(false)
+    set({ user: r.user, guest: false })
     useAlbumStore.getState().syncFromServer()
   },
 
@@ -50,7 +51,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       await setAT(r.accessToken)
       await setRT(r.refreshToken)
       await setCachedUser(r.user)
-      set({ user: r.user })
+      await setGuestMode(false)
+      set({ user: r.user, guest: false })
       useAlbumStore.getState().syncFromServer()
     }
   },
@@ -72,7 +74,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const me = await api.auth.me()
       const fresh = { id: me.id, email: me.email, username: me.username, role: me.role }
       await setCachedUser(fresh)
-      set({ user: fresh })
+      await setGuestMode(false)
+      set({ user: fresh, guest: false })
       useAlbumStore.getState().syncFromServer()
     } catch (e) {
       // Profile fetch failed — likely public.users row missing (first Google sign-in).
@@ -86,7 +89,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
           role: 'customer',
         }
         await setCachedUser(fallback)
-        set({ user: fallback })
+        await setGuestMode(false)
+        set({ user: fallback, guest: false })
       }
     }
     return { ok: true }
@@ -107,7 +111,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const me = await api.auth.me()
       const fresh = { id: me.id, email: me.email, username: me.username, role: me.role }
       await setCachedUser(fresh)
-      set({ user: fresh })
+      await setGuestMode(false)
+      set({ user: fresh, guest: false })
       useAlbumStore.getState().syncFromServer()
     } catch {
       const { data: { user: sbUser } } = await supabase.auth.getUser()
@@ -119,7 +124,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
           role: 'customer',
         }
         await setCachedUser(fallback)
-        set({ user: fallback })
+        await setGuestMode(false)
+        set({ user: fallback, guest: false })
       }
     }
     return { ok: true }

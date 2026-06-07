@@ -130,7 +130,7 @@ export default function TiendaScreen() {
               <Text style={s.heroEyebrow}>NEW · $200</Text>
               <Text style={s.heroTitle}>Your face,{'\n'}your sticker.</Text>
               <Text style={s.heroSub}>
-                Toma una selfie. La convertimos en tu propio cromo personalizado en 5 segundos.
+                Toma una foto. La convertimos en tu propio cromo personalizado en 5 segundos.
               </Text>
               <View style={s.heroCta}>
                 <Text style={s.heroCtaText}>Crear mi cromo</Text>

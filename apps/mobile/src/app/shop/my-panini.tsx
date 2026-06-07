@@ -430,7 +430,7 @@ function PhotoStep({
   return (
     <View style={{ gap: SPACING.md, alignItems: 'center' }}>
       <Text style={s.h1}>Tu foto</Text>
-      <Text style={s.body}>Una selfie clara, bien iluminada. Cuadrada.</Text>
+      <Text style={s.body}>Una foto clara, bien iluminada. Cuadrada.</Text>
 
       <View style={s.photoPreviewWrap}>
         {photoUri ? (
@@ -446,11 +446,11 @@ function PhotoStep({
       <View style={s.photoBtns}>
         <TouchableOpacity onPress={() => pick(true)} disabled={busy} style={[s.photoBtn, s.photoBtnPrimary]} activeOpacity={0.85}>
           <Ionicons name="camera" size={18} color={COLORS.paper} />
-          <Text style={s.photoBtnPrimaryText}>Tomar selfie</Text>
+          <Text style={s.photoBtnPrimaryText}>Continuar</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => pick(false)} disabled={busy} style={[s.photoBtn, s.photoBtnSecondary]} activeOpacity={0.85}>
           <Ionicons name="images" size={18} color={COLORS.green} />
-          <Text style={s.photoBtnSecondaryText}>Elegir de galería</Text>
+          <Text style={s.photoBtnSecondaryText}>Elegir foto</Text>
         </TouchableOpacity>
       </View>
 

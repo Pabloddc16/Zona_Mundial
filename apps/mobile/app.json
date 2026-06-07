@@ -48,8 +48,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Cromos 26 to access your photos so you can create a custom Panini sticker.",
-          "cameraPermission": "Allow Cromos 26 to use your camera so you can take a selfie for your custom sticker."
+          "photosPermission": "Allow Cromos 26 to access your photos so you can use one in your custom sticker.",
+          "cameraPermission": "Allow Cromos 26 to use your camera so you can take a photo for your custom sticker."
         }
       ],
       [

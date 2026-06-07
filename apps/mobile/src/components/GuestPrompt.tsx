@@ -10,7 +10,6 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
-import { useAuthStore } from '@/lib/auth-store'
 import { COLORS, SPACING, RADIUS, FONT } from '@/lib/theme'
 
 interface Props {
@@ -20,14 +19,14 @@ interface Props {
 }
 
 export function GuestPrompt({ title, body, iconName }: Props) {
-  const setGuest = useAuthStore((s) => s.setGuest)
-
-  async function signUp() {
-    await setGuest(false)
+  // Don't flip guest=false here — AuthGate would immediately redirect to
+  // /welcome and race with this navigation, crashing the navigator.
+  // Auth actions (signIn / signUp / signInWith*) clear the guest flag in
+  // the auth-store after they succeed, so the user lands cleanly on /.
+  function signUp() {
     router.push('/register')
   }
-  async function signIn() {
-    await setGuest(false)
+  function signIn() {
     router.push('/login')
   }
 
